@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/cs-satyam/leetcode-companywise-questions",
+  "revision": "a09d3bae6ecf5420ae59e8886e0f9bf660717388",
+  "dataset_date": null,
+  "company": {
+    "slug": "1kosmos",
+    "name": "1Kosmos"
+  },
+  "source_slug": "cs-satyam-1kosmos",
+  "attribution": "cs-satyam/leetcode-companywise-questions; upstream snehasishroy/leetcode-companywise-interview-questions",
+  "files": [
+    {
+      "path": "all.csv",
+      "repository_path": "1kosmos/all.csv",
+      "window": "all",
+      "sha256": "ee80acfb5c68213168126d3665370fe25b9eea0975a3459ad44e57e43f66a8c8",
+      "rows": 1
+    },
+    {
+      "path": "more-than-six-months.csv",
+      "repository_path": "1kosmos/more-than-six-months.csv",
+      "window": "older-than-180d",
+      "sha256": "ee80acfb5c68213168126d3665370fe25b9eea0975a3459ad44e57e43f66a8c8",
+      "rows": 1
+    }
+  ]
+}

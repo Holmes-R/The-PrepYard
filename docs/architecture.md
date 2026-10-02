@@ -8,7 +8,8 @@ The PrepYard is a free, multi-platform interview preparation tracker.
 - Tailwind CSS and shadcn-compatible design tokens provide the interface foundation.
 - Public routes work without a database or account.
 - Domain features, storage, auth, and import directories define future implementation boundaries.
-- No live questions, account system, persistence, scheduled imports, or database schema are implemented yet.
+- Database migrations implement catalogue and student-data tables, constraints, indexes, RLS, and server-only snapshot publication. See [database guide](database.md).
+- No live questions, account UI, application persistence connection, or scheduled imports are implemented yet.
 
 ## Planned boundaries
 
@@ -23,3 +24,7 @@ Preserve dataset date, import time, and last-check time separately. Never infer 
 ## Secrets
 
 Public Supabase configuration identifies the project; row-level security must enforce access. Secret database/import keys must never enter client components or NEXT_PUBLIC variables. Add authentication and authorization before creating admin routes or privileged endpoints.
+
+## First importer
+
+The fixed 1Kosmos adapter verifies checked-in CSV checksums, normalizes one question across two time windows, and generates JSON plus transactional staging SQL. It does not auto-publish or connect the frontend. See [importer guide](importer.md).

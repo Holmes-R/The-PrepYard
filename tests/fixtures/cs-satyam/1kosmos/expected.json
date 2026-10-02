@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "questions": [
+    {
+      "external_id": "2938",
+      "canonical_url": "https://leetcode.com/problems/separate-black-and-white-balls",
+      "title": "Separate Black and White Balls",
+      "difficulty": "medium",
+      "original_difficulty": "Medium"
+    }
+  ],
+  "observations": [
+    {
+      "external_id": "2938",
+      "time_window": "all",
+      "frequency": 100,
+      "frequency_kind": "percent",
+      "source_rank": null,
+      "acceptance_percent": 63.9
+    },
+    {
+      "external_id": "2938",
+      "time_window": "older-than-180d",
+      "frequency": 100,
+      "frequency_kind": "percent",
+      "source_rank": null,
+      "acceptance_percent": 63.9
+    }
+  ]
+}

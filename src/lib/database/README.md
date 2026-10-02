@@ -1,5 +1,5 @@
-# Module boundary
+# Database boundary
 
-Server database access and generated database types. No client configured yet.
+Versioned schema and access policies live in supabase/migrations. See [database guide](../../../docs/database.md).
 
-Reserved for the corresponding implementation milestone.
+The schema is implemented; the application is not connected to Supabase yet. Add server/browser clients and generate TypeScript types from the applied schema during integration. Do not hand-maintain types that can drift from SQL. Keep privileged service credentials out of browser code.

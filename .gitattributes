@@ -1,0 +1,2 @@
+# Preserve exact upstream bytes for checksum-pinned fixtures.
+tests/fixtures/cs-satyam/1kosmos/*.csv -text
