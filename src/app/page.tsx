@@ -1,7 +1,8 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Building2, Layers3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { site } from "@/lib/site";
+import { requireUser } from "@/lib/auth/server";
 
 const paths = [
   {
@@ -24,7 +25,8 @@ const paths = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  await requireUser();
   return (
     <>
       <section className="grid gap-10 py-8 md:grid-cols-[1.4fr_1fr] md:py-16">
@@ -62,15 +64,8 @@ export default function Home() {
           </h2>
           <p className="mt-4 leading-7 text-muted-foreground">
             This first milestone establishes the application. Live question
-            imports, personal progress, and account sync are next.
+            imports, personal progress, are next.
           </p>
-          <a
-            href={site.repository}
-            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary"
-          >
-            Follow the project on GitHub{" "}
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
         </aside>
       </section>
       <section

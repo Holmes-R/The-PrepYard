@@ -15,8 +15,7 @@ export const sections = [
     href: "/companies",
     title: "Companies",
     description: "Prepare for the companies on your list.",
-    detail:
-      "Company sheets will show source-specific frequency, time windows, and dataset dates.",
+    detail: "Company sheets will help you prioritize questions by frequency.",
   },
   {
     href: "/patterns",
@@ -30,7 +29,7 @@ export const sections = [
     title: "My dashboard",
     description: "Make room for steady progress.",
     detail:
-      "Guest progress, bookmarks, and a revision queue are planned. Nothing is saved yet.",
+      "Account progress, bookmarks, and a revision queue are planned. Nothing is saved yet.",
   },
   {
     href: "/notes",
@@ -38,12 +37,5 @@ export const sections = [
     description: "Keep the lessons behind each solution.",
     detail:
       "Private notes and backup export will be implemented with progress storage.",
-  },
-  {
-    href: "/sources",
-    title: "Data sources",
-    description: "Know where your practice data comes from.",
-    detail:
-      "Source credits, snapshot dates, and import history will appear here once the first importer is connected.",
   },
 ] as const;

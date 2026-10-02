@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sprout } from "lucide-react";
 import { sections } from "@/lib/site";
+import { signOut } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -17,26 +18,33 @@ export function SiteHeader() {
         >
           <Sprout aria-hidden="true" className="text-primary" /> The PrepYard
         </Link>
-        <nav
-          aria-label="Main navigation"
-          className="flex flex-wrap gap-x-5 gap-y-3 text-sm"
-        >
-          {sections.map(({ href, title }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={pathname === href ? "page" : undefined}
-              className={cn(
-                "hover:text-primary",
-                pathname === href
-                  ? "font-bold text-primary"
-                  : "text-muted-foreground",
-              )}
-            >
-              {title}
-            </Link>
-          ))}
-        </nav>
+        {!["/login", "/signup"].includes(pathname) && (
+          <nav
+            aria-label="Main navigation"
+            className="flex flex-wrap gap-x-5 gap-y-3 text-sm"
+          >
+            {sections.map(({ href, title }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={pathname === href ? "page" : undefined}
+                className={cn(
+                  "hover:text-primary",
+                  pathname === href
+                    ? "font-bold text-primary"
+                    : "text-muted-foreground",
+                )}
+              >
+                {title}
+              </Link>
+            ))}
+            <form action={signOut}>
+              <button className="font-semibold hover:text-primary">
+                Sign out
+              </button>
+            </form>
+          </nav>
+        )}
       </div>
     </header>
   );

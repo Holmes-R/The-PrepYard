@@ -6,14 +6,14 @@ The PrepYard is a free, multi-platform interview preparation tracker.
 
 - Next.js App Router and TypeScript provide pages and future application endpoints.
 - Tailwind CSS and shadcn-compatible design tokens provide the interface foundation.
-- Public routes work without a database or account.
+- Every application page and API requires Supabase sign-in. Login, registration, and email confirmation are the entry points.
 - Domain features, storage, auth, and import directories define future implementation boundaries.
 - Database migrations implement catalogue and student-data tables, constraints, indexes, RLS, and server-only snapshot publication. See [database guide](database.md).
-- No live questions, account UI, application persistence connection, or scheduled imports are implemented yet.
+- Account UI and server-side session guards are implemented. Live catalogue queries, progress persistence, and scheduled imports remain pending.
 
 ## Planned boundaries
 
-Public catalogue reads use cached server queries against Supabase PostgreSQL. Private progress uses Supabase Auth and owner-scoped database policies. Guest progress will use Dexie/IndexedDB, with explicit backup and account-merge behaviour.
+Catalogue reads require authenticated identities. Private progress uses Supabase Auth and owner-scoped database policies. Guest browsing and guest progress are no longer planned. Authentication responses are private and never shared through a cache. Source metadata, snapshot dates, and import history remain internal; students can query only the allowed frequency observation columns.
 
 Imports run separately from website requests. Source adapters fetch a fixed revision, normalise records, validate a staged snapshot, and publish it atomically. Failed imports preserve the last good dataset. Refresh only affected catalogue caches after publication.
 

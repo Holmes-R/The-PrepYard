@@ -54,21 +54,22 @@ for (const file of readdirSync(path.join(root, "supabase/migrations"))
   .sort()) {
   console.log("Applying", file);
   psql(["-f", path.join("supabase/migrations", file)]);
+  if (file === "20261002000300_access_and_publication.sql") {
+    psql(["-f", "tests/database/policies.sql"]);
+    const historicalImporter = spawnSync(
+      process.execPath,
+      ["tests/import/database.mjs"],
+      {
+        cwd: root,
+        env: { ...process.env, PREPYARD_DATABASE_TESTS: "1" },
+        stdio: "inherit",
+      },
+    );
+    if (historicalImporter.error || historicalImporter.status !== 0)
+      throw new Error("Historical importer checks failed");
+  }
 }
-psql(["-f", "tests/database/policies.sql"]);
+psql(["-f", "tests/database/members-only.sql"]);
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );
-
-const importerResult = spawnSync(
-  process.execPath,
-  ["tests/import/database.mjs"],
-  {
-    cwd: root,
-    env: { ...process.env, PREPYARD_DATABASE_TESTS: "1" },
-    stdio: "inherit",
-  },
-);
-if (importerResult.error) throw importerResult.error;
-if (importerResult.status !== 0)
-  throw new Error("Importer database integration failed.");

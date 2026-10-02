@@ -30,7 +30,7 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="border-t px-5 py-7 text-center text-sm text-muted-foreground">
-          The PrepYard · Built for students. Open to everyone.
+          The PrepYard · Built for students. Free with an account.
         </footer>
       </body>
     </html>

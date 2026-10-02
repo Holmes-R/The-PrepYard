@@ -6,7 +6,7 @@ export default function Page() {
     <SectionPlaceholder
       title="Companies"
       description="Prepare for the companies on your list."
-      detail="Company sheets will show source-specific frequency, time windows, and dataset dates."
+      detail="Company sheets will help you prioritize questions by frequency."
     />
   );
 }

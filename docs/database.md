@@ -1,8 +1,12 @@
 # Database implementation
 
+## Current access contract
+
+Migration 4 supersedes the original anonymous-access design below. Every student read requires an account. Sources, snapshots, and import logs are internal only. Frequency observations allow an explicit projection of company, question, window, frequency, frequency kind, and acceptance; provenance IDs and source ranks are denied. The original contract tests run before migration 4, followed by the final membership tests.
+
 ## Status
 
-Three SQL migrations implement 16 application tables, constraints, indexes, timestamp triggers, RLS, explicit grants, and a service-role-only publication function. The UI is not connected and no hosted Supabase project has been changed.
+Four SQL migrations implement 16 application tables, constraints, indexes, timestamp triggers, RLS, explicit grants, and a service-role-only publication function. The UI is not connected and no hosted Supabase project has been changed.
 
 Tests execute SQL on PostgreSQL 17 with real role switching. A disposable test bootstrap supplies a minimal auth.users table, auth.uid() claim helper, and Supabase-style API roles/default grants. This verifies PostgreSQL behaviour, not hosted authentication, JWT verification, PostgREST, or Supabase deployment configuration.
 

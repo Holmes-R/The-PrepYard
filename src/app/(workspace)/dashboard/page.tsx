@@ -6,7 +6,7 @@ export default function Page() {
     <SectionPlaceholder
       title="My dashboard"
       description="Make room for steady progress."
-      detail="Guest progress, bookmarks, and a revision queue are planned. Nothing is saved yet."
+      detail="Account progress, bookmarks, and a revision queue are planned. Nothing is saved yet."
     />
   );
 }

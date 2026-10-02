@@ -15,9 +15,8 @@ export default function AboutPage() {
         patterns, and personal practice into one free workspace.
       </p>
       <p className="mt-5 leading-8 text-muted-foreground">
-        We will link to original problems, credit data sources, and show dataset
-        dates. Community snapshots are preparation aids, not guarantees about
-        future interviews.
+        Practice questions and learning patterns help you prepare steadily for
+        future interviews. Create a free account to access your workspace.
       </p>
       <p className="mt-5 leading-8 text-muted-foreground">
         The current release is a scaffold. The catalogue and progress features
