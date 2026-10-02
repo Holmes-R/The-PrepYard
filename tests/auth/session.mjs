@@ -101,6 +101,50 @@ try {
   }
   const legacy = await fetch(base + "/auth/confirm?token_hash=unused", options);
   assert.equal(legacy.status, 404, "Supabase confirmation route removed");
+  const signInRedirect = await fetch(base + "/api/auth/signin", {
+    redirect: "manual",
+  });
+  assert.ok(
+    [302, 303, 307].includes(signInRedirect.status),
+    "Auth GET redirect must not throw immutable header error",
+  );
+  assert.equal(
+    new URL(signInRedirect.headers.get("location"), base).pathname,
+    "/login",
+  );
+  assert.equal(
+    signInRedirect.headers.get("cache-control"),
+    "private, no-store",
+  );
+  const csrfResponse = await fetch(base + "/api/auth/csrf", options);
+  const { csrfToken } = await csrfResponse.json();
+  const csrfCookies = csrfResponse.headers
+    .getSetCookie()
+    .map((value) => value.split(";")[0])
+    .join("; ");
+  const signOutResponse = await fetch(base + "/api/auth/signout", {
+    method: "POST",
+    redirect: "manual",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Cookie: options.headers.Cookie + "; " + csrfCookies,
+    },
+    body: new URLSearchParams({ csrfToken, callbackUrl: base + "/login" }),
+  });
+  assert.ok(
+    [302, 303, 307].includes(signOutResponse.status),
+    "Auth POST redirect must not throw immutable header error",
+  );
+  assert.equal(
+    signOutResponse.headers.get("cache-control"),
+    "private, no-store",
+  );
+  assert.ok(
+    signOutResponse.headers
+      .getSetCookie()
+      .some((value) => value.startsWith("authjs.session-token=;")),
+    "Sign-out must preserve cookie deletion",
+  );
   const providers = await (await fetch(base + "/api/auth/providers")).json();
   assert.deepEqual(Object.keys(providers), ["google"]);
   console.log(

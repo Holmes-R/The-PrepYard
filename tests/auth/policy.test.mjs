@@ -64,3 +64,35 @@ test("only internal UUIDs identify students", () => {
   for (const value of ["google-subject", "student@example.test", "", null])
     assert.equal(validStudentId(value), false);
 });
+
+test("immutable authentication redirects can receive private cache headers", async () => {
+  const { privateAuthResponse } =
+    await import("../../src/lib/auth/response.mjs");
+  const original = Response.redirect("http://localhost:3000/login", 302);
+  assert.throws(
+    () => original.headers.set("Cache-Control", "no-store"),
+    TypeError,
+  );
+  const response = privateAuthResponse(original);
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "http://localhost:3000/login");
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+});
+test("auth response copying preserves separate cookies and response content", async () => {
+  const { privateAuthResponse } =
+    await import("../../src/lib/auth/response.mjs");
+  const headers = new Headers({ "Content-Type": "application/json" });
+  headers.append("Set-Cookie", "authjs.session-token=token; HttpOnly; Path=/");
+  headers.append(
+    "Set-Cookie",
+    "authjs.csrf-token=csrf; Expires=Wed, 01 Jan 2030 00:00:00 GMT; Path=/",
+  );
+  const original = new Response('{"ok":true}', { status: 200, headers });
+  const response = privateAuthResponse(original);
+  assert.deepEqual(
+    response.headers.getSetCookie(),
+    original.headers.getSetCookie(),
+  );
+  assert.equal(response.headers.get("content-type"), "application/json");
+  assert.deepEqual(await response.json(), { ok: true });
+});
