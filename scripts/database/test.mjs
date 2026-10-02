@@ -74,6 +74,7 @@ for (const file of readdirSync(path.join(root, "supabase/migrations"))
   }
 }
 psql(["-f", "tests/database/google-identity.sql"]);
+psql(["-f", "tests/database/password-identity.sql"]);
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

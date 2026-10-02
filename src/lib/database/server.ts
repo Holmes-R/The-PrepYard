@@ -12,7 +12,7 @@ function pool() {
     connectionTimeoutMillis: 10000,
   }));
 }
-async function connection() {
+export async function connection() {
   const client = await pool().connect();
   try {
     const { rows } = await client.query(

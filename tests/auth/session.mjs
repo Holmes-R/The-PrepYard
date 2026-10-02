@@ -146,9 +146,9 @@ try {
     "Sign-out must preserve cookie deletion",
   );
   const providers = await (await fetch(base + "/api/auth/providers")).json();
-  assert.deepEqual(Object.keys(providers), ["google"]);
+  assert.deepEqual(Object.keys(providers).sort(), ["credentials", "google"]);
   console.log(
-    "Encrypted session checks passed: protected pages, real server verification, expired/tampered/foreign tokens denied, Google-only provider, and no provenance route.",
+    "Encrypted session checks passed: protected pages, real server verification, expired/tampered/foreign tokens denied, Google and password providers, and no provenance route.",
   );
 } finally {
   server.kill();

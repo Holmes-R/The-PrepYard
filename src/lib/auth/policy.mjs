@@ -1,3 +1,6 @@
+export function authConfigured(env = process.env) {
+  return Boolean(env.AUTH_SECRET && env.DATABASE_URL);
+}
 export function googleConfigured(env = process.env) {
   return Boolean(
     env.AUTH_SECRET &&
@@ -21,7 +24,7 @@ export function safeDestination(value) {
     const parsed = new URL(value, "https://prepyard.invalid");
     if (
       parsed.origin !== "https://prepyard.invalid" ||
-      /^\/(login|signup|auth|api\/auth)(\/|$)/.test(
+      /^\/(login|signup|forgot-password|reset-password|verify-email|auth|api\/auth)(\/|$)/.test(
         decodeURIComponent(parsed.pathname),
       )
     )

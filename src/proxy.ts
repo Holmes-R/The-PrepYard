@@ -1,14 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { passwordSessionValid } from "@/lib/auth/password-server";
 import { getToken } from "next-auth/jwt";
-import { googleConfigured, validStudentId } from "@/lib/auth/policy.mjs";
+import { authConfigured, validStudentId } from "@/lib/auth/policy.mjs";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const publicRoute =
     pathname === "/login" ||
     pathname === "/signup" ||
+    ["/forgot-password", "/reset-password", "/verify-email"].includes(
+      pathname,
+    ) ||
     pathname.startsWith("/api/auth/");
   let signedIn = false;
-  if (googleConfigured()) {
+  if (authConfigured()) {
     try {
       const token = await getToken({
         req: request,
@@ -16,6 +20,11 @@ export async function proxy(request: NextRequest) {
         secureCookie: request.nextUrl.protocol === "https:",
       });
       signedIn = validStudentId(token?.studentId);
+      if (signedIn && typeof token?.passwordVersion === "number")
+        signedIn = await passwordSessionValid(
+          token.studentId!,
+          token.passwordVersion,
+        );
     } catch {
       signedIn = false;
     }
@@ -31,6 +40,7 @@ export async function proxy(request: NextRequest) {
       : NextResponse.redirect(target);
   }
   response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }
 export const config = {

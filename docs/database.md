@@ -73,3 +73,7 @@ pnpm db:test
 The runner applies the test-only auth shim, tests the historical policies/importer at migration 3, tests membership at migration 4, inserts a legacy preservation fixture, applies migration 5, then tests the current Google identity/ownership contract and transaction cleanup. It does not load .env.local, access a hosted database, or drop a database. Use a fresh disposable cluster for a full repeat. Do not run the historical policies.sql against the final schema: it deliberately expects the older contract. CI uses its own ephemeral PostgreSQL 17 service.
 
 Coverage includes constraints, exact fixture data, repeated staging, rollback, publication, anonymous denial, metadata hiding, stable Google identity, legacy notes, foreign-key migration, cross-user private records, and cleared transaction-local identity. Live Google consent and hosted connections require separate verification with real configuration.
+
+## Password identities (migration 6)
+
+`private.password_accounts` stores verified email identities, salted password hashes and session versions. `private.email_tokens` stores expiring, one-use verification/reset token digests. `private.auth_limits` provides shared attempt limits. Direct student access to all three tables is denied; restricted server functions handle authentication operations. The database test runner includes password verification state, token expiry/replay, reset revocation and ownership tests. See [password authentication](password-auth.md) for setup and the full HTTP login test.

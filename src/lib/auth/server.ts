@@ -1,9 +1,9 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { googleConfigured, validStudentId } from "./policy.mjs";
+import { authConfigured, validStudentId } from "./policy.mjs";
 export async function currentUser() {
-  if (!googleConfigured()) return null;
+  if (!authConfigured()) return null;
   try {
     const session = await auth();
     return validStudentId(session?.user?.id) ? session!.user : null;

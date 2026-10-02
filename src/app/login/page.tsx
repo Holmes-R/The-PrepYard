@@ -11,7 +11,7 @@ export default async function Login({
       <AuthForm next={params.next} />
       {params.error && (
         <p role="alert" className="text-center">
-          Google sign-in could not be completed. Please try again.
+          Sign-in could not be completed. Please try again.
         </p>
       )}
     </>

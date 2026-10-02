@@ -1,3 +1,6 @@
+export function authConfigured(
+  env?: Record<string, string | undefined>,
+): boolean;
 export function googleConfigured(
   env?: Record<string, string | undefined>,
 ): boolean;

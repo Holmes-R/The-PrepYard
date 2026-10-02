@@ -1,8 +1,12 @@
 "use server";
 import { AuthError } from "next-auth";
 import { signIn, signOut as endSession } from "@/auth";
-import { googleConfigured, safeDestination } from "./policy.mjs";
-export type AuthState = { message: string };
+import {
+  authConfigured,
+  googleConfigured,
+  safeDestination,
+} from "./policy.mjs";
+export type AuthState = { message: string; success?: boolean };
 export async function continueWithGoogle(
   _previous: AuthState,
   form: FormData,
@@ -22,5 +26,5 @@ export async function continueWithGoogle(
   return { message: "" };
 }
 export async function signOut() {
-  if (googleConfigured()) await endSession({ redirectTo: "/login" });
+  if (authConfigured()) await endSession({ redirectTo: "/login" });
 }

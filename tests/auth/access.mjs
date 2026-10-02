@@ -77,17 +77,17 @@ try {
     assert.equal(response.status, 200);
     const html = await response.text();
     assert.match(html, /Continue with Google/);
-    assert.doesNotMatch(html, /type="password"|name="email"|name="password"/);
+    assert.match(html, /type="password"/);
+    assert.match(html, /PrepYard password/);
     assert.doesNotMatch(html, /Data sources|dataset dates|import history/);
   }
   const confirmation = await fetch(base + "/signup", {
     redirect: "manual",
   });
-  assert.equal(confirmation.status, 307);
-  assert.equal(
-    new URL(confirmation.headers.get("location"), base).pathname,
-    "/login",
-  );
+  assert.equal(confirmation.status, 200);
+  assert.match(await confirmation.text(), /Create your PrepYard account/);
+  for (const route of ["/forgot-password", "/verify-email", "/reset-password"])
+    assert.equal((await fetch(base + route)).status, 200);
   const oauth = await fetch(base + "/api/auth/signin/google", {
     redirect: "manual",
   });
@@ -98,7 +98,7 @@ try {
   );
   assert.equal(oldConfirmation.status, 307);
   console.log(
-    "Account access checks passed: protected routes, APIs, forged cookie denial, Google entry point, no password collection, and missing configuration.",
+    "Account access checks passed: protected routes, APIs, forged cookie denial, Google entry point, separate PrepYard password forms, and missing configuration.",
   );
 } finally {
   server.kill();

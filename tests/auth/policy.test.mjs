@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  authConfigured,
   googleConfigured,
   safeDestination,
   verifiedGoogleIdentity,
@@ -47,6 +48,9 @@ test("callback destinations cannot escape the application or loop into auth", ()
     "/%5cevil.test",
     "/login",
     "/signup",
+    "/verify-email",
+    "/reset-password",
+    "/forgot-password",
     "/api/auth/callback/google",
     "/../login",
     null,
@@ -95,4 +99,13 @@ test("auth response copying preserves separate cookies and response content", as
   );
   assert.equal(response.headers.get("content-type"), "application/json");
   assert.deepEqual(await response.json(), { ok: true });
+});
+
+test("password access does not depend on Google configuration", () => {
+  assert.equal(
+    authConfigured({ AUTH_SECRET: "test", DATABASE_URL: "test" }),
+    true,
+  );
+  assert.equal(authConfigured({ AUTH_SECRET: "test" }), false);
+  assert.equal(authConfigured({ DATABASE_URL: "test" }), false);
 });

@@ -1,3 +1,3 @@
-# Google authentication
+# Authentication
 
-Google OAuth through Auth.js replaces Supabase Auth. No password or OTP forms remain. The callback accepts verified Google identities only and resolves an application UUID by Google subject. Sessions use encrypted Auth.js JWT cookies with a one-day lifetime. Protected pages, APIs, and student database operations verify server-side identity. See docs/google-sign-in.md for setup and migration details.
+Auth.js supports Google OAuth and verified email/password accounts. Passwords are separate PrepYard passwords. See [password setup](../../../docs/password-auth.md) and [Google setup](../../../docs/google-sign-in.md). All application pages require a session; only account entry, verification, recovery and Auth.js endpoints are public. Password sessions validate the current credential version so resets revoke them.
