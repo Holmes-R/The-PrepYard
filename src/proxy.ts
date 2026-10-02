@@ -1,42 +1,34 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { googleConfigured, validStudentId } from "@/lib/auth/policy.mjs";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const publicRoute = ["/login", "/signup", "/auth/confirm"].includes(pathname);
-  let response = NextResponse.next({ request });
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const publicRoute =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname.startsWith("/api/auth/");
   let signedIn = false;
-  if (url && key) {
-    const client = createServerClient(url, key, {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (items) => {
-          items.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          items.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
-      },
-    });
+  if (googleConfigured()) {
     try {
-      const { data, error } = await client.auth.getUser();
-      signedIn = Boolean(data.user && !error);
+      const token = await getToken({
+        req: request,
+        secret: process.env.AUTH_SECRET!,
+        secureCookie: request.nextUrl.protocol === "https:",
+      });
+      signedIn = validStudentId(token?.studentId);
     } catch {
       signedIn = false;
     }
   }
+  let response = NextResponse.next();
   if (!signedIn && !publicRoute) {
     const target = request.nextUrl.clone();
     target.pathname = "/login";
     target.search = "";
     target.searchParams.set("next", pathname + request.nextUrl.search);
-    const denied = pathname.startsWith("/api/")
+    response = pathname.startsWith("/api/")
       ? NextResponse.json({ error: "Sign in required" }, { status: 401 })
       : NextResponse.redirect(target);
-    response.cookies.getAll().forEach((cookie) => denied.cookies.set(cookie));
-    response = denied;
   }
   response.headers.set("Cache-Control", "private, no-store");
   return response;

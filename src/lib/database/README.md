@@ -1,5 +1,3 @@
-# Database boundary
+# Server database boundary
 
-Versioned schema and access policies live in supabase/migrations. See [database guide](../../../docs/database.md).
-
-The schema is implemented; the application is not connected to Supabase yet. Add server/browser clients and generate TypeScript types from the applied schema during integration. Do not hand-maintain types that can drift from SQL. Keep privileged service credentials out of browser code.
+Direct PostgreSQL access uses the restricted prepyard_web login. Never connect application queries as postgres or service_role. withStudentDatabase derives identity internally from the verified server session, sets the authenticated role and identity within one transaction, and returns the connection after commit/rollback. Callers must use parameterized queries and never take ownership IDs from the browser. Database grants and policies still hide import provenance. See docs/google-sign-in.md.

@@ -1,0 +1,111 @@
+import assert from "node:assert/strict";
+import { randomBytes, randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { encode } from "next-auth/jwt";
+const root = fileURLToPath(new URL("../../", import.meta.url));
+const base = "http://127.0.0.1:3113";
+const secret = randomBytes(32).toString("base64url");
+const server = spawn(
+  process.execPath,
+  [
+    "node_modules/next/dist/bin/next",
+    "start",
+    "--hostname",
+    "127.0.0.1",
+    "--port",
+    "3113",
+  ],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      AUTH_URL: base,
+      AUTH_SECRET: secret,
+      AUTH_GOOGLE_ID: "test-client",
+      AUTH_GOOGLE_SECRET: "test-client-secret",
+      DATABASE_URL: "postgresql://prepyard_web:unused@127.0.0.1:1/unreachable",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  },
+);
+let output = "";
+server.stdout.on("data", (data) => {
+  output += data;
+});
+server.stderr.on("data", (data) => {
+  output += data;
+});
+try {
+  let ready = false;
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (server.exitCode !== null) throw new Error(output);
+    try {
+      await fetch(base + "/login");
+      ready = true;
+      break;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+  }
+  assert.ok(ready, output);
+  const userId = randomUUID();
+  const salt = "authjs.session-token";
+  const token = {
+    studentId: userId,
+    sub: userId,
+    email: "student@example.test",
+    name: "Test Student",
+  };
+  const cookie = await encode({ secret, salt, token, maxAge: 3600 });
+  const options = {
+    redirect: "manual",
+    headers: { Cookie: `${salt}=${cookie}` },
+  };
+  const health = await fetch(base + "/api/health", options);
+  assert.equal(health.status, 200, await health.text());
+  for (const route of ["/", "/companies", "/dashboard", "/notes"]) {
+    const response = await fetch(base + route, options);
+    assert.equal(response.status, 200, route);
+  }
+  const sources = await fetch(base + "/sources", options);
+  assert.equal(
+    sources.status,
+    404,
+    "Source metadata page stays removed after sign-in",
+  );
+  const session = await (
+    await fetch(base + "/api/auth/session", options)
+  ).json();
+  assert.equal(session.user.id, userId);
+  assert.equal(session.user.email, "student@example.test");
+  assert.equal(session.access_token, undefined);
+  assert.equal(session.refresh_token, undefined);
+  const expired = await encode({ secret, salt, token, maxAge: -60 });
+  const foreign = await encode({
+    secret: "different-secret",
+    salt,
+    token,
+    maxAge: 3600,
+  });
+  for (const invalid of [cookie.slice(0, -8) + "tampered", expired, foreign]) {
+    const response = await fetch(base + "/api/health", {
+      redirect: "manual",
+      headers: { Cookie: `${salt}=${invalid}` },
+    });
+    assert.equal(
+      response.status,
+      401,
+      "Invalid session cannot reach protected endpoint",
+    );
+  }
+  const legacy = await fetch(base + "/auth/confirm?token_hash=unused", options);
+  assert.equal(legacy.status, 404, "Supabase confirmation route removed");
+  const providers = await (await fetch(base + "/api/auth/providers")).json();
+  assert.deepEqual(Object.keys(providers), ["google"]);
+  console.log(
+    "Encrypted session checks passed: protected pages, real server verification, expired/tampered/foreign tokens denied, Google-only provider, and no provenance route.",
+  );
+} finally {
+  server.kill();
+}

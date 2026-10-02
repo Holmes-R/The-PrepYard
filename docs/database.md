@@ -1,120 +1,51 @@
 # Database implementation
 
-## Current access contract
+## Current contract
 
-Migration 4 supersedes the original anonymous-access design below. Every student read requires an account. Sources, snapshots, and import logs are internal only. Frequency observations allow an explicit projection of company, question, window, frequency, frequency kind, and acceptance; provenance IDs and source ranks are denied. The original contract tests run before migration 4, followed by the final membership tests.
+Five tracked migrations implement 16 public application tables and the private.students identity table, constraints, indexes, RLS, internal publication, and Google-owned identity. Migration 5 removes application foreign keys to auth.users and replaces policy identity lookups with private.student_id(). Earlier files remain unchanged for already-deployed projects.
 
-## Status
+Supabase may host PostgreSQL and manage migration tooling, but the website does not use Supabase Auth or student PostgREST requests. Direct server PostgreSQL queries use Auth.js session identity. See [Google setup](google-sign-in.md) for credentials, the restricted database login, and legacy-account migration limits.
 
-Four SQL migrations implement 16 application tables, constraints, indexes, timestamp triggers, RLS, explicit grants, and a service-role-only publication function. The UI is not connected and no hosted Supabase project has been changed.
+## Tables
 
-Tests execute SQL on PostgreSQL 17 with real role switching. A disposable test bootstrap supplies a minimal auth.users table, auth.uid() claim helper, and Supabase-style API roles/default grants. This verifies PostgreSQL behaviour, not hosted authentication, JWT verification, PostgREST, or Supabase deployment configuration.
+| Area            | Tables                                                                                 | Responsibility                                          |
+| --------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Catalogue       | platforms, companies, questions, patterns, question_patterns                           | Stable identities and reviewed mappings                 |
+| Internal data   | sources, company_aliases, source_snapshots, company_question_observations, import_runs | Source normalization, observations, publication history |
+| Sheets          | sheets, sheet_items                                                                    | Curated/personal collections and ordered questions      |
+| Student records | user_question_state, notes, practice_events, correction_reports                        | Private state and reporter-owned submissions            |
+| Accounts        | private.students                                                                       | Internal UUID, unique Google subject, profile metadata  |
 
-## Tables and relationships
+Progress belongs to stable question IDs and survives publication. Frequency windows include 30d, 60d, 90d, 180d, 1y, 2y, older-than-180d, and all. Values represent unknown, percent, count, or score, and different kinds/windows must not be added together. Constraints reject invalid values, duplicate identities, inconsistent source/snapshot references, and unsupported windows. Indexes support catalogue filters, owner lookups, revisions, search, and one active snapshot per source.
 
-| Area            | Tables                                      | Identity and invariants                                                            |
-| --------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Catalogue       | platforms, companies, questions, patterns   | UUID keys; unique slugs; platform/problem ID and platform/canonical URL uniqueness |
-| Company aliases | company_aliases                             | Source-scoped case-insensitive trimmed alias uniqueness                            |
-| Patterns        | question_patterns                           | One mapping per question/pattern; only reviewed mappings exposed                   |
-| Provenance      | sources, source_snapshots                   | Source/revision uniqueness; separate dataset date, import time, check time         |
-| Evidence        | company_question_observations               | Unique snapshot/company/question/window; source-specific frequency                 |
-| Operations      | import_runs                                 | Server-only logs; snapshot must belong to run source                               |
-| Collections     | sheets, sheet_items                         | Owner or server-curated sheet; question unique per sheet; section positions unique |
-| Personal        | user_question_state, notes, practice_events | Owner foreign keys; one state and note per user/question                           |
-| Feedback        | correction_reports                          | Reporter-owned submission; server-managed moderation                               |
+## Access
 
-Time windows: 30d, 60d, 90d, 180d, 1y, 2y, older-than-180d, all. These are source-relative windows, not live dates.
+| Data                                        | Anonymous | Signed-in student through server | Trusted maintenance |
+| ------------------------------------------- | --------- | -------------------------------- | ------------------- |
+| Eligible catalogue, patterns, shared sheets | None      | Read                             | Manage              |
+| Frequency observations                      | None      | Explicit safe columns only       | Manage              |
+| Sources, aliases, snapshots, import history | None      | None                             | Manage              |
+| Notes and progress                          | None      | Owner only                       | Manage              |
+| Practice events                             | None      | Owner read/insert/delete         | Manage              |
+| Correction reports                          | None      | Own submissions; no moderation   | Moderate            |
+| private.students                            | None      | No direct table access           | Manage              |
+| Snapshot publication                        | None      | None                             | Execute             |
 
-Frequency kinds: unknown (NULL only), percent (0–100), count (nonnegative whole number), score (nonnegative finite number). Missing frequency is never silently zero. Original difficulty is retained separately from optional easy/medium/hard normalization.
+Owner-scoped policies apply to reads and writes, including ownership changes and moving sheet items. Student clients cannot claim curated sheets or modify the catalogue. Allowed observation columns are company_id, question_id, time_window, frequency, frequency_kind, and acceptance_percent. Never use select * on observations as a student.
 
-Deletion of a user cascades their private records and owned sheets. Deleting a sheet cascades its items. Question deletion is restricted when referenced by observations or student records. Source removal is restricted when history exists. Prefer unlisting and snapshot retirement over deleting stable identities.
+The prepyard_web role is NOINHERIT, non-superuser, and cannot bypass RLS. It can resolve a verified Google identity through one private function. Ordinary queries use withStudentDatabase: the server derives the user from the verified session, starts a transaction, switches to the authenticated database permission role, sets a transaction-local identity, and commits/rolls back before releasing the connection. Identity from URL/form/header data is never trusted. Two narrowly scoped SECURITY DEFINER functions operate inside the private schema for eligibility checks and verified account registration; their execute privileges are explicit.
 
-## Access matrix
+## Legacy accounts
 
-| Data                                   | Anonymous                                                | Signed-in student                     | Server service role |
-| -------------------------------------- | -------------------------------------------------------- | ------------------------------------- | ------------------- |
-| Platforms, companies, patterns         | Read                                                     | Read                                  | Manage              |
-| Listed question metadata               | Read                                                     | Read                                  | Manage              |
-| Approved public sources                | Read                                                     | Read                                  | Manage              |
-| Published/archived snapshot provenance | Read for public sources                                  | Same                                  | Manage              |
-| Current observations                   | Read for published public snapshots and listed questions | Same                                  | Manage              |
-| Reviewed pattern mappings              | Read for listed questions                                | Same                                  | Manage              |
-| Company aliases / import logs          | None                                                     | None                                  | Manage              |
-| Public sheets and items                | Read                                                     | Read; owner may edit                  | Manage              |
-| Private sheets and items               | None                                                     | Owner only                            | Manage              |
-| Progress / notes                       | None                                                     | Owner CRUD                            | Manage              |
-| Practice events                        | None                                                     | Owner read, insert, delete; no update | Manage              |
-| Correction reports                     | None                                                     | Read own; submit own details only     | Moderate            |
-| Snapshot publication                   | None                                                     | None                                  | Execute             |
+Migration 5 copies existing Supabase user UUIDs into private.students and reattaches their records. It does not alter Supabase-managed auth objects or merge Google accounts by email. Saved work is preserved but needs an explicit verified ownership migration to attach it to a new Google login. Google subject is the stable identity; a changed email retains the account, and matching emails never automatically merge different subjects.
 
-A public personal sheet intentionally exposes its owner UUID and contents; notes and progress remain private. NULL sheet owner means server-curated, and clients cannot create, claim, or edit such sheets. Ownership checks apply to both old and new rows, preventing transfer to another user and movement of sheet items into someone else's sheet.
+## Publication
 
-RLS is enabled on every application table. Policies alone are insufficient: migrations revoke inherited/default grants and explicitly grant each operation. The service role bypasses RLS by Supabase design and must only be used in trusted server code. Database owners also bypass RLS; tests use anon/authenticated roles rather than testing everything as postgres.
+Stage a fixed, approved source revision, verify parser/completeness/anomaly checks, mark the snapshot validated, and invoke publish_source_snapshot using trusted maintenance access. Publication serializes per source, exposes eligible new questions, and archives the previous snapshot in one transaction. Failed imports preserve the active catalogue. Publishing an archived snapshot restores it; student data is never rewritten. Source is_public remains an internal catalogue-eligibility flag, not permission to expose provenance to students.
 
-No SECURITY DEFINER functions or RLS-bypassing views are exposed. Function execution is revoked from PUBLIC and granted explicitly.
+## Migration deployment
 
-## Indexes
-
-Composite indexes cover company/window/snapshot/frequency browsing, question/company lookup, owner sheet listings, owner revision queues, bookmarks, recent practice, and source import history. A partial unique index enforces one published snapshot per source. Title full-text search uses a GIN index. Foreign-key reverse lookup indexes support joins and deletion checks.
-
-## Publication and rollback
-
-1. Create a disabled source with pending reuse permission.
-2. After reviewing permission and attribution, a trusted operator approves/enables the source and chooses public visibility.
-3. Import a fixed revision into a staged snapshot. New questions default to unlisted.
-4. Complete parser, completeness, and anomaly validation in the future importer.
-5. The trusted importer marks the snapshot validated.
-6. Call public.publish_source_snapshot(snapshot_uuid) as the server role.
-7. Refresh affected website caches in application code after the transaction commits.
-
-The function locks the source row to serialize publications, locks the snapshot, requires an approved/enabled/public source, rejects unvalidated or empty snapshots, archives the previous snapshot, exposes new question metadata, and publishes the target in one transaction. Repeating the active publication is a no-op. Passing an archived snapshot restores it as current.
-
-Old snapshot provenance remains readable; old observations do not appear in the active catalogue. Previously listed question metadata remains available to preserve history. Student state is never rewritten during publication.
-
-The service role is trusted and can bypass this workflow with direct SQL. Import code must use the function, treat published snapshot contents as immutable, and never mark a snapshot validated merely because it parsed. Automatic validation, scheduling, and cache refresh are future importer work. The database checks cannot determine whether source data is truthful or complete.
-
-## Local Supabase workflow
-
-Install the official Supabase CLI and run Docker. From the repository root:
-
-```sh
-supabase start
-supabase migration list --local
-supabase db push --local
-```
-
-supabase/config.toml uses PostgreSQL 17 and local ports 54321–54323. No fixture seed runs automatically. If these ports are occupied, choose an unused local configuration.
-
-The test-only bootstrap MUST NOT be run against this Supabase instance. To run policy assertions against an otherwise empty local Supabase database, execute only tests/database/policies.sql using psql as the local database owner. Tests wrap fixtures in a transaction and roll back. These fixtures use fixed IDs: use an isolated development instance.
-
-## Disposable PostgreSQL test workflow
-
-The repository runner requires an EMPTY isolated PostgreSQL cluster without Supabase roles, a loopback host, and a database name ending in _test. It intentionally refuses an existing application database.
-
-Create an isolated PostgreSQL 17 instance and a database such as prepyard_test, then in PowerShell:
-
-```powershell
-$env:PGHOST = '127.0.0.1'
-$env:PGPORT = '55439'
-$env:PGUSER = 'postgres'
-$env:PGDATABASE = 'prepyard_test'
-$env:PSQL_BIN = 'C:\Program Files\PostgreSQL\17\bin\psql.exe'
-# Set PGPASSWORD only if your disposable instance requires authentication.
-pnpm db:test
-```
-
-The runner applies the minimal test bootstrap and actual migrations, then policy/constraint assertions. It does not load .env.local, connect to hosted services, or delete a database. After a run, the cluster is no longer empty; use a fresh isolated cluster for a full replay. To rerun assertions alone on the same test database:
-
-```powershell
-& $env:PSQL_BIN -X -v ON_ERROR_STOP=1 -f tests/database/policies.sql
-```
-
-CI creates an ephemeral PostgreSQL 17 service and runs the same runner. Assertion fixtures roll back; migration schema persists only in the disposable service. Coverage includes anonymous access, cross-user SELECT/INSERT/UPDATE/DELETE, owner changes, public/private sheets, staged data, invalid values, duplicate identity, publication/rollback, and preservation of student work.
-
-## Hosted deployment (explicit separate operation)
-
-Review and back up the target project, confirm its project reference, and inspect the migration plan before applying. Supabase supplies auth.users, auth.uid(), anon, authenticated, and service_role; production migrations do not create them.
+With the Supabase CLI installed, confirm the project reference and inspect the plan:
 
 ```sh
 supabase link --project-ref YOUR_PROJECT_REF
@@ -122,8 +53,23 @@ supabase db push --dry-run
 supabase db push
 ```
 
-Do not use local test bootstrap files or development fixtures in hosted migrations. Once a migration is applied/shared, add a new migration instead of rewriting it. Rollback of a source snapshot is different from reverting a database schema; do not drop tables to undo an import.
+Provision prepyard_web with a strong private login password and configure DATABASE_URL as documented in google-sign-in.md. The website rejects postgres/service_role connections. Hosted connections must verify TLS certificates. New database changes belong in new migrations; do not rewrite previously applied migration files.
 
-After application, generate database TypeScript types using the Supabase CLI, test policies through real authenticated API requests, then wire application clients. No service key belongs in NEXT_PUBLIC variables or a browser bundle.
+Historical migrations expect Supabase-provided roles/auth objects. A fresh plain PostgreSQL production deployment needs a separate proper initialization plan; do not use the disposable test bootstrap in production. Local Supabase remains an optional development database, while Google still handles application sign-in.
 
-References: [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [migration workflow](https://supabase.com/docs/guides/local-development/database-migrations).
+## Disposable tests
+
+Use a fresh isolated PostgreSQL 17 cluster without Supabase roles and an empty database whose name ends in _test. Never point this runner at an existing application or hosted database.
+
+```powershell
+$env:PGHOST = '127.0.0.1'
+$env:PGPORT = 'YOUR_DISPOSABLE_PORT'
+$env:PGUSER = 'postgres'
+$env:PGDATABASE = 'prepyard_test'
+$env:PSQL_BIN = 'C:\Program Files\PostgreSQL\17\bin\psql.exe'
+pnpm db:test
+```
+
+The runner applies the test-only auth shim, tests the historical policies/importer at migration 3, tests membership at migration 4, inserts a legacy preservation fixture, applies migration 5, then tests the current Google identity/ownership contract and transaction cleanup. It does not load .env.local, access a hosted database, or drop a database. Use a fresh disposable cluster for a full repeat. Do not run the historical policies.sql against the final schema: it deliberately expects the older contract. CI uses its own ephemeral PostgreSQL 17 service.
+
+Coverage includes constraints, exact fixture data, repeated staging, rollback, publication, anonymous denial, metadata hiding, stable Google identity, legacy notes, foreign-key migration, cross-user private records, and cleared transaction-local identity. Live Google consent and hosted connections require separate verification with real configuration.

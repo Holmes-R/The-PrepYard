@@ -18,8 +18,10 @@ const server = spawn(
     cwd: root,
     env: {
       ...process.env,
-      NEXT_PUBLIC_SUPABASE_URL: "",
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+      AUTH_SECRET: "",
+      AUTH_GOOGLE_ID: "",
+      AUTH_GOOGLE_SECRET: "",
+      DATABASE_URL: "",
     },
     stdio: ["ignore", "pipe", "pipe"],
   },
@@ -58,7 +60,7 @@ try {
   ]) {
     const response = await fetch(base + route, {
       redirect: "manual",
-      headers: { Cookie: "sb-access-token=forged-session" },
+      headers: { Cookie: "authjs.session-token=forged-session" },
     });
     assert.equal(response.status, 307, route);
     assert.equal(
@@ -70,15 +72,15 @@ try {
   }
   const api = await fetch(base + "/api/health", { redirect: "manual" });
   assert.equal(api.status, 401);
-  for (const route of ["/login", "/signup"]) {
+  for (const route of ["/login"]) {
     const response = await fetch(base + route);
     assert.equal(response.status, 200);
     const html = await response.text();
-    assert.match(html, /name="email"/);
-    assert.match(html, /name="password"/);
+    assert.match(html, /Continue with Google/);
+    assert.doesNotMatch(html, /type="password"|name="email"|name="password"/);
     assert.doesNotMatch(html, /Data sources|dataset dates|import history/);
   }
-  const confirmation = await fetch(base + "/auth/confirm?token_hash=invalid", {
+  const confirmation = await fetch(base + "/signup", {
     redirect: "manual",
   });
   assert.equal(confirmation.status, 307);
@@ -86,8 +88,17 @@ try {
     new URL(confirmation.headers.get("location"), base).pathname,
     "/login",
   );
+  const oauth = await fetch(base + "/api/auth/signin/google", {
+    redirect: "manual",
+  });
+  assert.equal(oauth.status, 503);
+  const oldConfirmation = await fetch(
+    base + "/auth/confirm?token_hash=invalid",
+    { redirect: "manual" },
+  );
+  assert.equal(oldConfirmation.status, 307);
   console.log(
-    "Account access checks passed: protected routes, APIs, forged cookie denial, account forms, and invalid confirmation.",
+    "Account access checks passed: protected routes, APIs, forged cookie denial, Google entry point, no password collection, and missing configuration.",
   );
 } finally {
   server.kill();

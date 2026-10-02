@@ -2,18 +2,22 @@
 
 The PrepYard is a free, multi-platform interview preparation tracker.
 
+## Authentication update
+
+Supabase Auth has been removed. Auth.js verifies Google OAuth and issues encrypted sessions; PostgreSQL private.students owns identity. Application queries use the restricted prepyard_web login and transaction-local identity. See [Google setup](google-sign-in.md).
+
 ## Current scaffold
 
 - Next.js App Router and TypeScript provide pages and future application endpoints.
 - Tailwind CSS and shadcn-compatible design tokens provide the interface foundation.
-- Every application page and API requires Supabase sign-in. Login, registration, and email confirmation are the entry points.
+- Every application page and API requires Google sign-in through Auth.js. The Google sign-in page and OAuth endpoints are the entry points.
 - Domain features, storage, auth, and import directories define future implementation boundaries.
 - Database migrations implement catalogue and student-data tables, constraints, indexes, RLS, and server-only snapshot publication. See [database guide](database.md).
-- Account UI and server-side session guards are implemented. Live catalogue queries, progress persistence, and scheduled imports remain pending.
+- Google-only account UI and server-side session guards are implemented. Live catalogue queries, progress persistence, and scheduled imports remain pending.
 
 ## Planned boundaries
 
-Catalogue reads require authenticated identities. Private progress uses Supabase Auth and owner-scoped database policies. Guest browsing and guest progress are no longer planned. Authentication responses are private and never shared through a cache. Source metadata, snapshot dates, and import history remain internal; students can query only the allowed frequency observation columns.
+Catalogue reads require authenticated identities. Private progress uses Auth.js Google sessions and owner-scoped database policies. Guest browsing and guest progress are no longer planned. Authentication responses are private and never shared through a cache. Source metadata, snapshot dates, and import history remain internal; students can query only the allowed frequency observation columns.
 
 Imports run separately from website requests. Source adapters fetch a fixed revision, normalise records, validate a staged snapshot, and publish it atomically. Failed imports preserve the last good dataset. Refresh only affected catalogue caches after publication.
 
@@ -23,7 +27,7 @@ Preserve dataset date, import time, and last-check time separately. Never infer 
 
 ## Secrets
 
-Public Supabase configuration identifies the project; row-level security must enforce access. Secret database/import keys must never enter client components or NEXT_PUBLIC variables. Add authentication and authorization before creating admin routes or privileged endpoints.
+Google OAuth secrets, AUTH_SECRET, and PostgreSQL connection credentials remain server-only. The restricted database login and row-level security enforce student access. Administrative features require separate authorization.
 
 ## First importer
 

@@ -52,8 +52,12 @@ psql(["-f", "tests/database/bootstrap.sql"]);
 for (const file of readdirSync(path.join(root, "supabase/migrations"))
   .filter((name) => name.endsWith(".sql"))
   .sort()) {
+  if (file === "20261002000500_google_identity.sql")
+    psql(["-f", "tests/database/google-preflight.sql"]);
   console.log("Applying", file);
   psql(["-f", path.join("supabase/migrations", file)]);
+  if (file === "20261002000400_members_only.sql")
+    psql(["-f", "tests/database/members-only.sql"]);
   if (file === "20261002000300_access_and_publication.sql") {
     psql(["-f", "tests/database/policies.sql"]);
     const historicalImporter = spawnSync(
@@ -69,7 +73,7 @@ for (const file of readdirSync(path.join(root, "supabase/migrations"))
       throw new Error("Historical importer checks failed");
   }
 }
-psql(["-f", "tests/database/members-only.sql"]);
+psql(["-f", "tests/database/google-identity.sql"]);
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

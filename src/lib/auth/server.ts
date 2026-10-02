@@ -1,29 +1,18 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import "server-only";
 import { redirect } from "next/navigation";
-export async function authClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return null;
-  const store = await cookies();
-  return createServerClient(url, key, {
-    cookies: {
-      getAll: () => store.getAll(),
-      setAll: (items) => {
-        try {
-          items.forEach(({ name, value, options }) =>
-            store.set(name, value, options),
-          );
-        } catch {
-          /* Proxy handles refresh for read-only server components. */
-        }
-      },
-    },
-  });
+import { auth } from "@/auth";
+import { googleConfigured, validStudentId } from "./policy.mjs";
+export async function currentUser() {
+  if (!googleConfigured()) return null;
+  try {
+    const session = await auth();
+    return validStudentId(session?.user?.id) ? session!.user : null;
+  } catch {
+    return null;
+  }
 }
 export async function requireUser() {
-  const client = await authClient();
-  const result = client ? await client.auth.getUser() : null;
-  if (!result?.data.user || result.error) redirect("/login");
-  return result.data.user;
+  const user = await currentUser();
+  if (!user) redirect("/login");
+  return user;
 }

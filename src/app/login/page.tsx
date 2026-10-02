@@ -1,4 +1,5 @@
 import { AuthForm } from "@/components/auth-form";
+export const dynamic = "force-dynamic";
 export default async function Login({
   searchParams,
 }: {
@@ -10,8 +11,7 @@ export default async function Login({
       <AuthForm next={params.next} />
       {params.error && (
         <p role="alert" className="text-center">
-          This confirmation link is invalid or expired. Please request a new
-          confirmation email.
+          Google sign-in could not be completed. Please try again.
         </p>
       )}
     </>
