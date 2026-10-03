@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import { SectionPlaceholder } from "@/components/section-placeholder";
-export const metadata: Metadata = { title: "Companies" };
-export default function Page() {
-  return (
-    <SectionPlaceholder
-      title="Companies"
-      description="Prepare for the companies on your list."
-      detail="Company sheets will help you prioritize questions by frequency."
-    />
-  );
+import { listCompanies } from "@/features/catalogue/server";
+import { CompanyDirectory } from "@/components/questions/company-sheet";
+export const metadata: Metadata = { title: "Company questions" };
+export default async function Page() {
+  return <CompanyDirectory companies={await listCompanies()} />;
 }

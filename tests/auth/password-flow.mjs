@@ -145,6 +145,50 @@ try {
   };
   assert.equal((await fetch(base + "/dashboard", authenticated)).status, 200);
   assert.equal((await fetch(base + "/api/health", authenticated)).status, 200);
+  if (process.env.PREPYARD_CATALOGUE_TESTS === "1") {
+    const directory = await fetch(base + "/companies", authenticated);
+    assert.equal(directory.status, 200);
+    assert.match(await directory.text(), /1Kosmos/);
+    const response = await fetch(base + "/companies/1kosmos", authenticated);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /Separate Black and White Balls/);
+    assert.match(html, /100%/);
+    assert.match(
+      html,
+      /leetcode.com\/problems\/separate-black-and-white-balls/,
+    );
+    assert.doesNotMatch(
+      html,
+      /a09d3bae|cs-satyam|snapshot_id|dataset_date|import_runs/,
+    );
+    assert.match(
+      await (
+        await fetch(base + "/companies/1kosmos?difficulty=hard", authenticated)
+      ).text(),
+      /No questions match/,
+    );
+    assert.match(
+      await (
+        await fetch(base + "/companies/1kosmos?q=BLACK", authenticated)
+      ).text(),
+      /Separate Black and White Balls/,
+    );
+    const missing = await fetch(
+      base + "/companies/not-a-company",
+      authenticated,
+    );
+    // Next.js can return 200 for a streamed not-found response after its loading shell.
+    assert.ok([200, 404].includes(missing.status));
+    assert.match(await missing.text(), /We could not find that page/);
+    assert.equal(
+      (await fetch(base + "/companies/1kosmos", { redirect: "manual" })).status,
+      307,
+    );
+    console.log(
+      "Signed-in company pages render exact fixture values, filter correctly and conceal provenance; guests are redirected.",
+    );
+  }
   const session = await (
     await fetch(base + "/api/auth/session", authenticated)
   ).json();

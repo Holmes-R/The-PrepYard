@@ -6,7 +6,7 @@ Repository: [Holmes-R/The-PrepYard](https://github.com/Holmes-R/The-PrepYard).
 
 ## Current status
 
-Implemented: Next.js scaffold, protected routes, email/password authentication through Auth.js, seven database migrations, constraints/indexes/row-level policies, internal snapshot publication, and a pinned 1Kosmos importer. Supabase Auth is removed. Email/password registration, verification, login and password reset are implemented. The catalogue, dashboard, and notes pages remain placeholders. student progress screens, automatic fetching/scheduling, and production deployment are not yet verified or completed.
+Implemented: Next.js scaffold, protected routes, email/password authentication through Auth.js, seven database migrations, constraints/indexes/row-level policies, internal snapshot publication, and a pinned 1Kosmos importer. Supabase Auth is removed. Email/password registration, verification, login and password reset are implemented. The company directory and company question sheets are connected to PostgreSQL. The dashboard, explore, patterns, and notes pages remain placeholders. student progress screens, automatic fetching/scheduling, and production deployment are not yet verified or completed.
 
 All student application pages and APIs require sign-in. Only /login, /signup, /forgot-password, /verify-email, /reset-password, Auth.js endpoints, and framework assets are available before login. Sources, dataset dates, and import history are hidden from student screens and database access. Login uses a separate PrepYard password.
 
@@ -50,16 +50,16 @@ private.students owns application UUIDs. Verified password identities resolve th
 
 ## Routes and folders
 
-| Route                         | Behaviour                                           |
-| ----------------------------- | --------------------------------------------------- |
-| /login                        | Email and PrepYard password                         |
-| /signup                       | Create an email/password account                    |
-| /api/auth/*                   | Auth.js password/session endpoints                  |
-| /                             | Protected home                                      |
-| /companies /explore /patterns | Protected catalogue placeholders                    |
-| /dashboard /notes             | Protected workspace placeholders                    |
-| /sources                      | Removed; not found after sign-in                    |
-| /api/health                   | Protected application liveness, not database health |
+| Route             | Behaviour                                           |
+| ----------------- | --------------------------------------------------- |
+| /login            | Email and PrepYard password                         |
+| /signup           | Create an email/password account                    |
+| /api/auth/*       | Auth.js password/session endpoints                  |
+| /                 | Protected home                                      |
+| /companies        | Published company directory and question sheets     |
+| /dashboard /notes | Protected workspace placeholders                    |
+| /sources          | Removed; not found after sign-in                    |
+| /api/health       | Protected application liveness, not database health |
 
 src/auth.ts configures password authentication, src/proxy.ts guards requests, src/lib/auth provides verified session helpers, and src/lib/database provides server-only PostgreSQL transactions. Supabase/migrations contains historical and current schema migrations. Scripts/import contains the pinned adapter and staging generator. Tests cover imports, auth policies, page/session access, and real PostgreSQL permissions. GitHub Actions runs application and disposable database checks.
 
@@ -67,7 +67,7 @@ src/auth.ts configures password authentication, src/proxy.ts guards requests, sr
 
 Configure production AUTH_URL, server secrets, and a certificate-verified PostgreSQL connection. Apply reviewed migrations, provision the restricted login, build, and verify email delivery, login and sign-out. The application may be hosted on a server-capable Next.js provider. Automated deployment and scheduled imports are future work.
 
-Next: configure email delivery and database; connect one published company sheet; save completion/bookmarks/notes; add reviewed patterns; automate imports; then expand platforms. Preserve necessary source licensing/attribution internally. The project does not bypass paid problem access or reproduce third-party statements.
+Next: configure production email delivery; save completion/bookmarks/notes; add reviewed patterns; automate imports; then expand platforms. Preserve necessary source licensing/attribution internally. The project does not bypass paid problem access or reproduce third-party statements.
 
 Documentation: [Password authentication](docs/password-auth.md), [database](docs/database.md), [importer](docs/importer.md), [architecture](docs/architecture.md), [roadmap](docs/roadmap.md).
 
@@ -80,3 +80,11 @@ Apply migration `20261002000600_password_identity.sql` with your database admini
 ## Completed fixed-snapshot importer
 
 `pnpm import:company` imports the complete 1Kosmos fixture pinned to `a09d3bae6ecf5420ae59e8886e0f9bf660717388`: one LeetCode question and two frequency windows. It generates deterministic JSON and staging SQL without modifying your database. `pnpm test:import` checks the independently recorded expected fixture, malformed inputs, exact revision and CLI replay. `pnpm db:test` verifies exact stored values, sequential/concurrent idempotence and rollback on conflicts in an isolated database. See [importer instructions](docs/importer.md).
+
+## Working company sheets
+
+`/companies` now lists companies with published questions. `/companies/1kosmos` provides title search, difficulty and question-window filters, frequency sorting, ranked company tags and platform links. All access requires login; source metadata remains private. Publish the reviewed fixture with `pnpm import:publish --approve-source` using a trusted `IMPORT_DATABASE_URL`. See [company page and publication workflow](docs/company-pages.md).
+
+## Full company directory
+
+The Companies section now includes all 656 repository companies, expandable dark question sections, search, filters, completion tracking, bookmarks, private notes and revision scheduling. Questions are loaded on demand and company tags are frequency-sorted. `pnpm import:repository --directory PATH [--approve-source]` validates the pinned full archive and optionally publishes it using the trusted importer connection. See [company workflow](docs/company-pages.md).
