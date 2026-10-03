@@ -19,15 +19,17 @@ begin
     values (data#>>'{platform,slug}',data#>>'{platform,name}',data#>>'{platform,base_url}')
     on conflict(slug) do nothing;
   select id into plat from public.platforms where slug=data#>>'{platform,slug}';
+  if not exists(select 1 from public.platforms where id=plat and name=data#>>'{platform,name}' and base_url=data#>>'{platform,base_url}') then raise exception 'Conflicting platform metadata'; end if;
   insert into public.companies(slug,name)
     values (data#>>'{source,company,slug}',data#>>'{source,company,name}') on conflict(slug) do nothing;
   select id into company from public.companies where slug=data#>>'{source,company,slug}';
+  if not exists(select 1 from public.companies where id=company and name=data#>>'{source,company,name}') then raise exception 'Conflicting company metadata'; end if;
   insert into public.sources(slug,name,url,adapter,attribution)
     values(data#>>'{source,slug}', 'cs-satyam / 1Kosmos',data#>>'{source,repository}',
       'cs-satyam-company-csv-v1',data#>>'{source,attribution}') on conflict(slug) do nothing;
   select id into src from public.sources where slug=data#>>'{source,slug}' for update;
   if not exists(select 1 from public.sources where id=src and url=data#>>'{source,repository}'
-      and adapter='cs-satyam-company-csv-v1') then raise exception 'Conflicting source identity'; end if;
+      and adapter='cs-satyam-company-csv-v1' and attribution=data#>>'{source,attribution}') then raise exception 'Conflicting source identity'; end if;
   insert into public.source_snapshots(source_id,revision,dataset_date)
     values(src,data#>>'{source,revision}',(data#>>'{source,dataset_date}')::date)
     on conflict(source_id,revision) do nothing;

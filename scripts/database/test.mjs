@@ -52,6 +52,10 @@ psql(["-f", "tests/database/bootstrap.sql"]);
 for (const file of readdirSync(path.join(root, "supabase/migrations"))
   .filter((name) => name.endsWith(".sql"))
   .sort()) {
+  if (file === "20261002000700_remove_google_sign_in.sql") {
+    psql(["-f", "tests/database/google-identity.sql"]);
+    psql(["-f", "tests/database/password-identity.sql"]);
+  }
   if (file === "20261002000500_google_identity.sql")
     psql(["-f", "tests/database/google-preflight.sql"]);
   console.log("Applying", file);
@@ -73,8 +77,10 @@ for (const file of readdirSync(path.join(root, "supabase/migrations"))
       throw new Error("Historical importer checks failed");
   }
 }
-psql(["-f", "tests/database/google-identity.sql"]);
-psql(["-f", "tests/database/password-identity.sql"]);
+psql([
+  "-c",
+  "select 1 / ((to_regprocedure('private.register_google_student(text,text,text)') is null)::integer)",
+]);
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

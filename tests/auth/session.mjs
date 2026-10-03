@@ -62,25 +62,18 @@ try {
     redirect: "manual",
     headers: { Cookie: `${salt}=${cookie}` },
   };
-  const health = await fetch(base + "/api/health", options);
-  assert.equal(health.status, 200, await health.text());
   for (const route of ["/", "/companies", "/dashboard", "/notes"]) {
-    const response = await fetch(base + route, options);
-    assert.equal(response.status, 200, route);
+    assert.equal(
+      (await fetch(base + route, options)).status,
+      307,
+      "Legacy Google session denied",
+    );
   }
-  const sources = await fetch(base + "/sources", options);
-  assert.equal(
-    sources.status,
-    404,
-    "Source metadata page stays removed after sign-in",
-  );
+  assert.equal((await fetch(base + "/api/health", options)).status, 401);
   const session = await (
     await fetch(base + "/api/auth/session", options)
   ).json();
-  assert.equal(session.user.id, userId);
-  assert.equal(session.user.email, "student@example.test");
-  assert.equal(session.access_token, undefined);
-  assert.equal(session.refresh_token, undefined);
+  assert.ok(!session?.user, "Legacy session cannot authenticate");
   const expired = await encode({ secret, salt, token, maxAge: -60 });
   const foreign = await encode({
     secret: "different-secret",
@@ -100,7 +93,7 @@ try {
     );
   }
   const legacy = await fetch(base + "/auth/confirm?token_hash=unused", options);
-  assert.equal(legacy.status, 404, "Supabase confirmation route removed");
+  assert.equal(legacy.status, 307, "Legacy session cannot reach removed route");
   const signInRedirect = await fetch(base + "/api/auth/signin", {
     redirect: "manual",
   });
@@ -146,9 +139,9 @@ try {
     "Sign-out must preserve cookie deletion",
   );
   const providers = await (await fetch(base + "/api/auth/providers")).json();
-  assert.deepEqual(Object.keys(providers).sort(), ["credentials", "google"]);
+  assert.deepEqual(Object.keys(providers).sort(), ["credentials"]);
   console.log(
-    "Encrypted session checks passed: protected pages, real server verification, expired/tampered/foreign tokens denied, Google and password providers, and no provenance route.",
+    "Session checks passed: legacy Google/expired/tampered/foreign tokens denied, credentials-only provider, private redirects and sign-out.",
   );
 } finally {
   server.kill();

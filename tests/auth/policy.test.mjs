@@ -2,43 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   authConfigured,
-  googleConfigured,
   safeDestination,
-  verifiedGoogleIdentity,
   validStudentId,
 } from "../../src/lib/auth/policy.mjs";
-test("all required Google/database configuration must exist", () => {
-  const env = {
-    AUTH_SECRET: "secret",
-    AUTH_GOOGLE_ID: "id",
-    AUTH_GOOGLE_SECRET: "secret",
-    DATABASE_URL: "url",
-  };
-  assert.equal(googleConfigured(env), true);
-  for (const key of Object.keys(env))
-    assert.equal(googleConfigured({ ...env, [key]: "" }), false, key);
-});
-test("only a verified Google subject may create an identity", () => {
-  const profile = {
-    sub: "12345",
-    email: "student@example.test",
-    email_verified: true,
-  };
-  const account = { provider: "google", providerAccountId: "12345" };
-  assert.equal(verifiedGoogleIdentity(profile, account), true);
-  for (const changed of [
-    { ...profile, email_verified: false },
-    { ...profile, email_verified: "true" },
-    { ...profile, sub: "different" },
-    { ...profile, email: "" },
-    undefined,
-  ])
-    assert.equal(verifiedGoogleIdentity(changed, account), false);
-  assert.equal(
-    verifiedGoogleIdentity(profile, { ...account, provider: "credentials" }),
-    false,
-  );
-});
 test("callback destinations cannot escape the application or loop into auth", () => {
   for (const input of [
     "https://evil.test",

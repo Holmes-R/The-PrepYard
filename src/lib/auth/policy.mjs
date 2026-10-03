@@ -1,14 +1,6 @@
 export function authConfigured(env = process.env) {
   return Boolean(env.AUTH_SECRET && env.DATABASE_URL);
 }
-export function googleConfigured(env = process.env) {
-  return Boolean(
-    env.AUTH_SECRET &&
-    env.AUTH_GOOGLE_ID &&
-    env.AUTH_GOOGLE_SECRET &&
-    env.DATABASE_URL,
-  );
-}
 export function safeDestination(value) {
   if (
     typeof value !== "string" ||
@@ -33,19 +25,6 @@ export function safeDestination(value) {
   } catch {
     return "/dashboard";
   }
-}
-export function verifiedGoogleIdentity(profile, account) {
-  return (
-    account?.provider === "google" &&
-    profile?.email_verified === true &&
-    typeof profile.email === "string" &&
-    profile.email.length > 0 &&
-    profile.email.length <= 320 &&
-    typeof profile.sub === "string" &&
-    profile.sub.length > 0 &&
-    profile.sub.length <= 255 &&
-    profile.sub === account.providerAccountId
-  );
 }
 export function validStudentId(value) {
   return (

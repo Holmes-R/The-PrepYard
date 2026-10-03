@@ -1,4 +1,6 @@
 import test from "node:test";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdtemp, cp, rm } from "node:fs/promises";
@@ -186,4 +188,39 @@ test("SQL quoting handles apostrophes and dollar-quote delimiters", async () => 
   const sql = toStagingSql(data);
   assert.ok(sql.includes("Alice''s $prepyard$ puzzle"));
   assert.ok(sql.includes("do $prepyard_$"));
+});
+
+test("another full commit is rejected until the reviewed fixture is updated", async (t) => {
+  const file = await changedFixture(t, (_dir, manifest) => {
+    manifest.revision = "f".repeat(40);
+  });
+  await assert.rejects(loadCompanySnapshot(file), /Unexpected commit/);
+});
+test("manifest file ordering cannot change generated artifacts", async (t) => {
+  const file = await changedFixture(t, (_dir, manifest) =>
+    manifest.files.reverse(),
+  );
+  const original = await loadCompanySnapshot(manifestPath);
+  const reordered = await loadCompanySnapshot(file);
+  assert.deepEqual(reordered, original);
+  assert.equal(toStagingSql(reordered), toStagingSql(original));
+});
+test("actual CLI replay writes identical JSON and SQL and rejects invalid arguments", async (t) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "prepyard-cli-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const cli = fileURLToPath(
+    new URL("../../scripts/import/company.mjs", import.meta.url),
+  );
+  const exec = promisify(execFile);
+  const invoke = () => exec(process.execPath, [cli, "--out", directory]);
+  const first = JSON.parse((await invoke()).stdout);
+  assert.equal(first.database_modified, false);
+  assert.equal(first.questions, 1);
+  assert.equal(first.observations, 2);
+  const json = await readFile(path.join(directory, "snapshot.json"));
+  const sql = await readFile(path.join(directory, "stage.sql"));
+  await invoke();
+  assert.deepEqual(await readFile(path.join(directory, "snapshot.json")), json);
+  assert.deepEqual(await readFile(path.join(directory, "stage.sql")), sql);
+  await assert.rejects(exec(process.execPath, [cli, "--unknown"]), /Usage/);
 });

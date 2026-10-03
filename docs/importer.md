@@ -57,3 +57,9 @@ The parser suite covers fixture fidelity, deterministic output, quoting, missing
 The database integration suite applies the generated SQL twice in the disposable instance, compares stored values to the independent fixture, verifies staged data is hidden from anonymous readers, rejects value/metadata conflicts without changing stored data, and refuses to mutate non-staged snapshots.
 
 The fixtures contain metadata only and preserve attribution. Public publication still requires the source permission review described in the database guide.
+
+## Completion checks
+
+The adapter accepts only the reviewed commit `a09d3bae6ecf5420ae59e8886e0f9bf660717388`, not an arbitrary commit or branch. File ordering in the manifest is normalized. The golden `expected.json` is maintained independently from parser output: compare it directly with the two upstream CSV files at that commit when reviewing updates. Never regenerate the golden fixture from the importer under test.
+
+Tests execute the actual CLI twice and compare both artifacts byte-for-byte. PostgreSQL tests replay the transaction sequentially and concurrently and compare all platform, company, source, snapshot, question and observation rows, including IDs and timestamps. Conflicting platform/company metadata and attribution are rejected atomically alongside question and observation conflicts.

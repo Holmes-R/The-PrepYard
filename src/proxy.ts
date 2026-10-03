@@ -19,7 +19,9 @@ export async function proxy(request: NextRequest) {
         secret: process.env.AUTH_SECRET!,
         secureCookie: request.nextUrl.protocol === "https:",
       });
-      signedIn = validStudentId(token?.studentId);
+      signedIn =
+        validStudentId(token?.studentId) &&
+        typeof token?.passwordVersion === "number";
       if (signedIn && typeof token?.passwordVersion === "number")
         signedIn = await passwordSessionValid(
           token.studentId!,

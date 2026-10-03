@@ -1,7 +1,6 @@
 "use client";
 import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { continueWithGoogle } from "@/lib/auth/actions";
 import {
   loginWithPassword,
   requestAccountEmail,
@@ -22,10 +21,6 @@ export function AuthForm({
       : mode === "signup" || mode === "forgot"
         ? requestAccountEmail
         : completeAccountEmail,
-    { message: "" },
-  );
-  const [googleState, googleAction, googlePending] = useActionState(
-    continueWithGoogle,
     { message: "" },
   );
   const [token, setToken] = useState("");
@@ -168,21 +163,7 @@ export function AuthForm({
             </p>
           )}
       </form>
-      {(mode === "login" || mode === "signup") && (
-        <>
-          <p className="my-5 text-center text-sm text-muted-foreground">or</p>
-          <form action={googleAction} className="grid gap-4">
-            <input type="hidden" name="next" value={next} />
-            <button
-              disabled={googlePending}
-              className="rounded-full border px-5 py-3 font-semibold disabled:opacity-50"
-            >
-              {googlePending ? "Opening Google…" : "Continue with Google"}
-            </button>
-            <p role="status">{googleState.message}</p>
-          </form>
-        </>
-      )}
+
       <nav
         aria-label="Account options"
         className="mt-6 flex flex-wrap gap-4 text-sm"
@@ -209,12 +190,6 @@ export function AuthForm({
           </>
         )}
       </nav>
-      {(mode === "login" || mode === "signup") && (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Already use Google? Continue with Google to keep your existing account
-          and progress.
-        </p>
-      )}
     </section>
   );
 }

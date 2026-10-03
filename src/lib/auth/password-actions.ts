@@ -72,7 +72,7 @@ export async function requestAccountEmail(
       message:
         purpose === "verify"
           ? "If this address can be registered, a verification email is on its way. Check your inbox and spam folder. Already registered? Log in or reset your password."
-          : "If an email-and-password account exists for this address, a reset link is on its way. Google users can continue with Google.",
+          : "If an email-and-password account exists for this address, a reset link is on its way.",
     };
   } catch {
     return unavailable;

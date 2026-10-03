@@ -33,22 +33,6 @@ export async function connection() {
     throw error;
   }
 }
-export async function registerGoogleStudent(
-  subject: string,
-  email: string,
-  name: string,
-) {
-  const client = await connection();
-  try {
-    const { rows } = await client.query<{ id: string }>(
-      "select private.register_google_student($1,$2,$3) as id",
-      [subject, email, name],
-    );
-    return rows[0].id;
-  } finally {
-    client.release();
-  }
-}
 // The database identity is derived internally from the verified server session.
 export async function withStudentDatabase<T>(
   operation: (client: PoolClient) => Promise<T>,

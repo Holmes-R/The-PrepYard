@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+export const PINNED_REVISION = "a09d3bae6ecf5420ae59e8886e0f9bf660717388";
+
 const header = [
   "ID",
   "URL",
@@ -165,6 +167,10 @@ export async function loadCompanySnapshot(manifestPath) {
     "Source must be pinned to a full commit SHA",
   );
   requireValue(
+    manifest.revision === PINNED_REVISION,
+    "Unexpected commit: this importer requires its reviewed fixed snapshot",
+  );
+  requireValue(
     manifest.company?.slug === "1kosmos" &&
       manifest.company?.name === "1Kosmos",
     "This adapter currently imports 1Kosmos",
@@ -195,10 +201,13 @@ export async function loadCompanySnapshot(manifestPath) {
       JSON.stringify(["all.csv", "more-than-six-months.csv"]),
     "Missing or unexpected source files",
   );
+  const sourceFiles = [...manifest.files].sort((a, b) =>
+    a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
+  );
   const questions = new Map(),
     observations = [],
     urls = new Map();
-  for (const file of manifest.files) {
+  for (const file of sourceFiles) {
     requireValue(
       file.repository_path === "1kosmos/" + file.path &&
         file.window === windows[file.path],
@@ -249,7 +258,7 @@ export async function loadCompanySnapshot(manifestPath) {
       dataset_date: manifest.dataset_date,
       attribution: manifest.attribution,
       company: manifest.company,
-      files: manifest.files,
+      files: sourceFiles,
     },
     platform: {
       slug: "leetcode",

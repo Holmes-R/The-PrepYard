@@ -18,13 +18,14 @@ const snapshot = await loadCompanySnapshot(
   path.join(root, "tests/fixtures/cs-satyam/1kosmos/manifest.json"),
 );
 const output = path.resolve(root, args[1] || "artifacts/imports/1kosmos");
+const stagingSql = toStagingSql(snapshot);
 await mkdir(output, { recursive: true });
 // Validate the entire snapshot before creating any output.
 await writeFile(
   path.join(output, "snapshot.json"),
   JSON.stringify(snapshot, null, 2) + "\n",
 );
-await writeFile(path.join(output, "stage.sql"), toStagingSql(snapshot));
+await writeFile(path.join(output, "stage.sql"), stagingSql);
 console.log(
   JSON.stringify(
     {
