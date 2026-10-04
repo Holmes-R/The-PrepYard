@@ -8,10 +8,7 @@ import {
   Circle,
   CircleCheck,
   Code2,
-  Plus,
-  RotateCcw,
   Search,
-  Star,
   StickyNote,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
@@ -67,10 +64,7 @@ function Question({
   const [notesOpen, setNotesOpen] = useState(false);
   const [note, setNote] = useState(q.note);
   const [message, setMessage] = useState("");
-  function save(
-    kind: "solved" | "bookmark" | "revision" | "note",
-    value: boolean | string,
-  ) {
+  function save(kind: "solved" | "note", value: boolean | string) {
     start(async () => {
       setMessage("");
       const result = await saveQuestionProgress(q.id, kind, value);
@@ -100,7 +94,12 @@ function Question({
             {q.title}
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
-          <div className="dsa-tags">
+          <div className="dsa-tags" aria-label="Question patterns">
+            {!q.patterns.length && (
+              <span title="A verified pattern has not been assigned yet">
+                Pattern pending
+              </span>
+            )}
             {q.patterns.map((p) => (
               <Link
                 key={p.slug}
@@ -127,27 +126,14 @@ function Question({
         <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
           {q.difficulty ?? "Unrated"}
         </span>
+        <span
+          className="dsa-frequency"
+          title="Highest reported company frequency (all time)"
+        >
+          <span className="sr-only">Frequency: </span>
+          {q.frequency === null ? "—" : q.frequency + "%"}
+        </span>
         <div className="dsa-actions">
-          <button
-            className={q.revision ? "dsa-revising" : ""}
-            aria-label={`${q.revision ? "Remove from" : "Add to"} revision: ${q.title}`}
-            title={q.revision ? "Remove from revision" : "Revise tomorrow"}
-            aria-pressed={q.revision}
-            disabled={pending}
-            onClick={() => save("revision", !q.revision)}
-          >
-            {q.revision ? <RotateCcw size={19} /> : <Plus size={19} />}
-          </button>
-          <button
-            className="dsa-star"
-            aria-label={`${q.bookmarked ? "Remove bookmark" : "Bookmark"}: ${q.title}`}
-            title="Bookmark"
-            aria-pressed={q.bookmarked}
-            disabled={pending}
-            onClick={() => save("bookmark", !q.bookmarked)}
-          >
-            <Star size={23} fill={q.bookmarked ? "currentColor" : "none"} />
-          </button>
           <button
             aria-label={`Notes: ${q.title}`}
             title="Private notes"
@@ -502,8 +488,6 @@ export function PatternSheet({
           options={[
             { slug: "solved", name: "Solved" },
             { slug: "unsolved", name: "Unsolved" },
-            { slug: "bookmarked", name: "Bookmarked" },
-            { slug: "revision", name: "Needs revision" },
           ]}
           placeholder="Any progress"
         />

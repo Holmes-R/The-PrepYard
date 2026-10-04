@@ -8,6 +8,7 @@ export async function listCompanies() {
         await client.query<{
           slug: string;
           name: string;
+          has_logo: boolean;
           question_count: number;
           solved_count: number;
         }>(companiesSql)

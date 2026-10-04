@@ -112,6 +112,7 @@ export async function patternQuestions(client, f) {
   const rows = (
     await client.query(
       `select q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
+ (select max(o.frequency)::float8 from public.company_question_observations o where o.question_id=q.id and o.time_window='all' and o.frequency_kind='percent') frequency,
  coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  coalesce((select content from public.notes n where n.question_id=q.id and n.user_id=private.student_id()),'') note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns

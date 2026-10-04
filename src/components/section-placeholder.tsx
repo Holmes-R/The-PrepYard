@@ -23,8 +23,7 @@ export function SectionPlaceholder({
         <h2 className="font-semibold">Coming in a future milestone</h2>
         <p className="mt-3 leading-7 text-muted-foreground">{detail}</p>
         <p className="mt-3 text-sm text-muted-foreground">
-          This is the application scaffold. No live data or progress storage is
-          connected.
+          Browse company questions or practice sheets to keep preparing.
         </p>
       </div>
       <Button asChild variant="outline">

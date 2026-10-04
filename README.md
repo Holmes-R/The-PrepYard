@@ -100,3 +100,9 @@ then run `pnpm patterns:publish` with `IMPORT_DATABASE_URL` set.
 Practice collections also include Striver A2Z, Striver SDE, NeetCode 150 and Blind 75.
 Use `pnpm collections:publish` to publish their reviewed fixtures; details and counts
 are documented in [the pattern sheet guide](docs/pattern-sheet.md).
+
+### Application appearance
+
+The interface uses a LaunchPad-inspired dark theme: a subtle star background, soft blue glow, rounded panels, pale primary buttons, and responsive navigation. Home shows live catalogue totals and links to company practice, patterns, and collections. All practice areas remain protected by account login. Question rows keep frequency, verified pattern tags, completion, and private notes. Decorative previews contain navigation links rather than simulated progress. Reduced-motion preferences are respected.
+
+The redesigned dashboard reads the current student’s saved progress. The private notebook shows up to 100 non-empty notes in question-title order, with original question links and a shortcut to locate the question in practice.

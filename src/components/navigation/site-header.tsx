@@ -1,49 +1,76 @@
 "use client";
-
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sprout } from "lucide-react";
+import { Orbit, Menu, X, ArrowUpRight } from "lucide-react";
 import { sections } from "@/lib/site";
 import { signOut } from "@/lib/auth/actions";
-import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const authPage = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-email",
+  ].includes(pathname);
   return (
-    <header className="border-b bg-card">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 py-5 md:px-8">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-xl font-bold tracking-tight"
-        >
-          <Sprout aria-hidden="true" className="text-primary" /> The PrepYard
+    <header className="launch-header">
+      <div className="launch-nav-shell">
+        <Link href="/" className="launch-brand" onClick={() => setOpen(false)}>
+          <span>
+            <Orbit size={22} />
+          </span>
+          The PrepYard
         </Link>
-        {!["/login", "/signup"].includes(pathname) && (
-          <nav
-            aria-label="Main navigation"
-            className="flex flex-wrap gap-x-5 gap-y-3 text-sm"
+        {authPage ? (
+          <Link
+            className="launch-auth-link"
+            href={pathname === "/signup" ? "/login" : "/signup"}
           >
-            {sections.map(({ href, title }) => (
-              <Link
-                key={href}
-                href={href}
-                aria-current={pathname === href ? "page" : undefined}
-                className={cn(
-                  "hover:text-primary",
-                  pathname === href
-                    ? "font-bold text-primary"
-                    : "text-muted-foreground",
-                )}
-              >
-                {title}
-              </Link>
-            ))}
-            <form action={signOut}>
-              <button className="font-semibold hover:text-primary">
-                Sign out
-              </button>
-            </form>
-          </nav>
+            {pathname === "/signup" ? "Log in" : "Create account"}
+            <ArrowUpRight size={15} />
+          </Link>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="launch-menu-toggle"
+              aria-label={open ? "Close navigation" : "Open navigation"}
+              aria-expanded={open}
+              aria-controls="main-navigation"
+              onClick={() => setOpen(!open)}
+            >
+              {open ? <X /> : <Menu />}
+            </button>
+            <nav
+              id="main-navigation"
+              aria-label="Main navigation"
+              className={"launch-nav" + (open ? " is-open" : "")}
+            >
+              {sections.map(({ href, title }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  aria-current={
+                    pathname === href || pathname.startsWith(href + "/")
+                      ? "page"
+                      : undefined
+                  }
+                >
+                  {title}
+                </Link>
+              ))}
+              <form action={signOut}>
+                <button className="launch-signout">
+                  Sign out <ArrowUpRight size={14} />
+                </button>
+              </form>
+            </nav>
+          </>
         )}
       </div>
     </header>

@@ -113,3 +113,7 @@ The recommended order uses the selected collection's own positions.
 
 Tests: pnpm test:patterns; pnpm test:collections:database against the same populated,
 isolated loopback test database described above.
+
+## Question row controls
+
+Question rows offer completion and private notes. Revision and bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show “Pattern pending”. Frequency is the highest reported all-time company percentage, or — when unavailable. Company rows retain their selected-window percentage.

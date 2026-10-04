@@ -16,6 +16,7 @@ export type PatternQuestion = {
   canonical_url: string;
   difficulty: string | null;
   platform: string;
+  frequency: number | null;
   status: string;
   bookmarked: boolean;
   revision: boolean;

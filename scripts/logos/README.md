@@ -4,62 +4,78 @@ Brand marks live in `public.company_logos` as bytes, not as URLs. A card then ne
 renders a broken image, never calls a third party at page load, and never leaks a
 student's visit to somebody else's CDN.
 
+`assets/company-logos/` holds vendored original artwork; everything else is a favicon
+fetched from the company's own verified site. Both are stored as bytes with the
+provenance recorded alongside them.
+
 ```sh
 pnpm logos:vendor                        # download Simple Icons, vendor assets/company-logos
-pnpm logos:fetch                         # publish those marks to the database
-pnpm logos:fetch -- --slug adobe         # one company
-pnpm logos:fetch -- --favicons           # fill the gaps from favicons
-pnpm logos:fetch -- --dry-run            # report, write nothing
+pnpm logos:fetch                         # publish vendored artwork only
+pnpm logos:fetch -- --favicons --guess   # + fill the gaps from verified favicons
+pnpm logos:fetch -- --reject gartner,lowe # refuse marks found to be wrong on review
+pnpm logos:fetch -- --dry-run --snapshot --favicons --guess   # audit, no database
 ```
 
 `logos:vendor` needs network and writes `assets/company-logos/`. `logos:fetch` needs
 `IMPORT_DATABASE_URL`, because these are operator-supplied brand assets. Re-running
 either is safe; a replaced mark changes its ETag, so clients refetch exactly once.
 
-## Coverage is 31%, and that is the ceiling for free sources
+`--snapshot` reads the company list from the import snapshot instead of the database,
+so coverage can be audited with no credentials at all. It refuses to write.
 
-205 of the 656 companies have real artwork. The other 451 keep a generated monogram.
+## Coverage: 465 of 656
 
-That is not a shortcoming of the matching. It is what the sources actually contain:
+| Layer                   | Companies | What it is                                             |
+| ----------------------- | --------- | ------------------------------------------------------ |
+| `assets/company-logos/` | 205       | Original brand artwork from Simple Icons               |
+| Verified favicons       | 260       | The site's own favicon, after the site was vouched for |
+| Monogram only           | 191       | No public asset found                                  |
 
-- **Simple Icons 16.33 is the source**, chosen because the marks are real brand
-  artwork, the set is CC0-1.0 so there is nothing to track, and every entry carries a
-  brand hex. It has 3463 brands, but only 205 of them are companies from this list.
-- **Simple Icons has deleted Adobe, Amazon, Alibaba, Microsoft, LinkedIn, Agoda,
-  Affirm, Oracle, Salesforce, Canva and OpenAI** for trademark reasons. They are not
-  available from the current release at all.
-- **Older releases do not rescue this.** v13.21.0 adds exactly 15 companies and
-  v11.15.0 adds 6, because the gaps are companies the project never had, not
-  companies it dropped. Resurrection is possible but worth 2 points, and it would use
-  artwork the maintainers removed on purpose.
-- **Wikidata was evaluated and rejected.** Name lookup mis-resolves constantly:
-  `Adobe` returns the building-material company, `Amazon` the rainforest, `Ascend`
-  and `Aurora` unrelated entities, `Acko` a place in Israel, `Alibaba` a
-  disambiguation page. A guarded probe over 40 names yielded 4 usable logos. Shipping
-  Amazon's rainforest as Amazon's logo is worse than shipping a monogram.
-- **Favicon services are not artwork.** `--favicons` exists to fill gaps for the
-  recognisable names only, and is off by default.
+## Why there are two layers
 
-The long tail here is Indian IT services, Chinese firms and small startups. No free
-bulk source carries original artwork for them. Closing the remaining gap means
-supplying files: drop `<slug>.svg` into `assets/company-logos/` and re-run
-`logos:fetch`. That path needs no code.
+Simple Icons has deleted Adobe, Amazon, Alibaba, Microsoft, LinkedIn, Agoda, Affirm,
+Oracle, Salesforce, Canva and OpenAI for trademark reasons, so the companies a reader
+recognises most are exactly the ones it will not supply. Older releases add only 15
+and 6 respectively, because the gaps are companies it never had. Favicons close most
+of what is left.
 
-## Matching is deliberately conservative
+## How a favicon earns its place
 
-A company is matched only when a normalised slug, name, alias, or corporate-suffix-
-stripped stem lands exactly on one brand. Two brands answering to one name is treated
-as ambiguous and skipped rather than guessed: `hive` is left unmatched because it could
-be Apache Hive or Hive the bank. Wrong attribution is the failure mode that matters,
-so it is not traded for coverage.
+A slug is not a domain, and `aurora.com` belongs to Vistance Networks while
+`gartner.org` is a hotel in Tirolo. So no domain is trusted on its own. A candidate is
+fetched and kept only if all of the following hold:
 
-## Favicon guessing is off by default
+1. **The site's own title names the company.** Matched with word boundaries, so `Aon`
+   matches "Better Decisions | Aon" and `AT&T` matches "AT&T" or "AT and T", while `aon`
+   does not match inside another word.
+2. **It is not a parked or listed domain.** `ascend.com` answers 200 with a title
+   containing "Ascend" and is for sale; `amadeus.co.in` is listed on DaaZ under a title
+   that names Amadeus. Both are refused.
+3. **The landing domain is still the same brand.** `gartner.org` resolving to
+   `hotel-gartner.com`, `lowe.com` to boat engines, `appdynamics.com` to `splunk.com`
+   are all refused, while `micro1.io` to `micro1.ai` and `in.ixl.com` are kept.
 
-A slug is not a domain. `--favicons --guess` tries `<slug>.com`, `.io`, `.co.in` and
-`.ai`, and `goldman` resolves to `goldman.io`, a different business. A wrong logo is
-worse than a monogram, so guessing has to be asked for explicitly. Every stored mark
-records the domain or file it came from, so a bad attribution is visible and
-correctable.
+The evidence travels with the bytes: every stored mark records the domain and the title
+that justified it.
+
+## Review is still required
+
+Title matching proves a site belongs to something with the company's name. It does not
+prove that thing is the employer in a list of interview hints. `aurora.org` is titled
+"Aurora Health Care" and passes every rule above, and it is almost certainly the wrong
+Aurora.
+
+So every automatically accepted favicon is written to
+`artifacts/logos/favicon-review.json` with its evidence. Read it, then:
+
+```sh
+pnpm logos:fetch -- --reject gartner,lowe,aurora
+```
+
+Rejected slugs are never fetched again, so the correction survives re-runs. Scanning the
+list once is what turns 465 automatic marks into 465 trustworthy ones. The run also
+prints why candidates were refused, grouped: `unreachable` dominates, which is the long
+tail genuinely not having those domains.
 
 ## Handling and security
 

@@ -3,7 +3,7 @@ import { getCompanyLogo } from "@/features/catalogue/server";
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const notFound = {
   status: 404,
-  headers: { "Cache-Control": "private, max-age=3600" },
+  headers: { "Cache-Control": "private, no-cache" },
 };
 // Logos are shared company metadata rather than student records, so a response may
 // be cached by the browser. The stored content hash is the validator, so replacing a
@@ -30,7 +30,7 @@ export async function GET(
     if (!logo) return new Response(null, notFound);
     const headers = new Headers({
       "Content-Type": logo.content_type,
-      "Cache-Control": "private, max-age=86400, immutable",
+      "Cache-Control": "private, no-cache",
       ETag: `"${logo.sha256}"`,
       "Content-Length": String(logo.image.byteLength),
       "X-Content-Type-Options": "nosniff",

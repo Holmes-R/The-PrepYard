@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/navigation/site-header";
 import "./globals.css";
+import "./launch-theme.css";
 
 export const metadata: Metadata = {
   title: {

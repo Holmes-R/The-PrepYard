@@ -54,7 +54,7 @@ export function AuthForm({
   const passwordField =
     mode === "login" || mode === "signup" || mode === "reset";
   return (
-    <section className="mx-auto my-12 max-w-md rounded-3xl border bg-card p-8">
+    <section className="launch-auth-card mx-auto my-12 max-w-md rounded-3xl border bg-card p-8">
       <p className="text-sm font-semibold text-primary">
         Free preparation. Your own account.
       </p>

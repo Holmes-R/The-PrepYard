@@ -36,6 +36,7 @@ export type Sheet = {
     frequency: number | null;
     acceptance: number | null;
     topics: TopicTag[];
+    patterns: TopicTag[];
     companies: CompanyTag[];
     status: string;
     bookmarked: boolean;

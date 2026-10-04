@@ -14,7 +14,7 @@
 //
 // Needs IMPORT_DATABASE_URL because logos are operator-supplied brand assets.
 import { createHash } from "node:crypto";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import pg from "pg";
@@ -35,8 +35,21 @@ const fromDir = argv.includes("--from")
   ? value("--from")
   : "assets/company-logos";
 const dryRun = argv.includes("--dry-run");
+// Reads the company list from the import snapshot instead of the database, so
+// coverage can be audited offline. Audit only: writing still needs the database.
+const fromSnapshot = argv.includes("--snapshot");
+// Marks the favicon layer refused after review, so a re-run does not put a known-wrong
+// logo back. The workflow is: run, read the review list, --reject the bad ones, re-run.
+const rejecting = value("--reject")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 // Favicons are a fallback, not artwork. Off unless asked for.
 const favicons = argv.includes("--favicons");
+// Every candidate domain must be vouched for by the site itself. On by default
+// because that is the whole point of --favicons; --no-verify stores whatever the
+// service returns, which is how aurora.com ends up as Aurora's mark.
+const verify = favicons && !argv.includes("--no-verify");
 // Off by default on purpose. A slug is not a domain, and guessing attaches real
 // other companies' marks: "goldman" resolves to goldman.io, a different business.
 // A wrong logo is worse than a monogram, so guessing has to be asked for.
@@ -46,7 +59,7 @@ const ENDPOINT = "https://www.google.com/s2/favicons";
 const SERVICE = "google-favicon-service";
 const SOURCE = `${SERVICE} sz=128`;
 const MAX_BYTES = 262144;
-const CONCURRENCY = 4;
+const CONCURRENCY = 12;
 // public.company_logos only accepts these, so anything else is skipped rather than
 // failing the whole run. The favicon service will happily return image/jpeg.
 const ALLOWED = new Set([
@@ -237,37 +250,164 @@ const DOMAINS = {
   zscaler: "zscaler.com",
 };
 const guessed = (slug) => [
-  ...new Set([`${slug}.com`, `${slug}.io`, `${slug}.co.in`, `${slug}.ai`]),
+  ...new Set([
+    `${slug}.com`,
+    `${slug}.io`,
+    `${slug}.co.in`,
+    `${slug}.ai`,
+    `${slug}.org`,
+    `${slug}.co`,
+  ]),
 ];
-async function fromNetwork(slug) {
+// Why each company was skipped, so a low hit rate can be diagnosed rather than guessed at.
+const lastRejection = new Map();
+// A guessed domain is only a candidate. It is believed once the site itself names
+// the company, which is what separates acko.com from aurora.com (Vistance Networks).
+function titleNames(title, name) {
+  const parts = String(name)
+    .toLowerCase()
+    .split(/[^a-z0-9]+/i)
+    .filter(Boolean)
+    .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!parts.length) return false;
+  // Separators in the company name may be anything non-alphanumeric in the title,
+  // so "AT&T" matches "AT&T" and "AT and T". Boundaries stop "aon" matching "naond".
+  const pattern = `(?<![a-z0-9])${parts.join("[\\s\\W_]*")}(?![a-z0-9])`;
+  return new RegExp(pattern, "i").test(title);
+}
+// A parked domain still answers 200, and its title usually contains the company
+// name, so matching alone is not enough. ascend.com is for sale rather than the chip
+// company, and amadeus.co.in is listed on DaaZ under a title that names Amadeus.
+const PARKED =
+  /\bfor sale\b|domain (name|names) (are |is )?for sale|parked (domain|free)|under construction|coming soon|default (web )?page|premium domain|domain name for your brand|this domain (may )?be for sale|buy (this|our|the)? ?[\w.-]* ?domain|\bdaaz\b|\bsedo\b|\bhugedomains\b|\bafternic\b|dan\.com/i;
+function siteText(html) {
+  const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "";
+  const og =
+    /<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)/i.exec(
+      html,
+    )?.[1];
+  const name =
+    /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i.exec(
+      html,
+    )?.[1];
+  return [title, og, name].filter(Boolean).join(" | ");
+}
+async function verifyDomain(domain, name, slug) {
+  if (!verify) return { ok: true, evidence: "unverified (--no-verify)" };
+  let response;
+  try {
+    response = await fetch(`https://${domain}/`, {
+      headers: {
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+        accept: "text/html,application/xhtml+xml",
+      },
+      redirect: "follow",
+      signal: AbortSignal.timeout(7000),
+    });
+  } catch {
+    return { ok: false, reason: "unreachable" };
+  }
+  if (!response.ok) return { ok: false, reason: `HTTP ${response.status}` };
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("html")) return { ok: false, reason: "not html" };
+  let html;
+  try {
+    html = (await response.text()).slice(0, 120000);
+  } catch {
+    return { ok: false, reason: "unreadable" };
+  }
+  const text = siteText(html);
+  if (!text.trim()) return { ok: false, reason: "no title" };
+  if (PARKED.test(text))
+    return { ok: false, reason: "parked or listed domain" };
+  if (!titleNames(text, name))
+    return { ok: false, reason: "title does not name it" };
+  const landed = hostOf(response.url);
+  if (landed && landed !== hostOf(domain) && !brandConsistent(slug, landed))
+    // The company name in the title is not enough once the page has moved: gartner.org
+    // is a hotel, lowe.com is boat engines, appdynamics.com now redirects to Splunk.
+    return { ok: false, reason: `redirects to ${landed}, a different brand` };
+  return {
+    ok: true,
+    evidence:
+      `site title ${JSON.stringify(text.trim().slice(0, 110))}` +
+      (landed && landed !== hostOf(domain) ? ` [via ${landed}]` : ""),
+  };
+}
+// The registrable name, skipping a subdomain prefix. in.ixl.com and intl.garena.com
+// are still IXL and Garena; hotel-gartner.com and loweboats.com are not Gartner and Lowe.
+const labelOf = (host) => {
+  const parts = host.split(".");
+  return parts.length >= 3 ? parts[1] : parts[0];
+};
+const squash = (value) =>
+  String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+// After a redirect the landing domain still has to be the company's own brand.
+// micro1.io to micro1.ai and jpmorganchase.com both satisfy this; splunk.com and
+// hotel-gartner.com do not.
+function brandConsistent(slug, host) {
+  const label = squash(labelOf(host));
+  const brand = squash(slug);
+  if (!label || !brand) return true;
+  return label.includes(brand) || brand.includes(label);
+}
+function hostOf(url) {
+  // Accepts a bare hostname as well as a full URL, since candidates are bare.
+  const match = String(url).match(/^(?:[a-z]+:\/\/)?(?:[^@/]*@)?([^/:?#]+)/i);
+  return match ? match[1].replace(/^www\./i, "").toLowerCase() : "";
+}
+async function fromNetwork(slug, name) {
   if (!favicons) return null;
   const mapped = DOMAINS[slug];
   if (!mapped && !guess) return null;
+  const notes = [];
   for (const domain of mapped ? [mapped] : guessed(slug)) {
+    const check = await verifyDomain(domain, name, slug);
+    if (!check.ok) {
+      notes.push(`${domain}: ${check.reason}`);
+      continue;
+    }
     const url = `${ENDPOINT}?domain=${encodeURIComponent(domain)}&sz=128`;
     try {
       const response = await fetch(url, {
         headers: { "user-agent": "Mozilla/5.0", accept: "image/*,*/*" },
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(7000),
       });
-      if (!response.ok) continue;
+      if (!response.ok) {
+        notes.push(`${domain}: favicon HTTP ${response.status}`);
+        continue;
+      }
       const content_type = (response.headers.get("content-type") ?? "")
         .split(";")[0]
         .trim()
         .toLowerCase();
-      if (!ALLOWED.has(content_type)) continue;
+      if (!ALLOWED.has(content_type)) {
+        notes.push(`${domain}: favicon was ${content_type}`);
+        continue;
+      }
       const image = Buffer.from(await response.arrayBuffer());
-      if (image.byteLength < 32 || image.byteLength > MAX_BYTES) continue;
+      if (image.byteLength < 32 || image.byteLength > MAX_BYTES) {
+        notes.push(`${domain}: favicon ${image.byteLength}B out of range`);
+        continue;
+      }
       return {
         image,
         content_type,
         source: SOURCE,
-        attribution: `Favicon fetched from ${domain} via the Google favicon service.`,
+        // The evidence travels with the bytes, so a stored mark can be audited
+        // without re-running this script.
+        attribution:
+          `Favicon fetched from ${domain} via the Google favicon service. ` +
+          `Domain verified: ${check.evidence}`,
       };
     } catch {
       // One unreachable domain is not a reason to abandon the company.
     }
   }
+  lastRejection.set(slug, notes);
   return null;
 }
 const LOCAL = {
@@ -293,9 +433,9 @@ async function fromDisk(slug) {
   }
   return null;
 }
-async function resolve(slug) {
+async function resolve(slug, name) {
   // A supplied file always wins, so a curated mark is never overwritten by a favicon.
-  return (await fromDisk(slug)) ?? (await fromNetwork(slug));
+  return (await fromDisk(slug)) ?? (await fromNetwork(slug, name));
 }
 // Connected only when something is actually written, so --dry-run can be used to
 // audit the curated map without any credential present.
@@ -312,24 +452,75 @@ async function db() {
   }
   return client;
 }
+async function snapshotCompanies() {
+  const file = path.join(root, "artifacts/imports/repository/snapshot.json");
+  if (!existsSync(file))
+    throw new Error(
+      "No artifacts/imports/repository/snapshot.json. Generate it with pnpm import:repository --directory PATH.",
+    );
+  return JSON.parse(readFileSync(file, "utf8")).companies;
+}
 async function main() {
-  const slugs = only.length
-    ? only
-    : (
-        await (
-          await db()
-        ).query("select slug from public.companies order by lower(name),slug")
-      ).rows.map((r) => r.slug);
+  let directory;
+  if (fromSnapshot) directory = await snapshotCompanies();
+  else if (only.length) {
+    // Verification needs the real display name, so the import snapshot is consulted
+    // for it. It holds the same names the database was populated from.
+    const snapshot = path.join(
+      root,
+      "artifacts/imports/repository/snapshot.json",
+    );
+    const known = new Map(
+      existsSync(snapshot)
+        ? JSON.parse(readFileSync(snapshot, "utf8")).companies.map((c) => [
+            c.slug,
+            c.name,
+          ])
+        : [],
+    );
+    directory = only.map((slug) => ({ slug, name: known.get(slug) ?? slug }));
+  } else {
+    directory = (
+      await (
+        await db()
+      ).query(
+        "select slug,name from public.companies order by lower(name),slug",
+      )
+    ).rows;
+  }
+  const slugs = directory.map((c) => c.slug);
+  if (fromSnapshot) slugs.sort();
   console.log(
-    `${slugs.length} companies to consider${only.length ? ` (filtered from the full directory)` : ""}`,
+    `${slugs.length} companies to consider${fromSnapshot ? " (from the import snapshot)" : only.length ? " (filtered from the full directory)" : ""}`,
   );
+  if (fromSnapshot && !dryRun)
+    throw new Error("--snapshot is for auditing. Re-run without it to write.");
+  const names = new Map(directory.map((c) => [c.slug, c.name]));
+  // Marks refused after review are never fetched again, so the workflow is:
+  // run, read the review list, --reject the wrong ones, re-run.
+  const reviewPath = path.join(root, "artifacts/logos/favicon-review.json");
+  const readReview = () => {
+    try {
+      return JSON.parse(readFileSync(reviewPath, "utf8"));
+    } catch {
+      return { marks: [], rejected: [] };
+    }
+  };
+  const review = readReview();
+  const refused = new Set(review.rejected ?? []);
+  for (const slug of rejecting) refused.add(slug);
   const stored = [];
   const skipped = [];
   const queue = [...slugs];
   await Promise.all(
     Array.from({ length: CONCURRENCY }, async () => {
       for (let slug = queue.shift(); slug; slug = queue.shift()) {
-        const logo = await resolve(slug);
+        // A mark refused after review is never fetched again.
+        if (refused.has(slug)) {
+          skipped.push(slug);
+          continue;
+        }
+        const logo = await resolve(slug, names.get(slug) ?? slug);
         if (!logo) {
           skipped.push(slug);
           continue;
@@ -339,13 +530,62 @@ async function main() {
     }),
   );
   stored.sort((a, b) => a.slug.localeCompare(b.slug));
+  const onDisk = stored.filter((l) => l.source.startsWith("local:")).length;
   for (const logo of stored)
     console.log(
       `  ${logo.slug.padEnd(24)} ${String(logo.image.byteLength).padStart(7)}B ${logo.content_type}  ${logo.attribution}`,
     );
+  // Title matching proves the site belongs to something with the company's name, not
+  // that it is the specific employer in the catalogue. That last judgement is a
+  // human one, so every automatically accepted favicon is written out for review.
+  const faviconMarks = stored.filter((l) => !l.source.startsWith("local:"));
+  if (rejecting.length) {
+    review.rejected = [...refused].sort();
+    mkdirSync(path.dirname(reviewPath), { recursive: true });
+    writeFileSync(reviewPath, JSON.stringify(review, null, 1) + "\n");
+    console.log(
+      `\nRefusing ${refused.size} mark(s) on future runs: ${[...refused].join(", ")}`,
+    );
+  }
+  if (faviconMarks.length) {
+    mkdirSync(path.dirname(reviewPath), { recursive: true });
+    writeFileSync(
+      reviewPath,
+      JSON.stringify(
+        {
+          note: "Automatically accepted favicon marks. Read the evidence column: a title that names something other than the employer means the wrong favicon was accepted, and no string rule can catch that. Reject those with --reject <slug>, then re-run.",
+          generated_by: "scripts/logos/fetch.mjs",
+          marks: faviconMarks.map((l) => ({
+            slug: l.slug,
+            evidence: l.attribution.replace(/^Favicon fetched from /, ""),
+          })),
+          rejected: review.rejected ?? [],
+        },
+        null,
+        1,
+      ) + "\n",
+    );
+    console.log(`\nReview list written to ${path.relative(root, reviewPath)}.`);
+  }
   console.log(
-    `\n${stored.length} marks resolved, ${skipped.length} companies keep their monogram.`,
+    `\n${stored.length} marks resolved (${onDisk} vendored artwork, ${stored.length - onDisk} favicons), ${skipped.length} companies keep their monogram.`,
   );
+  if (verify && skipped.length) {
+    // A rejected domain is usually right and blocked, or wrong and correctly
+    // refused. Grouping by reason tells those apart at a glance.
+    const reasons = new Map();
+    for (const slug of skipped) {
+      for (const note of lastRejection.get(slug) ?? []) {
+        const reason = note.split(": ").slice(1).join(": ");
+        reasons.set(reason, (reasons.get(reason) || 0) + 1);
+      }
+    }
+    if (reasons.size) {
+      console.log("Why candidates were refused:");
+      for (const [reason, count] of [...reasons].sort((a, b) => b[1] - a[1]))
+        console.log(`  ${String(count).padStart(4)}  ${reason}`);
+    }
+  }
   if (skipped.length)
     console.log(
       `No mark for: ${skipped.slice(0, 40).join(", ")}${skipped.length > 40 ? `, +${skipped.length - 40} more` : ""}`,
@@ -382,7 +622,7 @@ async function main() {
     const payload = stored.map((logo) => ({
       slug: logo.slug,
       content_type: logo.content_type,
-      image: "\\x" + logo.image.toString("hex"),
+      image: logo.image.toString("hex"),
       sha256: createHash("sha256").update(logo.image).digest("hex"),
       source: logo.source,
       attribution: logo.attribution,

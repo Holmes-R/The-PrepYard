@@ -7,10 +7,7 @@ import {
   Circle,
   CircleCheck,
   RotateCcw,
-  Star,
   StickyNote,
-  Plus,
-  Check,
   Search,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
@@ -23,6 +20,7 @@ import {
 export type CompanyItem = {
   slug: string;
   name: string;
+  has_logo?: boolean;
   question_count: number;
   solved_count: number;
 };
@@ -52,12 +50,20 @@ function logoColour(name: string) {
     hash = (hash * 31 + character.codePointAt(0)!) % LOGO_COLOURS.length;
   return LOGO_COLOURS[hash];
 }
-function CompanyLogo({ name, slug }: { name: string; slug: string }) {
+function CompanyLogo({
+  name,
+  slug,
+  available,
+}: {
+  name: string;
+  slug: string;
+  available?: boolean;
+}) {
   // Most of the directory has no stored mark, and the route answers 404 for those.
   // The monogram is the normal appearance, so it must not cost a request per card
   // once it is known to be missing.
   const [failed, setFailed] = useState(false);
-  if (failed)
+  if (failed || available === false)
     return (
       <span
         className="company-logo"
@@ -97,10 +103,7 @@ function QuestionRow({
   const [message, setMessage] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [note, setNote] = useState(question.note);
-  const save = (
-    kind: "solved" | "bookmark" | "revision" | "note",
-    value: boolean | string,
-  ) =>
+  const save = (kind: "solved" | "note", value: boolean | string) =>
     start(async () => {
       setMessage("");
       const result = await saveQuestionProgress(question.id, kind, value);
@@ -140,13 +143,22 @@ function QuestionRow({
             {question.title}
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
-          {question.topics.length > 0 && (
-            <div className="question-topics">
-              {question.topics.map((topic) => (
-                <span key={topic.slug}>{topic.name}</span>
-              ))}
-            </div>
-          )}
+          <div className="question-topics" aria-label="Question patterns">
+            {question.patterns.length ? (
+              question.patterns.map((pattern) => (
+                <Link
+                  key={pattern.slug}
+                  href={"/patterns?pattern=" + encodeURIComponent(pattern.slug)}
+                >
+                  {pattern.name}
+                </Link>
+              ))
+            ) : (
+              <span title="A verified pattern has not been assigned yet">
+                Pattern pending
+              </span>
+            )}
+          </div>
           <div className="company-tags">
             {question.companies.slice(0, 4).map((c) => (
               <Link
@@ -169,7 +181,7 @@ function QuestionRow({
                   .map((c) => c.name)
                   .join(", ")}
               >
-                +{question.companies.length - 4} companies
+                {question.companies.length - 4} more companies
               </span>
             )}
           </div>
@@ -211,40 +223,7 @@ function QuestionRow({
         >
           {question.frequency === null ? "—" : question.frequency + "%"}
         </span>
-        <button
-          className={"revision-button " + (question.revision ? "is-added" : "")}
-          title={
-            question.revision
-              ? "Remove from revision"
-              : "Add to tomorrow’s revision"
-          }
-          aria-label={
-            question.revision ? "Remove from revision" : "Add to revision"
-          }
-          aria-pressed={question.revision}
-          disabled={pending}
-          onClick={() => save("revision", !question.revision)}
-        >
-          {question.revision ? <Check size={17} /> : <Plus size={17} />}
-        </button>
         <div className="question-utilities">
-          <button
-            className="bookmark-button"
-            title={
-              question.bookmarked ? "Remove bookmark" : "Bookmark question"
-            }
-            aria-label={
-              question.bookmarked ? "Remove bookmark" : "Bookmark question"
-            }
-            aria-pressed={question.bookmarked}
-            disabled={pending}
-            onClick={() => save("bookmark", !question.bookmarked)}
-          >
-            <Star
-              size={24}
-              fill={question.bookmarked ? "currentColor" : "none"}
-            />
-          </button>
           <button
             className={"note-button " + (question.note ? "has-note" : "")}
             title="Question notes"
@@ -441,11 +420,13 @@ function CompanyQuestions({
         <label className="sheet-field">
           My progress
           <select name="progress" defaultValue={filters.progress}>
-            {Object.entries(progressLabels).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
+            {Object.entries(progressLabels)
+              .filter(([key]) => !["bookmarked", "revision"].includes(key))
+              .map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
           </select>
         </label>
         <label className="sheet-field">
@@ -546,8 +527,7 @@ function CompanyQuestions({
             <span>Platform</span>
             <span>Difficulty</span>
             <span>Frequency</span>
-            <span>Revision</span>
-            <span>Save / notes</span>
+            <span>Notes</span>
           </div>
           <div className="company-question-list" aria-busy={loading}>
             {sheet.rows.map((question) => (
@@ -622,7 +602,11 @@ function CompanyPanel({
             if (!open && !sheet && !loading) void load();
           }}
         >
-          <CompanyLogo name={company.name} slug={company.slug} />
+          <CompanyLogo
+            name={company.name}
+            slug={company.slug}
+            available={company.has_logo}
+          />
           <span className="company-card-name">{company.name}</span>
           {open && (
             <span className="company-progress-count">

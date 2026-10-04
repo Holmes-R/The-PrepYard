@@ -1,11 +1,11 @@
 .dsa-sheet {
-  --ring: #fb923c;
+  --ring: #adc8ef;
   color: #e5e5ec;
-  background: #141416;
+  background: #0d121a;
   max-width: 1440px;
   margin: 24px auto;
   padding: 34px;
-  border: 1px solid #303035;
+  border: 1px solid #283241;
   border-radius: 20px;
   color-scheme: dark;
   font-size: 14px;
@@ -31,7 +31,7 @@
 .dsa-sheet input:focus-visible,
 .dsa-sheet select:focus-visible,
 .dsa-sheet textarea:focus-visible {
-  outline: 2px solid #fb923c;
+  outline: 2px solid #adc8ef;
   outline-offset: 3px;
 }
 .dsa-hero {
@@ -46,7 +46,7 @@
   gap: 8px;
   font-size: 11px;
   letter-spacing: 0.15em;
-  color: #fb923c;
+  color: #adc8ef;
   font-weight: 700;
   margin: 0 0 16px;
 }
@@ -58,7 +58,7 @@
   margin: 0 0 16px;
 }
 .dsa-hero h1 > span {
-  color: #fb923c;
+  color: #adc8ef;
 }
 .dsa-description {
   color: #a6a6b2;
@@ -81,7 +81,7 @@
   width: 260px;
   flex-shrink: 0;
   padding: 22px 24px;
-  background: #202023;
+  background: #151d29;
   border: 1px solid #35353a;
   border-radius: 14px;
   align-self: center;
@@ -109,13 +109,13 @@
 }
 .dsa-meter {
   height: 5px;
-  background: #303035;
+  background: #283241;
   overflow: hidden;
 }
 .dsa-meter > span {
   display: block;
   height: 100%;
-  background: #fb923c;
+  background: #adc8ef;
   transition: width 0.2s;
 }
 .dsa-progress-card .dsa-meter {
@@ -126,7 +126,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px 14px;
   padding: 24px;
-  background: #1d1d20;
+  background: #121925;
   border: 1px solid #303036;
   border-radius: 12px;
 }
@@ -178,8 +178,8 @@
 }
 .dsa-filter-buttons button,
 .dsa-note button[type="submit"] {
-  background: #fb923c;
-  border: 1px solid #fb923c;
+  background: #adc8ef;
+  border: 1px solid #adc8ef;
   border-radius: 7px;
   color: #211308;
   font-weight: 650;
@@ -214,7 +214,7 @@
   margin-bottom: 16px;
 }
 .dsa-active-filter a {
-  color: #fb923c;
+  color: #adc8ef;
 }
 .dsa-topic {
   border: 1px solid #3b3b42;
@@ -272,7 +272,7 @@
 }
 .dsa-question-main {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 110px 76px 122px;
+  grid-template-columns: 28px minmax(0, 1fr) 110px 76px 70px 32px;
   align-items: center;
   gap: 16px;
   padding: 18px 16px;
@@ -302,7 +302,8 @@
   gap: 5px;
   margin-top: 7px;
 }
-.dsa-tags > a {
+.dsa-tags > a,
+.dsa-tags > span {
   font-size: 10px;
   line-height: 1.5;
   color: #b8afd2;
@@ -357,19 +358,8 @@
   width: 26px;
   min-height: 32px;
 }
-.dsa-actions button:first-child {
-  background: #29292e;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  min-height: 30px;
-}
-.dsa-actions button.dsa-star {
-  color: #f5c400;
-}
-.dsa-actions button.dsa-revising,
 .dsa-actions button.dsa-has-note {
-  color: #fb923c;
+  color: #adc8ef;
 }
 .dsa-note {
   padding: 0 20px 20px 60px;
@@ -413,7 +403,7 @@
   line-height: 1.6;
 }
 .dsa-message button {
-  color: #fb923c;
+  color: #adc8ef;
   text-decoration: underline;
   margin-left: 8px;
 }
@@ -450,7 +440,7 @@
 .dsa-empty a {
   display: inline-block;
   margin-top: 18px;
-  color: #fb923c;
+  color: #adc8ef;
 }
 .dsa-fallback {
   padding: 60px;
@@ -462,7 +452,7 @@
   margin: 20px 0;
 }
 .dsa-fallback button {
-  color: #fb923c;
+  color: #adc8ef;
 }
 @media (min-width: 1500px) {
   .dsa-sheet {
@@ -475,7 +465,7 @@
     padding: 24px;
   }
   .dsa-question-main {
-    grid-template-columns: 24px minmax(0, 1fr) 65px 110px;
+    grid-template-columns: 24px minmax(0, 1fr) 65px 65px 32px;
     gap: 12px;
   }
   .dsa-platform {
@@ -531,8 +521,9 @@
     padding: 14px 10px;
   }
   .dsa-actions {
-    grid-column: 2/-1;
-    justify-content: flex-start;
+    grid-column: 3;
+    grid-row: 2;
+    justify-content: flex-end;
     gap: 22px;
   }
   .dsa-actions button {
@@ -568,4 +559,37 @@
   .dsa-results-heading h2 {
     font-size: 17px;
   }
+}
+
+.dsa-frequency {
+  color: #acacb6;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .dsa-frequency {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.dsa-sheet {
+  background: linear-gradient(145deg, #101722, #0b1017);
+  border-color: #ffffff16;
+  box-shadow: 0 0 100px #718eb409;
+}
+.dsa-topic {
+  background: #101722;
+  border-color: #293342;
+}
+.dsa-question {
+  background: #0b111a;
+  border-color: #252f3e;
+}
+.dsa-filter-buttons button {
+  background: linear-gradient(180deg, #eef3fa, #d7e1ef);
+  color: #131b28;
+}
+.dsa-meter > span {
+  background: linear-gradient(90deg, #6e92c5, #c2d8f7);
 }
