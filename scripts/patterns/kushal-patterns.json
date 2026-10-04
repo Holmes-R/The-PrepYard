@@ -1,0 +1,407 @@
+{
+  "slug": "kushal-essential-patterns",
+  "name": "20 Essential DSA Patterns by Kushal Vijay",
+  "referenceUrl": "https://codolio.com/question-tracker/sheet/20-essential-dsa-patterns-by-kushal",
+  "verifiedOn": "2026-10-04",
+  "expectedEntries": 180,
+  "expectedUniqueQuestions": 178,
+  "groups": [
+    {
+      "name": "Fast and Slow Pointer",
+      "questions": [
+        "linked-list-cycle-ii",
+        "remove-nth-node-from-end-of-list",
+        "find-the-duplicate-number",
+        "palindrome-linked-list"
+      ]
+    },
+    {
+      "name": "Overlapping Intervals",
+      "questions": [
+        "merge-intervals",
+        "insert-interval",
+        "my-calendar-ii",
+        "minimum-number-of-arrows-to-burst-balloons",
+        "non-overlapping-intervals"
+      ]
+    },
+    {
+      "name": "Prefix Sum",
+      "questions": [
+        "find-the-middle-index-in-array",
+        "product-of-array-except-self",
+        "maximum-product-subarray",
+        "number-of-ways-to-split-array",
+        "range-sum-query-2d-immutable"
+      ]
+    },
+    {
+      "name": "Fixed Size",
+      "questions": [
+        "maximum-sum-of-distinct-subarrays-with-length-k",
+        "number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold",
+        "repeated-dna-sequences",
+        "permutation-in-string",
+        "sliding-subarray-beauty",
+        "sliding-window-maximum"
+      ]
+    },
+    {
+      "name": "Variable Size",
+      "questions": [
+        "longest-substring-without-repeating-characters",
+        "minimum-size-subarray-sum",
+        "subarray-product-less-than-k",
+        "max-consecutive-ones",
+        "fruit-into-baskets",
+        "count-number-of-nice-subarrays",
+        "minimum-window-substring"
+      ]
+    },
+    {
+      "name": "Two Pointers",
+      "questions": [
+        "two-sum-ii-input-array-is-sorted",
+        "sort-colors",
+        "next-permutation",
+        "bag-of-tokens",
+        "container-with-most-water",
+        "trapping-rain-water"
+      ]
+    },
+    {
+      "name": "Cyclic Sort (Index-Based)",
+      "questions": [
+        "missing-number",
+        "find-all-numbers-disappeared-in-an-array",
+        "set-mismatch",
+        "first-missing-positive"
+      ]
+    },
+    {
+      "name": "Reversal of Linked List (In-place)",
+      "questions": [
+        "reverse-linked-list",
+        "reverse-nodes-in-k-group",
+        "swap-nodes-in-pairs"
+      ]
+    },
+    {
+      "name": "Matrix Manipulation",
+      "questions": [
+        "rotate-image",
+        "spiral-matrix",
+        "set-matrix-zeroes",
+        "game-of-life"
+      ]
+    },
+    {
+      "name": "Breadth First Search (BFS)",
+      "questions": [
+        "shortest-path-in-binary-matrix",
+        "rotting-oranges",
+        "as-far-from-land-as-possible",
+        "word-ladder"
+      ]
+    },
+    {
+      "name": "Depth First Search (DFS)",
+      "questions": [
+        "number-of-closed-islands",
+        "coloring-a-border",
+        "number-of-enclaves",
+        "time-needed-to-inform-all-employees",
+        "find-eventual-safe-states"
+      ]
+    },
+    {
+      "name": "Backtracking",
+      "questions": [
+        "permutations-ii",
+        "combination-sum",
+        "generate-parentheses",
+        "n-queens",
+        "sudoku-solver",
+        "palindrome-partitioning",
+        "word-search"
+      ]
+    },
+    {
+      "name": "Modified Binary Search",
+      "questions": [
+        "search-in-rotated-sorted-array",
+        "find-minimum-in-rotated-sorted-array",
+        "find-peak-element",
+        "single-element-in-a-sorted-array",
+        "minimum-speed-to-arrive-on-time",
+        "capacity-to-ship-packages-within-d-days",
+        "koko-eating-bananas",
+        "find-in-mountain-array",
+        "median-of-two-sorted-arrays"
+      ]
+    },
+    {
+      "name": "Bitwise XOR",
+      "questions": [
+        "missing-number",
+        "single-number-ii",
+        "single-number-iii",
+        "find-the-original-array-of-prefix-xor",
+        "xor-queries-of-a-subarray"
+      ]
+    },
+    {
+      "name": "Top 'K' Elements",
+      "questions": [
+        "top-k-frequent-elements",
+        "kth-largest-element-in-an-array",
+        "ugly-number-ii",
+        "k-closest-points-to-origin"
+      ]
+    },
+    {
+      "name": "K-way Merge",
+      "questions": [
+        "find-k-pairs-with-smallest-sums",
+        "kth-smallest-element-in-a-sorted-matrix",
+        "merge-k-sorted-lists",
+        "smallest-range-covering-elements-from-k-lists"
+      ]
+    },
+    {
+      "name": "Two Heaps",
+      "questions": [
+        "find-median-from-data-stream",
+        "sliding-window-median",
+        "ipo"
+      ]
+    },
+    {
+      "name": "Monotonic Stack",
+      "questions": [
+        "next-greater-element-ii",
+        "next-greater-node-in-linked-list",
+        "daily-temperatures",
+        "online-stock-span",
+        "maximum-width-ramp",
+        "largest-rectangle-in-histogram"
+      ]
+    },
+    {
+      "name": "Level Order Traversal",
+      "questions": [
+        "binary-tree-level-order-traversal",
+        "binary-tree-zigzag-level-order-traversal",
+        "even-odd-tree",
+        "reverse-odd-levels-of-binary-tree",
+        "deepest-leaves-sum",
+        "add-one-row-to-tree",
+        "maximum-width-of-binary-tree",
+        "all-nodes-distance-k-in-binary-tree"
+      ]
+    },
+    {
+      "name": "Tree Construction",
+      "questions": [
+        "construct-binary-tree-from-preorder-and-inorder-traversal",
+        "maximum-binary-tree",
+        "construct-binary-search-tree-from-preorder-traversal",
+        "construct-binary-tree-from-inorder-and-postorder-traversal"
+      ]
+    },
+    {
+      "name": "Height related",
+      "questions": [
+        "maximum-depth-of-binary-tree",
+        "balanced-binary-tree",
+        "diameter-of-binary-tree",
+        "minimum-depth-of-binary-tree"
+      ]
+    },
+    {
+      "name": "Root to leaf path",
+      "questions": [
+        "binary-tree-paths",
+        "path-sum-ii",
+        "smallest-string-starting-from-leaf",
+        "insufficient-nodes-in-root-to-leaf-paths",
+        "pseudo-palindromic-paths-in-a-binary-tree",
+        "binary-tree-maximum-path-sum",
+        "sum-root-to-leaf-numbers"
+      ]
+    },
+    {
+      "name": "Ancestor problem",
+      "questions": [
+        "lowest-common-ancestor-of-a-binary-tree",
+        "maximum-difference-between-node-and-ancestor",
+        "lowest-common-ancestor-of-deepest-leaves",
+        "kth-ancestor-of-a-tree-node"
+      ]
+    },
+    {
+      "name": "Binary Search Tree",
+      "questions": [
+        "validate-binary-search-tree",
+        "range-sum-of-bst",
+        "minimum-absolute-difference-in-bst",
+        "insert-into-a-binary-search-tree",
+        "lowest-common-ancestor-of-a-binary-search-tree"
+      ]
+    },
+    {
+      "name": "Take / Not take (0/1 Knapsack)",
+      "questions": [
+        "house-robber-ii",
+        "target-sum",
+        "partition-equal-subset-sum",
+        "ones-and-zeroes",
+        "last-stone-weight-ii"
+      ]
+    },
+    {
+      "name": "Infinite Supply",
+      "questions": [
+        "coin-change",
+        "coin-change-ii",
+        "perfect-squares",
+        "minimum-cost-for-tickets"
+      ]
+    },
+    {
+      "name": "Longest Increasing Subsequence",
+      "questions": [
+        "longest-increasing-subsequence",
+        "largest-divisible-subset",
+        "maximum-length-of-pair-chain",
+        "number-of-longest-increasing-subsequence",
+        "longest-string-chain"
+      ]
+    },
+    {
+      "name": "DP on Grids",
+      "questions": [
+        "unique-paths-ii",
+        "minimum-path-sum",
+        "triangle",
+        "minimum-falling-path-sum",
+        "maximal-square",
+        "cherry-pickup",
+        "dungeon-game"
+      ]
+    },
+    {
+      "name": "DP on Strings",
+      "questions": [
+        "longest-common-subsequence",
+        "longest-palindromic-subsequence",
+        "palindromic-substrings",
+        "longest-palindromic-substring",
+        "edit-distance",
+        "minimum-ascii-delete-sum-for-two-strings",
+        "distinct-subsequences",
+        "shortest-common-supersequence",
+        "wildcard-matching"
+      ]
+    },
+    {
+      "name": "DP on Stocks",
+      "questions": [
+        "best-time-to-buy-and-sell-stock-ii",
+        "best-time-to-buy-and-sell-stock-iii",
+        "best-time-to-buy-and-sell-stock-iv",
+        "best-time-to-buy-and-sell-stock-with-cooldown",
+        "best-time-to-buy-and-sell-stock-with-transaction-fee"
+      ]
+    },
+    {
+      "name": "Topological Sort",
+      "questions": [
+        "course-schedule",
+        "course-schedule-ii",
+        "strange-printer-ii",
+        "sequence-reconstruction",
+        "alien-dictionary"
+      ]
+    },
+    {
+      "name": "Union-Find",
+      "questions": [
+        "number-of-operations-to-make-network-connected",
+        "redundant-connection",
+        "accounts-merge",
+        "satisfiability-of-equality-equations"
+      ]
+    },
+    {
+      "name": "Greedy",
+      "questions": [
+        "jump-game-ii",
+        "gas-station",
+        "bag-of-tokens",
+        "boats-to-save-people",
+        "wiggle-subsequence",
+        "car-pooling",
+        "candy"
+      ]
+    },
+    {
+      "name": "Design Data Structure",
+      "questions": [
+        "design-twitter",
+        "design-browser-history",
+        "design-circular-deque",
+        "snapshot-array",
+        "lru-cache",
+        "lfu-cache"
+      ]
+    }
+  ],
+  "easy": [
+    "palindrome-linked-list",
+    "find-the-middle-index-in-array",
+    "max-consecutive-ones",
+    "missing-number",
+    "find-all-numbers-disappeared-in-an-array",
+    "set-mismatch",
+    "reverse-linked-list",
+    "maximum-depth-of-binary-tree",
+    "balanced-binary-tree",
+    "diameter-of-binary-tree",
+    "minimum-depth-of-binary-tree",
+    "binary-tree-paths",
+    "range-sum-of-bst",
+    "minimum-absolute-difference-in-bst"
+  ],
+  "hard": [
+    "sliding-window-maximum",
+    "minimum-window-substring",
+    "trapping-rain-water",
+    "first-missing-positive",
+    "reverse-nodes-in-k-group",
+    "word-ladder",
+    "n-queens",
+    "sudoku-solver",
+    "find-in-mountain-array",
+    "median-of-two-sorted-arrays",
+    "merge-k-sorted-lists",
+    "smallest-range-covering-elements-from-k-lists",
+    "find-median-from-data-stream",
+    "sliding-window-median",
+    "ipo",
+    "largest-rectangle-in-histogram",
+    "binary-tree-maximum-path-sum",
+    "kth-ancestor-of-a-tree-node",
+    "cherry-pickup",
+    "dungeon-game",
+    "distinct-subsequences",
+    "shortest-common-supersequence",
+    "wildcard-matching",
+    "best-time-to-buy-and-sell-stock-iii",
+    "best-time-to-buy-and-sell-stock-iv",
+    "strange-printer-ii",
+    "alien-dictionary",
+    "candy",
+    "lfu-cache"
+  ]
+}

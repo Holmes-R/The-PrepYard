@@ -17,3 +17,20 @@ export async function listCompanies() {
 export async function getCompanySheet(slug: string, filters: Filters) {
   return withStudentDatabase((client) => companySheet(client, slug, filters));
 }
+export async function getCompanyLogo(slug: string) {
+  return withStudentDatabase(async (client) => {
+    const { rows } = await client.query<{
+      content_type: string;
+      image: Buffer;
+      sha256: string;
+    }>(
+      `select l.content_type,l.image,l.sha256
+       from public.company_logos l
+       join public.companies c on c.id=l.company_id
+       where c.slug=$1`,
+      [slug],
+    );
+    const row = rows[0];
+    return row ? { ...row, image: new Uint8Array(row.image) } : null;
+  });
+}

@@ -19,9 +19,15 @@ export async function GET(
       { status: 404, headers },
     );
   try {
+    const query = request.nextUrl.searchParams;
     const sheet = await getCompanySheet(
       slug,
-      filtersFrom(Object.fromEntries(request.nextUrl.searchParams)),
+      filtersFrom({
+        ...Object.fromEntries(query),
+        // Object.fromEntries keeps only the last of a repeated key, which would
+        // silently drop every topic but one.
+        topics: query.getAll("topics"),
+      }),
     );
     return sheet
       ? Response.json(sheet, { headers })

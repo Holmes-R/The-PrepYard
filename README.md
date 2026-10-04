@@ -88,3 +88,15 @@ Apply migration `20261002000600_password_identity.sql` with your database admini
 ## Full company directory
 
 The Companies section now includes all 656 repository companies, expandable dark question sections, search, filters, completion tracking, bookmarks, private notes and revision scheduling. Questions are loaded on demand and company tags are frequency-sorted. `pnpm import:repository --directory PATH [--approve-source]` validates the pinned full archive and optionally publishes it using the trusted importer connection. See [company workflow](docs/company-pages.md).
+
+## DSA topics and patterns
+
+The authenticated `/patterns` practice sheet groups questions by standard DSA topics
+and offers clickable pattern tags, a Kushal Vijay collection filter, search, difficulty,
+progress filters, pagination, bookmarks, revision flags, and private notes. See
+[setup and data model](docs/pattern-sheet.md). Apply migration `20261004000900_dsa_sheet.sql`,
+then run `pnpm patterns:publish` with `IMPORT_DATABASE_URL` set.
+
+Practice collections also include Striver A2Z, Striver SDE, NeetCode 150 and Blind 75.
+Use `pnpm collections:publish` to publish their reviewed fixtures; details and counts
+are documented in [the pattern sheet guide](docs/pattern-sheet.md).

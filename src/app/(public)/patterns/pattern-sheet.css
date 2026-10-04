@@ -1,0 +1,571 @@
+.dsa-sheet {
+  --ring: #fb923c;
+  color: #e5e5ec;
+  background: #141416;
+  max-width: 1440px;
+  margin: 24px auto;
+  padding: 34px;
+  border: 1px solid #303035;
+  border-radius: 20px;
+  color-scheme: dark;
+  font-size: 14px;
+  min-height: 70vh;
+}
+.dsa-sheet button,
+.dsa-sheet select,
+.dsa-sheet a {
+  cursor: pointer;
+}
+.dsa-sheet button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+.dsa-sheet a {
+  text-decoration: none;
+}
+.dsa-sheet a:hover {
+  text-decoration: underline;
+}
+.dsa-sheet button:focus-visible,
+.dsa-sheet a:focus-visible,
+.dsa-sheet input:focus-visible,
+.dsa-sheet select:focus-visible,
+.dsa-sheet textarea:focus-visible {
+  outline: 2px solid #fb923c;
+  outline-offset: 3px;
+}
+.dsa-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 6px 0 32px;
+}
+.dsa-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: #fb923c;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.dsa-hero h1 {
+  font-size: clamp(32px, 4vw, 52px);
+  letter-spacing: -2px;
+  font-weight: 650;
+  line-height: 1.1;
+  margin: 0 0 16px;
+}
+.dsa-hero h1 > span {
+  color: #fb923c;
+}
+.dsa-description {
+  color: #a6a6b2;
+  line-height: 1.7;
+}
+.dsa-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.dsa-hero-tags span {
+  font-size: 11px;
+  border: 1px solid #34343b;
+  padding: 6px 10px;
+  border-radius: 20px;
+  color: #bdbdc7;
+}
+.dsa-progress-card {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 22px 24px;
+  background: #202023;
+  border: 1px solid #35353a;
+  border-radius: 14px;
+  align-self: center;
+}
+.dsa-progress-card > span {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #a6a6b2;
+}
+.dsa-progress-card strong {
+  display: block;
+  font-size: 34px;
+  font-weight: 650;
+  margin: 12px 0;
+}
+.dsa-progress-card small {
+  font-size: 17px;
+  color: #8f8f9c;
+  font-weight: 400;
+}
+.dsa-progress-card p {
+  color: #b3b3bc;
+  font-size: 11px;
+  margin: 12px 0 0;
+}
+.dsa-meter {
+  height: 5px;
+  background: #303035;
+  overflow: hidden;
+}
+.dsa-meter > span {
+  display: block;
+  height: 100%;
+  background: #fb923c;
+  transition: width 0.2s;
+}
+.dsa-progress-card .dsa-meter {
+  border-radius: 10px;
+}
+.dsa-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 14px;
+  padding: 24px;
+  background: #1d1d20;
+  border: 1px solid #303036;
+  border-radius: 12px;
+}
+.dsa-filter {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dsa-filter > span {
+  color: #b0b0ba;
+  font-size: 11px;
+  font-weight: 600;
+}
+.dsa-filter select,
+.dsa-search > div {
+  width: 100%;
+  height: 41px;
+  border: 1px solid #3a3a42;
+  background: #171719;
+  border-radius: 7px;
+  color: #e5e5ec;
+}
+.dsa-filter select {
+  padding: 0 10px;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+.dsa-search > div {
+  display: flex;
+  gap: 8px;
+  padding: 0 10px;
+  align-items: center;
+  color: #92929f;
+}
+.dsa-search input {
+  width: 100%;
+  min-width: 0;
+  background: none;
+  border: 0;
+  color: #e5e5ec;
+  font-size: 12px;
+  outline: none;
+}
+.dsa-filter-buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.dsa-filter-buttons button,
+.dsa-note button[type="submit"] {
+  background: #fb923c;
+  border: 1px solid #fb923c;
+  border-radius: 7px;
+  color: #211308;
+  font-weight: 650;
+  padding: 11px 16px;
+}
+.dsa-filter-buttons a {
+  color: #bcbcc7;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.dsa-results-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 30px 0 16px;
+  gap: 10px;
+}
+.dsa-results-heading h2 {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0;
+}
+.dsa-results-heading span {
+  color: #92929f;
+  font-size: 12px;
+}
+.dsa-active-filter {
+  color: #bcbcc7;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.dsa-active-filter a {
+  color: #fb923c;
+}
+.dsa-topic {
+  border: 1px solid #3b3b42;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #212125;
+  margin-bottom: 14px;
+}
+.dsa-topic h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.dsa-topic-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  text-align: left;
+  gap: 14px;
+  padding: 19px 20px;
+  background: none;
+  border: 0;
+  color: #dedee8;
+}
+.dsa-topic-number {
+  font-size: 11px;
+  font-weight: 400;
+  color: #90909b;
+}
+.dsa-topic-count {
+  color: #a0a0ae;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.dsa-topic-toggle > svg {
+  margin-left: auto;
+  color: #888895;
+  transform: rotate(-90deg);
+  transition: transform 0.2s;
+}
+.dsa-topic-toggle > svg.dsa-chevron-open {
+  transform: rotate(0);
+}
+.dsa-topic-body {
+  padding: 0 14px 14px;
+}
+.dsa-question {
+  background: #18181b;
+  border: 1px solid #303036;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.dsa-question:last-child {
+  margin-bottom: 0;
+}
+.dsa-question-main {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 110px 76px 122px;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px;
+  min-height: 80px;
+}
+.dsa-complete {
+  background: none;
+  border: 0;
+  color: #22c55e;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+.dsa-complete svg {
+  width: 22px;
+  height: 22px;
+}
+.dsa-question-title > a {
+  color: #e0e0eb;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.6;
+}
+.dsa-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.dsa-tags > a {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #b8afd2;
+  background: #24212f;
+  border: 1px solid #3b334c;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.dsa-tags > a[aria-current="true"] {
+  color: #ffc596;
+  background: #32251e;
+  border-color: #805133;
+}
+.dsa-platform {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #acacb6;
+  font-size: 10px;
+}
+.dsa-platform > svg:first-child {
+  color: #f6b664;
+}
+.dsa-difficulty {
+  font-size: 12px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+.dsa-difficulty.easy {
+  color: #15c891;
+}
+.dsa-difficulty.medium {
+  color: #ffb000;
+}
+.dsa-difficulty.hard {
+  color: #ff5360;
+}
+.dsa-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: flex-end;
+}
+.dsa-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #93939e;
+  width: 26px;
+  min-height: 32px;
+}
+.dsa-actions button:first-child {
+  background: #29292e;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+}
+.dsa-actions button.dsa-star {
+  color: #f5c400;
+}
+.dsa-actions button.dsa-revising,
+.dsa-actions button.dsa-has-note {
+  color: #fb923c;
+}
+.dsa-note {
+  padding: 0 20px 20px 60px;
+  display: grid;
+  gap: 10px;
+}
+.dsa-note label {
+  font-size: 12px;
+  color: #bdbdc9;
+}
+.dsa-note textarea {
+  width: 100%;
+  background: #111113;
+  color: #e5e5ec;
+  border: 1px solid #45454d;
+  border-radius: 6px;
+  padding: 12px;
+  resize: vertical;
+}
+.dsa-note > div {
+  display: flex;
+  gap: 12px;
+}
+.dsa-note button {
+  font-size: 12px;
+  background: none;
+  border: 1px solid #45454d;
+  color: #bbb;
+  border-radius: 6px;
+  padding: 9px 15px;
+}
+.dsa-save-message {
+  margin: 0;
+  padding: 0 20px 10px 60px;
+  font-size: 12px;
+  color: #bcbcc7;
+}
+.dsa-message {
+  padding: 20px;
+  color: #a9a9b5;
+  line-height: 1.6;
+}
+.dsa-message button {
+  color: #fb923c;
+  text-decoration: underline;
+  margin-left: 8px;
+}
+.dsa-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 18px;
+  color: #bcbcc7;
+  font-size: 12px;
+}
+.dsa-pagination button {
+  border: 1px solid #45454d;
+  background: #29292e;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+.dsa-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a6a6b2;
+  border: 1px dashed #45454d;
+  border-radius: 10px;
+}
+.dsa-empty > svg {
+  margin: auto;
+}
+.dsa-empty h2 {
+  font-size: 20px;
+  color: #eee;
+  margin: 16px 0 8px;
+}
+.dsa-empty a {
+  display: inline-block;
+  margin-top: 18px;
+  color: #fb923c;
+}
+.dsa-fallback {
+  padding: 60px;
+}
+.dsa-fallback h1 {
+  font-size: 26px;
+}
+.dsa-fallback p {
+  margin: 20px 0;
+}
+.dsa-fallback button {
+  color: #fb923c;
+}
+@media (min-width: 1500px) {
+  .dsa-sheet {
+    margin-top: 36px;
+  }
+}
+@media (max-width: 1000px) {
+  .dsa-sheet {
+    margin: 16px;
+    padding: 24px;
+  }
+  .dsa-question-main {
+    grid-template-columns: 24px minmax(0, 1fr) 65px 110px;
+    gap: 12px;
+  }
+  .dsa-platform {
+    display: none;
+  }
+  .dsa-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dsa-progress-card {
+    width: 230px;
+  }
+}
+@media (max-width: 600px) {
+  .dsa-sheet {
+    margin: 8px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+  .dsa-hero {
+    flex-direction: column;
+    gap: 22px;
+  }
+  .dsa-progress-card {
+    width: 100%;
+    align-self: stretch;
+    padding: 18px;
+  }
+  .dsa-progress-card strong {
+    font-size: 28px;
+    margin: 8px 0;
+  }
+  .dsa-hero h1 {
+    letter-spacing: -1px;
+  }
+  .dsa-filters {
+    padding: 16px;
+    gap: 14px 10px;
+  }
+  .dsa-search,
+  .dsa-filter:nth-child(4) {
+    grid-column: 1/-1;
+  }
+  .dsa-filter-buttons {
+    gap: 12px;
+  }
+  .dsa-filter-buttons button {
+    padding: 11px;
+    font-size: 12px;
+  }
+  .dsa-question-main {
+    grid-template-columns: 24px minmax(0, 1fr) 58px;
+    gap: 10px;
+    padding: 14px 10px;
+  }
+  .dsa-actions {
+    grid-column: 2/-1;
+    justify-content: flex-start;
+    gap: 22px;
+  }
+  .dsa-actions button {
+    width: 36px;
+    min-height: 36px;
+  }
+  .dsa-question-title > a {
+    font-size: 13px;
+  }
+  .dsa-difficulty {
+    font-size: 11px;
+  }
+  .dsa-topic-toggle {
+    gap: 10px;
+    padding: 17px 12px;
+    font-size: 14px;
+  }
+  .dsa-topic-number {
+    display: none;
+  }
+  .dsa-topic-body {
+    padding: 0 8px 8px;
+  }
+  .dsa-note {
+    padding: 0 12px 16px;
+  }
+  .dsa-save-message {
+    padding-left: 14px;
+  }
+  .dsa-topic-count {
+    font-size: 12px;
+  }
+  .dsa-results-heading h2 {
+    font-size: 17px;
+  }
+}

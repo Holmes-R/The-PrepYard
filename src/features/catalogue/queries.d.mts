@@ -1,10 +1,15 @@
 import type { PoolClient } from "pg";
 export const windowLabels: Record<string, string>;
+export const progressLabels: Record<string, string>;
 export type Filters = {
   q: string;
   difficulty: string;
   window: string;
   sort: string;
+  topics: string[];
+  progress: string;
+  minFrequency: number | null;
+  minAcceptance: number | null;
   page: number;
 };
 export function filtersFrom(
@@ -16,9 +21,12 @@ export type CompanyTag = {
   name: string;
   frequency: number | null;
 };
+export type TopicTag = { slug: string; name: string };
+export type CompanyTopic = TopicTag & { uses: number };
 export type Sheet = {
   company: { id: string; slug: string; name: string };
   available: string[];
+  topics: CompanyTopic[];
   rows: {
     id: string;
     title: string;
@@ -26,6 +34,8 @@ export type Sheet = {
     difficulty: string | null;
     platform: string;
     frequency: number | null;
+    acceptance: number | null;
+    topics: TopicTag[];
     companies: CompanyTag[];
     status: string;
     bookmarked: boolean;
@@ -37,6 +47,15 @@ export type Sheet = {
   page: number;
   pages: number;
 };
+export type CompanyLogo = {
+  content_type: string;
+  image: Uint8Array;
+  sha256: string;
+};
+export function companyTopics(
+  client: PoolClient,
+  companyId: string,
+): Promise<CompanyTopic[]>;
 export function companySheet(
   client: PoolClient,
   slug: string,

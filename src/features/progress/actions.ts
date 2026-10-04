@@ -56,6 +56,7 @@ export async function saveQuestionProgress(
         );
     });
     revalidatePath("/companies", "layout");
+    revalidatePath("/patterns", "layout");
     return { ok: true, message: "Saved" };
   } catch {
     return { ok: false, message: "Could not save. Please try again." };

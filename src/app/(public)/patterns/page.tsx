@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { SectionPlaceholder } from "@/components/section-placeholder";
-export const metadata: Metadata = { title: "Patterns" };
-export default function Page() {
+import { getPatternOverview } from "@/features/patterns/server";
+import { patternFilters } from "@/features/patterns/queries.mjs";
+import { PatternSheet } from "@/components/sheets/pattern-sheet";
+export const metadata: Metadata = { title: "DSA topics & patterns" };
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const filters = patternFilters(await searchParams);
   return (
-    <SectionPlaceholder
-      title="Patterns"
-      description="Build understanding, one pattern at a time."
-      detail="Curated pattern groups will connect related questions without duplicating your progress."
+    <PatternSheet
+      key={JSON.stringify(filters)}
+      overview={await getPatternOverview(filters)}
+      filters={filters}
     />
   );
 }

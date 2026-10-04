@@ -1,21 +1,22 @@
 "use client";
-import { useEffect, useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRight,
+  ArrowUpRight,
   Circle,
   CircleCheck,
+  RotateCcw,
   Star,
   StickyNote,
   Plus,
   Check,
-  ExternalLink,
   Search,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import {
   windowLabels,
+  progressLabels,
   type Sheet,
   type Filters,
 } from "@/features/catalogue/queries.mjs";
@@ -51,14 +52,35 @@ function logoColour(name: string) {
     hash = (hash * 31 + character.codePointAt(0)!) % LOGO_COLOURS.length;
   return LOGO_COLOURS[hash];
 }
-function CompanyLogo({ name }: { name: string }) {
+function CompanyLogo({ name, slug }: { name: string; slug: string }) {
+  // Most of the directory has no stored mark, and the route answers 404 for those.
+  // The monogram is the normal appearance, so it must not cost a request per card
+  // once it is known to be missing.
+  const [failed, setFailed] = useState(false);
+  if (failed)
+    return (
+      <span
+        className="company-logo"
+        style={{ color: logoColour(name) }}
+        aria-hidden="true"
+      >
+        {companyInitials(name)}
+      </span>
+    );
   return (
-    <span
-      className="company-logo"
-      style={{ color: logoColour(name) }}
-      aria-hidden="true"
-    >
-      {companyInitials(name)}
+    <span className="company-logo-tile">
+      {/* A stored mark is third-party artwork of unknown size, so it is bounded
+          rather than trusted to lay out. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={"/api/logos/" + slug}
+        alt=""
+        width={40}
+        height={40}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
     </span>
   );
 }
@@ -118,6 +140,13 @@ function QuestionRow({
             {question.title}
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
+          {question.topics.length > 0 && (
+            <div className="question-topics">
+              {question.topics.map((topic) => (
+                <span key={topic.slug}>{topic.name}</span>
+              ))}
+            </div>
+          )}
           <div className="company-tags">
             {question.companies.slice(0, 4).map((c) => (
               <Link
@@ -266,17 +295,21 @@ function QuestionRow({
     </div>
   );
 }
-const defaults: Filters = {
+export const defaultFilters: Filters = {
   q: "",
   difficulty: "",
   window: "all",
   sort: "frequency-desc",
+  topics: [],
+  progress: "any",
+  minFrequency: null,
+  minAcceptance: null,
   page: 1,
 };
 function useCompanySheet(
   company: CompanyItem,
   initial?: Sheet,
-  initialFilters: Filters = defaults,
+  initialFilters: Filters = defaultFilters,
 ) {
   const router = useRouter();
   const [sheet, setSheet] = useState<Sheet | undefined>(initial);
@@ -288,12 +321,19 @@ function useCompanySheet(
     const request = ++sequence.current;
     setLoading(true);
     setError("");
+    // URLSearchParams only takes strings, and an empty value must be omitted rather
+    // than sent as "", so the reader on the other side sees the documented default.
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(next)) {
+      if (key === "page" || key === "topics") continue;
+      if (value === "" || value === null) continue;
+      params.set(key, String(value));
+    }
+    for (const topic of next.topics) params.append("topics", topic);
+    params.set("page", String(next.page));
     try {
       const response = await fetch(
-        "/api/companies/" +
-          company.slug +
-          "?" +
-          new URLSearchParams({ ...next, page: String(next.page) }),
+        "/api/companies/" + company.slug + "?" + params.toString(),
         { cache: "no-store" },
       );
       if (response.status === 401) {
@@ -315,38 +355,61 @@ function useCompanySheet(
   };
   return { sheet, filters, loading, error, load };
 }
+function percentValue(raw: FormDataEntryValue | null) {
+  const text = String(raw ?? "").trim();
+  return /^\d{1,3}(?:\.\d{1,2})?$/.test(text) && Number(text) <= 100
+    ? Number(text)
+    : null;
+}
 function CompanyQuestions({
-  company,
   sheet,
   filters,
   loading,
   error,
   load,
 }: {
-  company: CompanyItem;
   sheet: Sheet | undefined;
   filters: Filters;
   loading: boolean;
   error: string;
   load: (next?: Filters) => Promise<void>;
 }) {
+  // Offering a window the company has no observations for returns an empty sheet
+  // that looks like a bug, so the options follow the data.
+  const windows = (
+    sheet?.available?.length ? sheet.available : Object.keys(windowLabels)
+  ).sort(
+    (a, b) =>
+      Object.keys(windowLabels).indexOf(a) -
+      Object.keys(windowLabels).indexOf(b),
+  );
+  // A bookmarked URL can name a window this company has no observations for. Offering
+  // it would silently disagree with the results, so the request falls back to all time.
+  const window_ = windows.includes(filters.window) ? filters.window : "all";
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    void load({
+      q: String(data.get("q") || ""),
+      difficulty: String(data.get("difficulty") || ""),
+      window: String(data.get("window") || "all"),
+      sort: String(data.get("sort") || "frequency-desc"),
+      topics: data.getAll("topics").map(String),
+      progress: String(data.get("progress") || "any"),
+      minFrequency: percentValue(data.get("minFrequency")),
+      minAcceptance: percentValue(data.get("minAcceptance")),
+      page: 1,
+    });
+  };
+  const topics = sheet?.topics ?? [];
+  // The form is uncontrolled, so it is remounted whenever the applied filters change.
+  // Without this, Reset and paging would change the results while the inputs still
+  // showed the previous values.
+  const applied = JSON.stringify(filters);
   return (
     <div className="company-panel-body">
-      <form
-        className="sheet-filters"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const data = new FormData(e.currentTarget);
-          void load({
-            q: String(data.get("q") || ""),
-            difficulty: String(data.get("difficulty") || ""),
-            window: String(data.get("window") || "all"),
-            sort: String(data.get("sort") || "frequency-desc"),
-            page: 1,
-          });
-        }}
-      >
-        <label>
+      <form className="sheet-filters" onSubmit={submit} key={applied}>
+        <label className="sheet-field sheet-field-title">
           Question title
           <input
             name="q"
@@ -356,7 +419,7 @@ function CompanyQuestions({
             placeholder="Search questions…"
           />
         </label>
-        <label>
+        <label className="sheet-field">
           Difficulty
           <select name="difficulty" defaultValue={filters.difficulty}>
             <option value="">All difficulties</option>
@@ -365,27 +428,105 @@ function CompanyQuestions({
             <option value="hard">Hard</option>
           </select>
         </label>
-        <label>
+        <label className="sheet-field">
           Window
-          <select name="window" defaultValue={filters.window}>
-            {Object.entries(windowLabels).map(([key, label]) => (
+          <select name="window" defaultValue={window_}>
+            {windows.map((key) => (
+              <option key={key} value={key}>
+                {windowLabels[key]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="sheet-field">
+          My progress
+          <select name="progress" defaultValue={filters.progress}>
+            {Object.entries(progressLabels).map(([key, label]) => (
               <option key={key} value={key}>
                 {label}
               </option>
             ))}
           </select>
         </label>
-        <label>
+        <label className="sheet-field">
           Sort
           <select name="sort" defaultValue={filters.sort}>
             <option value="frequency-desc">Highest frequency</option>
             <option value="frequency-asc">Lowest frequency</option>
+            <option value="acceptance-desc">Highest acceptance</option>
             <option value="title">Title A–Z</option>
+            <option value="title-desc">Title Z–A</option>
           </select>
         </label>
-        <button className="sheet-apply" disabled={loading}>
-          Apply
-        </button>
+        <label className="sheet-field sheet-field-narrow">
+          Min frequency %
+          <input
+            name="minFrequency"
+            type="number"
+            min={0}
+            max={100}
+            step={0.5}
+            inputMode="decimal"
+            placeholder="any"
+            defaultValue={filters.minFrequency ?? ""}
+          />
+        </label>
+        <label className="sheet-field sheet-field-narrow">
+          Min acceptance %
+          <input
+            name="minAcceptance"
+            type="number"
+            min={0}
+            max={100}
+            step={0.5}
+            inputMode="decimal"
+            placeholder="any"
+            defaultValue={filters.minAcceptance ?? ""}
+          />
+        </label>
+        <div className="sheet-filter-actions">
+          <button className="sheet-apply" disabled={loading}>
+            Apply
+          </button>
+          <button
+            type="button"
+            className="sheet-reset"
+            disabled={loading}
+            onClick={() => void load({ ...defaultFilters })}
+          >
+            <RotateCcw size={14} /> Reset
+          </button>
+        </div>
+        <fieldset className="sheet-topics">
+          <legend>
+            Topics
+            {filters.topics.length > 0 && (
+              <span className="sheet-topic-count">
+                {filters.topics.length} selected
+              </span>
+            )}
+          </legend>
+          {topics.length > 0 ? (
+            <div className="sheet-topic-chips">
+              {topics.map((topic) => (
+                <label key={topic.slug} className="sheet-topic-chip">
+                  <input
+                    type="checkbox"
+                    name="topics"
+                    value={topic.slug}
+                    defaultChecked={filters.topics.includes(topic.slug)}
+                  />
+                  <span>{topic.name}</span>
+                  <em>{topic.uses}</em>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <p className="sheet-message">
+              No topic tags yet. They arrive with the catalogue import.
+            </p>
+          )}
+        </fieldset>
       </form>
       {loading && (
         <p role="status" className="sheet-message">
@@ -420,8 +561,8 @@ function CompanyQuestions({
           </div>
           {!sheet.rows.length && (
             <p className="sheet-message">
-              No questions match these filters. Try another title, difficulty, or
-              window.
+              No questions match these filters. Try another title, difficulty,
+              topic, or window.
             </p>
           )}
           <div className="sheet-pagination">
@@ -445,9 +586,6 @@ function CompanyQuestions({
           </div>
         </>
       )}
-      <Link href={"/companies/" + company.slug} className="sheet-open-link">
-        Open company sheet <ExternalLink size={13} />
-      </Link>
     </div>
   );
 }
@@ -457,14 +595,12 @@ function CompanyPanel({
   initialFilters,
   open,
   onToggle,
-  className = "",
 }: {
   company: CompanyItem;
   initial?: Sheet;
   initialFilters?: Filters;
   open: boolean;
   onToggle: () => void;
-  className?: string;
 }) {
   const { sheet, filters, loading, error, load } = useCompanySheet(
     company,
@@ -475,34 +611,39 @@ function CompanyPanel({
   const total = sheet?.total ?? company.question_count;
   const panelId = "company-" + company.slug;
   return (
-    <section
-      className={
-        "company-card " + (open ? "is-open" : "") + (className ? " " + className : "")
-      }
-    >
-      <button
-        className="company-card-head"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => {
-          onToggle();
-          if (!open && !sheet && !loading) void load();
-        }}
-      >
-        <CompanyLogo name={company.name} />
-        <span className="company-card-name">{company.name}</span>
-        <span className="company-progress-count">
-          {solved} / {total}
-        </span>
-        <ArrowRight
-          size={18}
-          className={"company-card-arrow" + (open ? " is-open" : "")}
-        />
-      </button>
+    <section className={"company-card " + (open ? "is-open" : "")}>
+      <div className="company-card-head">
+        <button
+          className="company-card-toggle"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => {
+            onToggle();
+            if (!open && !sheet && !loading) void load();
+          }}
+        >
+          <CompanyLogo name={company.name} slug={company.slug} />
+          <span className="company-card-name">{company.name}</span>
+          {open && (
+            <span className="company-progress-count">
+              {solved} / {total}
+            </span>
+          )}
+        </button>
+        <a
+          className="company-card-newtab"
+          href={"/companies/" + company.slug}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={"Open " + company.name + " in a new tab"}
+        >
+          <span className="sr-only">Open {company.name} in a new tab</span>
+          <ArrowUpRight size={17} aria-hidden="true" />
+        </a>
+      </div>
       {open && (
         <div id={panelId}>
           <CompanyQuestions
-            company={company}
             sheet={sheet}
             filters={filters}
             loading={loading}
@@ -517,7 +658,7 @@ function CompanyPanel({
 export function CompanySection({
   company,
   initial,
-  initialFilters = defaults,
+  initialFilters = defaultFilters,
 }: {
   company: CompanyItem;
   initial?: Sheet;
@@ -542,25 +683,22 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
   const term = search.trim().toLowerCase();
   const matching = term
     ? companies.filter(
-        (c) =>
-          c.name.toLowerCase().includes(term) || c.slug.includes(term),
+        (c) => c.name.toLowerCase().includes(term) || c.slug.includes(term),
       )
     : companies;
   const pages = Math.max(1, Math.ceil(matching.length / PER_PAGE));
   const current = Math.min(page, pages);
   const visible = matching.slice((current - 1) * PER_PAGE, current * PER_PAGE);
-  useEffect(() => {
-    if (openSlug && !matching.some((c) => c.slug === openSlug))
-      setOpenSlug(null);
-  }, [matching, openSlug]);
+  const activeSlug =
+    openSlug && visible.some((c) => c.slug === openSlug) ? openSlug : null;
   return (
     <div className="company-sheet-theme">
       <header className="company-page-heading">
         <p className="sheet-eyebrow">Company-wise practice</p>
         <h1>Company questions</h1>
         <p>
-          Choose your company. Practice, track your progress, and keep your notes in
-          one place.
+          Choose your company. Practice, track your progress, and keep your
+          notes in one place.
         </p>
         <div className="company-directory-toolbar">
           <label className="company-search">
@@ -576,15 +714,14 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
               }}
             />
           </label>
-          <span role="status">
-            {matching.length} of {companies.length} companies
-          </span>
         </div>
       </header>
       <div className="company-directory-header">
         <h2>All companies</h2>
         <span className="company-directory-count">
-          {matching.length} companies
+          {term
+            ? `${matching.length} of ${companies.length} companies`
+            : `${matching.length} companies`}
         </span>
       </div>
       <div className="company-grid">
@@ -592,9 +729,9 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
           <CompanyPanel
             key={company.slug}
             company={company}
-            open={openSlug === company.slug}
+            open={activeSlug === company.slug}
             onToggle={() =>
-              setOpenSlug(openSlug === company.slug ? null : company.slug)
+              setOpenSlug(activeSlug === company.slug ? null : company.slug)
             }
           />
         ))}
@@ -607,10 +744,7 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
           Page {current} of {pages}
         </span>
         <div>
-          <button
-            disabled={current <= 1}
-            onClick={() => setPage(current - 1)}
-          >
+          <button disabled={current <= 1} onClick={() => setPage(current - 1)}>
             Previous
           </button>
           <button

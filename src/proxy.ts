@@ -41,7 +41,10 @@ export async function proxy(request: NextRequest) {
       ? NextResponse.json({ error: "Sign in required" }, { status: 401 })
       : NextResponse.redirect(target);
   }
-  response.headers.set("Cache-Control", "private, no-store");
+  // A stored logo is immutable for a given content hash and sets its own caching and
+  // ETag headers. The blanket no-store below would otherwise discard them.
+  if (!pathname.startsWith("/api/logos/"))
+    response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }

@@ -4,6 +4,18 @@ Students access /companies and /companies/1kosmos after login. Questions come fr
 
 Search and difficulty filters use parameterized SQL. Window and sort values are allowlisted. Pages contain at most 50 questions, with stable tie-breaking. Each sheet displays reported percentage frequency for one window; unknown values sort last. If several active sources report the same association, the highest reported percentage is used; values are never summed across windows or mixed with counts/scores. Company tags use the same window and metric and sort by descending frequency. GET filter URLs can be bookmarked. Empty results, unknown companies, loading and database failures have dedicated states.
 
+## Directory and filters
+
+The directory is a grid of company cards, 24 to a page. A card expands in place into its question sheet and spans the full row; the arrow on the card opens the dedicated `/companies/{slug}` page in a new tab, so a sheet can be kept open beside the directory. Each card carries a stored brand mark when one exists and a generated monogram otherwise.
+
+A sheet can be narrowed by question title, difficulty, window, topic, the caller's own progress, a minimum reported frequency and a minimum acceptance rate, and sorted by frequency, acceptance or title in either direction. Topic slugs and progress states are allowlisted and percentages are range-checked before they reach SQL; every predicate is a bound parameter. The window list follows the observations a company actually has, so it never offers a window that returns an empty sheet. Progress filters read `user_question_state` under the caller's row-level policies and therefore only ever match their own rows.
+
+## Topic tags and logos
+
+LeetCode topic tags live in `public.topics` and `public.question_topics`, published from a committed artifact by `scripts/topics/fetch.mjs`. The application never calls leetcode.com; see `scripts/topics/README.md`.
+
+Brand marks live in `public.company_logos` as bytes, served by `/api/logos/{slug}` with an ETag taken from the stored sha256. Bytes rather than URLs mean no third-party request at page load and no broken image. Absence is the normal case and answers 404 so the card falls back to its monogram. See `scripts/logos/README.md`.
+
 ## Publish the reviewed fixture
 
 Run pnpm import:company to generate staging artifacts. Set IMPORT_DATABASE_URL in the trusted operator's process to the database administrator connection, then run pnpm import:publish --approve-source. This deliberately approves this metadata source for student access; use only after reviewing the fixture and permitted use. Never use a NEXT_PUBLIC variable or put the admin connection in the app runtime DATABASE_URL.
@@ -16,7 +28,7 @@ On a migrated disposable local `_test` database, set PREPYARD_AUTH_TEST_DATABASE
 
 ## Complete directory and reference-style layout
 
-The directory covers all 656 company folders from the pinned repository, with 3,358 distinct questions and 39,353 company/window observations. Search companies by name; directory pages show 25 expandable sections. Questions load on demand, 50 at a time. The dark reference layout includes orange progress bars, green completion controls, colored difficulty labels, golden bookmarks and private notes. The plus button schedules revision for tomorrow. Controls persist to the authenticated student’s existing state and notes tables, with RLS enforcing ownership.
+The directory covers all 656 company folders from the pinned repository, with 3,358 distinct questions and 39,353 company/window observations. Search companies by name; directory pages show 24 company cards. Questions load on demand, 50 at a time. The dark reference layout includes green completion controls, colored difficulty labels, golden bookmarks and private notes. The plus button schedules revision for tomorrow. Controls persist to the authenticated student’s existing state and notes tables, with RLS enforcing ownership.
 
 Run `pnpm import:repository --directory PATH` to validate the extracted pinned archive and generate an internal snapshot. Add `--approve-source` and a trusted `IMPORT_DATABASE_URL` to publish the complete repository transactionally. The checked-in repository manifest pins every CSV by its Git blob hash and byte length. Any missing or altered file or conflicting metadata aborts the import. Existing stable question IDs and student records are preserved. Replays must match exactly. Source metadata stays hidden from students.
 
