@@ -9,6 +9,7 @@ import {
   CircleCheck,
   Code2,
   Search,
+  Shuffle,
   StickyNote,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
@@ -64,6 +65,7 @@ function Question({
   const [notesOpen, setNotesOpen] = useState(false);
   const [note, setNote] = useState(q.note);
   const [message, setMessage] = useState("");
+  const hideTopics = filters.hideTopics === "1";
   function save(kind: "solved" | "note", value: boolean | string) {
     start(async () => {
       setMessage("");
@@ -90,27 +92,38 @@ function Question({
           {q.status === "solved" ? <CircleCheck /> : <Circle />}
         </button>
         <div className="dsa-question-title">
-          <a href={q.canonical_url} target="_blank" rel="noopener noreferrer">
+          <a
+            className="dsa-problem-link"
+            href={q.canonical_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {q.title}
-            <span className="sr-only"> (opens in a new tab)</span>
+            <ArrowUpRight size={15} aria-hidden="true" />
+            <span className="sr-only">
+              {" "}
+              (opens on {q.platform} in a new tab)
+            </span>
           </a>
-          <div className="dsa-tags" aria-label="Question patterns">
-            {!q.patterns.length && (
-              <span title="A verified pattern has not been assigned yet">
-                Pattern pending
-              </span>
-            )}
-            {q.patterns.map((p) => (
-              <Link
-                key={p.slug}
-                href={"/patterns?" + paramsFor(filters, { pattern: p.slug })}
-                title={"Filter by " + p.name}
-                aria-current={filters.pattern === p.slug ? "true" : undefined}
-              >
-                {p.name}
-              </Link>
-            ))}
-          </div>
+          {!hideTopics && (
+            <div className="dsa-tags" aria-label="Question patterns">
+              {!q.patterns.length && (
+                <span title="A verified pattern has not been assigned yet">
+                  Pattern pending
+                </span>
+              )}
+              {q.patterns.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={"/patterns?" + paramsFor(filters, { pattern: p.slug })}
+                  title={"Filter by " + p.name}
+                  aria-current={filters.pattern === p.slug ? "true" : undefined}
+                >
+                  {p.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
         <a
           className="dsa-platform"
@@ -125,13 +138,6 @@ function Question({
         </a>
         <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
           {q.difficulty ?? "Unrated"}
-        </span>
-        <span
-          className="dsa-frequency"
-          title="Highest reported company frequency (all time)"
-        >
-          <span className="sr-only">Frequency: </span>
-          {q.frequency === null ? "—" : q.frequency + "%"}
         </span>
         <div className="dsa-actions">
           <button
@@ -360,6 +366,8 @@ function Topic({
     </section>
   );
 }
+const DIFFICULTIES = ["", "easy", "medium", "hard"];
+const CHIP_LIMIT = 12;
 function Select({
   name,
   label,
@@ -377,7 +385,7 @@ function Select({
     <label className="dsa-filter">
       <span>{label}</span>
       <select name={name} defaultValue={value}>
-        {name !== "sort" && <option value="">{placeholder}</option>}
+        <option value="">{placeholder}</option>
         {options.map((o) => (
           <option key={o.slug} value={o.slug}>
             {o.name}
@@ -394,6 +402,17 @@ export function PatternSheet({
   overview: PatternOverview;
   filters: PatternFilters;
 }) {
+  const groups = overview.groups;
+  const [showAllTopics, setShowAllTopics] = useState(false);
+  const shuffled = filters.sort === "random";
+  // The selection is the reason the reader is here, so it is never hidden behind
+  // the "+N more" control.
+  const selectedIndex = groups.findIndex((g) => g.slug === filters.topic);
+  const visibleGroups =
+    showAllTopics || selectedIndex >= CHIP_LIMIT
+      ? groups
+      : groups.slice(0, CHIP_LIMIT);
+  const hiddenTopics = groups.length - visibleGroups.length;
   return (
     <section
       id="dsa-practice"
@@ -438,73 +457,138 @@ export function PatternSheet({
       </header>
       <form action="/patterns" method="get" className="dsa-filters">
         <label className="dsa-filter dsa-search">
-          <span>Find a question</span>
+          <span className="sr-only">Filter problems or topics</span>
           <div>
             <Search size={17} />
             <input
               type="search"
               name="q"
               defaultValue={filters.q}
-              placeholder="Search questions…"
+              placeholder="Filter problems or topics…"
               maxLength={100}
             />
           </div>
         </label>
-        <Select
-          name="topic"
-          label="DSA topic"
-          value={filters.topic}
-          options={overview.topics}
-          placeholder="All topics"
-        />
-        <Select
-          name="pattern"
-          label="Pattern"
-          value={filters.pattern}
-          options={overview.patterns}
-          placeholder="All patterns"
-        />
-        <Select
-          name="collection"
-          label="Practice collection"
-          value={filters.collection}
-          options={overview.collections}
-          placeholder="All questions"
-        />
-        <Select
-          name="difficulty"
-          label="Difficulty"
-          value={filters.difficulty}
-          options={["easy", "medium", "hard"].map((slug) => ({
-            slug,
-            name: slug[0].toUpperCase() + slug.slice(1),
-          }))}
-          placeholder="Any difficulty"
-        />
-        <Select
-          name="progress"
-          label="Progress"
-          value={filters.progress}
-          options={[
-            { slug: "solved", name: "Solved" },
-            { slug: "unsolved", name: "Unsolved" },
-          ]}
-          placeholder="Any progress"
-        />
-        <Select
-          name="sort"
-          label="Order"
-          value={filters.sort}
-          options={[
-            { slug: "recommended", name: "Recommended" },
-            { slug: "difficulty", name: "Difficulty" },
-            { slug: "title", name: "Question title" },
-          ]}
-          placeholder="Recommended"
-        />
-        <div className="dsa-filter-buttons">
-          <button type="submit">Apply filters</button>
-          <Link href="/patterns">Reset</Link>
+        <div className="dsa-primary-row">
+          <fieldset className="dsa-segmented">
+            <legend className="sr-only">Difficulty</legend>
+            {DIFFICULTIES.map((slug) => (
+              <label
+                key={slug || "all"}
+                className={filters.difficulty === slug ? "is-active" : ""}
+              >
+                <input
+                  type="radio"
+                  name="difficulty"
+                  value={slug}
+                  defaultChecked={filters.difficulty === slug}
+                />
+                <span>
+                  {slug ? slug[0].toUpperCase() + slug.slice(1) : "All"}
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <button type="submit" className="dsa-apply">
+            Apply
+          </button>
+          {/* A link, not a submit button: it needs no form round-trip and leaves whatever is
+              typed in the search box alone. It toggles, because with no Order
+              control this is the only way back to the recommended order. */}
+          <Link
+            className={"dsa-random" + (shuffled ? " is-active" : "")}
+            href={
+              "/patterns?" +
+              paramsFor(filters, { sort: shuffled ? "" : "random" })
+            }
+            aria-pressed={shuffled}
+          >
+            <Shuffle size={15} /> {shuffled ? "Shuffled" : "Random"}
+          </Link>
+          <label className="dsa-check">
+            <input
+              type="checkbox"
+              name="hideTopics"
+              value="1"
+              defaultChecked={filters.hideTopics === "1"}
+            />
+            <span>Hide topics</span>
+          </label>
+        </div>
+        {groups.length > 0 && (
+          <fieldset className="dsa-chips">
+            <legend>Topics</legend>
+            <button
+              type="submit"
+              name="topic"
+              value=""
+              className={filters.topic ? "" : "is-active"}
+              aria-current={filters.topic ? undefined : "true"}
+            >
+              All topics
+            </button>
+            {visibleGroups.map((g) => (
+              <button
+                key={g.slug}
+                type="submit"
+                name="topic"
+                value={g.slug}
+                className={filters.topic === g.slug ? "is-active" : ""}
+                aria-current={filters.topic === g.slug ? "true" : undefined}
+              >
+                {g.name} <em>{g.total}</em>
+              </button>
+            ))}
+            {hiddenTopics > 0 && (
+              <button
+                type="button"
+                className="dsa-chips-more"
+                aria-expanded={showAllTopics}
+                onClick={() => setShowAllTopics(true)}
+              >
+                +{hiddenTopics} more
+              </button>
+            )}
+            {showAllTopics && visibleGroups.length > CHIP_LIMIT && (
+              <button
+                type="button"
+                className="dsa-chips-more"
+                onClick={() => setShowAllTopics(false)}
+              >
+                Show fewer
+              </button>
+            )}
+          </fieldset>
+        )}
+        <div className="dsa-secondary-row">
+          <Select
+            name="pattern"
+            label="Pattern"
+            value={filters.pattern}
+            options={overview.patterns}
+            placeholder="All patterns"
+          />
+          <Select
+            name="collection"
+            label="Practice collection"
+            value={filters.collection}
+            options={overview.collections}
+            placeholder="All collections"
+          />
+          <Select
+            name="progress"
+            label="Progress"
+            value={filters.progress}
+            options={[
+              { slug: "unsolved", name: "Unsolved" },
+              { slug: "solved", name: "Solved" },
+              { slug: "bookmarked", name: "Bookmarked" },
+            ]}
+            placeholder="Any progress"
+          />
+          <Link href="/patterns" className="dsa-reset">
+            Reset
+          </Link>
         </div>
       </form>
       <div className="dsa-results-heading">
@@ -523,8 +607,8 @@ export function PatternSheet({
           </Link>
         </p>
       )}
-      {overview.groups.length ? (
-        overview.groups.map((g, i) => (
+      {groups.length ? (
+        groups.map((g, i) => (
           <Topic
             key={g.slug}
             group={g}

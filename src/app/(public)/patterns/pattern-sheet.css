@@ -1,15 +1,20 @@
+/* The pattern sheet spans the whole application rather than sitting inside the
+   narrow reading column the marketing and marketing-adjacent routes use. */
+body:has(.dsa-sheet) > main {
+  max-width: none;
+  width: 100%;
+  padding: 0;
+}
 .dsa-sheet {
   --ring: #adc8ef;
   color: #e5e5ec;
-  background: #0d121a;
-  max-width: 1440px;
-  margin: 24px auto;
-  padding: 34px;
-  border: 1px solid #283241;
-  border-radius: 20px;
+  background: linear-gradient(145deg, #101722, #0b1017);
+  border: 0;
+  border-bottom: 1px solid #ffffff16;
   color-scheme: dark;
   font-size: 14px;
   min-height: 70vh;
+  padding: 30px clamp(16px, 3vw, 44px) 56px;
 }
 .dsa-sheet button,
 .dsa-sheet select,
@@ -123,12 +128,165 @@
 }
 .dsa-filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px 14px;
-  padding: 24px;
+  gap: 14px;
+  padding: 20px;
   background: #121925;
   border: 1px solid #303036;
   border-radius: 12px;
+}
+.dsa-primary-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dsa-segmented {
+  display: inline-flex;
+  border: 1px solid #3a3a42;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background: #171719;
+}
+.dsa-segmented > label {
+  position: relative;
+  display: inline-flex;
+}
+.dsa-segmented input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.dsa-segmented span {
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a6a6b2;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.dsa-segmented label:hover span {
+  color: #e5e5ec;
+}
+.dsa-segmented label.is-active span,
+.dsa-segmented input:checked + span {
+  background: linear-gradient(180deg, #eef3fa, #d7e1ef);
+  color: #131b28;
+}
+.dsa-segmented input:focus-visible + span {
+  outline: 2px solid var(--ring);
+  outline-offset: -3px;
+}
+.dsa-apply {
+  background: linear-gradient(180deg, #eef3fa, #d7e1ef);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #131b28;
+  font-weight: 650;
+  padding: 10px 22px;
+  font-size: 12px;
+}
+.dsa-random {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #3a3a42;
+  border-radius: 7px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d2d2dc;
+  background: #171719;
+}
+.dsa-random:hover {
+  color: #fff;
+  border-color: #5b5b66;
+  text-decoration: none;
+}
+.dsa-random.is-active {
+  background: #e9eff8;
+  border-color: #e9eff8;
+  color: #131b28;
+}
+.dsa-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #a6a6b2;
+  cursor: pointer;
+  margin-left: auto;
+}
+.dsa-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: #adc8ef;
+}
+.dsa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.dsa-chips > legend {
+  float: left;
+  width: 100%;
+  padding: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b0b0ba;
+}
+.dsa-chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #34343b;
+  background: #17171b;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9c9d3;
+}
+.dsa-chips button:hover {
+  color: #fff;
+  border-color: #56565f;
+}
+.dsa-chips button.is-active {
+  background: #e9eff8;
+  border-color: #e9eff8;
+  color: #131b28;
+}
+.dsa-chips em {
+  font-style: normal;
+  font-size: 10px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+.dsa-chips .dsa-chips-more {
+  border-style: dashed;
+  color: #adc8ef;
+  background: none;
+}
+.dsa-secondary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  padding-top: 14px;
+  border-top: 1px solid #26262c;
+}
+.dsa-reset {
+  color: #bcbcc7;
+  font-size: 12px;
+  padding-bottom: 11px;
 }
 .dsa-filter {
   min-width: 0;
@@ -171,12 +329,6 @@
   font-size: 12px;
   outline: none;
 }
-.dsa-filter-buttons {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-}
-.dsa-filter-buttons button,
 .dsa-note button[type="submit"] {
   background: #adc8ef;
   border: 1px solid #adc8ef;
@@ -184,11 +336,6 @@
   color: #211308;
   font-weight: 650;
   padding: 11px 16px;
-}
-.dsa-filter-buttons a {
-  color: #bcbcc7;
-  font-size: 12px;
-  margin-bottom: 12px;
 }
 .dsa-results-heading {
   display: flex;
@@ -272,7 +419,7 @@
 }
 .dsa-question-main {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 110px 76px 70px 32px;
+  grid-template-columns: 28px minmax(0, 1fr) 120px 76px 32px;
   align-items: center;
   gap: 16px;
   padding: 18px 16px;
@@ -290,11 +437,27 @@
   width: 22px;
   height: 22px;
 }
-.dsa-question-title > a {
-  color: #e0e0eb;
-  font-size: 14px;
-  font-weight: 550;
-  line-height: 1.6;
+.dsa-question-title > .dsa-problem-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  color: #eef1f7;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+.dsa-question-title > .dsa-problem-link > svg {
+  align-self: center;
+  flex: none;
+  color: #6f7d90;
+  transition: color 0.12s;
+}
+.dsa-question-title > .dsa-problem-link:hover {
+  color: #fff;
+  text-decoration: none;
+}
+.dsa-question-title > .dsa-problem-link:hover > svg {
+  color: #adc8ef;
 }
 .dsa-tags {
   display: flex;
@@ -456,23 +619,23 @@
 }
 @media (min-width: 1500px) {
   .dsa-sheet {
-    margin-top: 36px;
+    padding-top: 38px;
   }
 }
 @media (max-width: 1000px) {
-  .dsa-sheet {
-    margin: 16px;
-    padding: 24px;
-  }
   .dsa-question-main {
-    grid-template-columns: 24px minmax(0, 1fr) 65px 65px 32px;
+    grid-template-columns: 24px minmax(0, 1fr) 65px 32px;
     gap: 12px;
   }
   .dsa-platform {
     display: none;
   }
-  .dsa-filters {
+  .dsa-secondary-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dsa-reset {
+    grid-column: 1 / -1;
+    padding-bottom: 0;
   }
   .dsa-progress-card {
     width: 230px;
@@ -480,9 +643,7 @@
 }
 @media (max-width: 600px) {
   .dsa-sheet {
-    margin: 8px;
-    padding: 16px;
-    border-radius: 12px;
+    padding: 20px 12px 34px;
   }
   .dsa-hero {
     flex-direction: column;
@@ -501,19 +662,33 @@
     letter-spacing: -1px;
   }
   .dsa-filters {
-    padding: 16px;
-    gap: 14px 10px;
-  }
-  .dsa-search,
-  .dsa-filter:nth-child(4) {
-    grid-column: 1/-1;
-  }
-  .dsa-filter-buttons {
+    padding: 14px;
     gap: 12px;
   }
-  .dsa-filter-buttons button {
-    padding: 11px;
-    font-size: 12px;
+  .dsa-primary-row {
+    gap: 10px;
+  }
+  .dsa-segmented {
+    width: 100%;
+  }
+  .dsa-segmented label {
+    flex: 1;
+  }
+  .dsa-segmented span {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+  }
+  .dsa-apply,
+  .dsa-random {
+    flex: 1;
+    justify-content: center;
+  }
+  .dsa-check {
+    margin-left: 0;
+  }
+  .dsa-secondary-row {
+    grid-template-columns: minmax(0, 1fr);
   }
   .dsa-question-main {
     grid-template-columns: 24px minmax(0, 1fr) 58px;
@@ -530,8 +705,8 @@
     width: 36px;
     min-height: 36px;
   }
-  .dsa-question-title > a {
-    font-size: 13px;
+  .dsa-question-title > .dsa-problem-link {
+    font-size: 14px;
   }
   .dsa-difficulty {
     font-size: 11px;
@@ -561,23 +736,7 @@
   }
 }
 
-.dsa-frequency {
-  color: #acacb6;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-@media (max-width: 600px) {
-  .dsa-frequency {
-    grid-column: 2;
-    grid-row: 2;
-  }
-}
-
-.dsa-sheet {
-  background: linear-gradient(145deg, #101722, #0b1017);
-  border-color: #ffffff16;
-  box-shadow: 0 0 100px #718eb409;
-}
+/* Theme overrides kept last so they win over the base rules above. */
 .dsa-topic {
   background: #101722;
   border-color: #293342;
@@ -585,10 +744,6 @@
 .dsa-question {
   background: #0b111a;
   border-color: #252f3e;
-}
-.dsa-filter-buttons button {
-  background: linear-gradient(180deg, #eef3fa, #d7e1ef);
-  color: #131b28;
 }
 .dsa-meter > span {
   background: linear-gradient(90deg, #6e92c5, #c2d8f7);

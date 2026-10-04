@@ -7,16 +7,66 @@ separate filter. It does not use the company-page component or company grouping.
 ## Student workflow
 
 1. Open Patterns after signing in.
-2. Choose a DSA topic, pattern, difficulty, progress state or practice collection.
-3. Apply filters. Filters are stored in the URL and survive reloads.
-4. Expand a topic to load its questions, 30 at a time.
-5. Open a question on its platform; mark it solved, bookmark it, add a revision flag
+2. Search, or narrow by difficulty, topic, pattern, progress state or practice
+   collection. Apply filters. Filters are stored in the URL and survive reloads.
+3. Expand a topic to load its questions, 30 at a time.
+4. Open a question on its platform; mark it solved, bookmark it, add a revision flag
    for tomorrow, or edit a private note.
 
 Global and topic progress count unique questions in the filtered result. Each
 question has one primary teaching topic and any number of pattern tags. Student
 state is stored under the canonical question ID and shared with other practice views.
 No source URLs, dataset dates, import logs or operational history are sent to the UI.
+
+## Filters
+
+The filter panel is one GET form, so every control round-trips to a bookmarkable URL
+and nothing lives only in the browser.
+
+- **Search** matches question titles _and_ topic names, which is why the placeholder
+  says "Filter problems or topics". Topic matching uses an `exists()` rather than a
+  second join: a question has exactly one primary topic, so joining on any other
+  topic's name would duplicate rows.
+- **Difficulty** is a segmented control (All / Easy / Medium / Hard) rather than a
+  select, because it is the filter used most often and one click beats one click plus
+  a menu.
+- **Topics** are chips carrying the number of matching questions, taken from the same
+  grouped query that renders the accordions. A chip never advertises a count for a
+  topic with no matching questions. Twelve are shown, with a `+N more` control; the
+  selected topic is always visible even when it sits past that limit.
+- **Random** shuffles via `order by random()`, which is re-evaluated per query, so
+  reloading the same URL reshuffles. It is a toggle, because there is no Order control:
+  without the toggle, turning shuffle on would be a one-way door out of the
+  recommended order. It is a link rather than a submit button so it does not round-trip
+  the form or discard whatever is typed in the search box.
+- **Hide topics** suppresses the pattern tags on each row. It is a view preference, but
+  it lives in the URL so it survives a filter change like everything else.
+- **Progress** offers Unsolved, Solved and Bookmarked. Needs revision was removed
+  along with the Order control; the revision state itself still exists and is still
+  scheduled from company sheets.
+
+There is no Order control. Two orders exist: the recommended one, which leads with the
+reader's position in the selected practice collection, and the shuffle. Both the
+allowlist and the SQL reflect that, so `?sort=title` and `?sort=difficulty` fall back
+to recommended rather than silently sorting.
+
+Difficulty and progress are allowlisted; slugs must be slug-shaped; the search term is
+trimmed and capped. Filter values are always bound parameters, and every statement
+binds exactly as many parameters as it references.
+
+## Layout and question rows
+
+The sheet spans the full application width rather than the narrow reading column, so
+the filter panel has room for the topic chips without wrapping on a laptop.
+
+Each row shows completion, the problem title linking straight to the platform,
+optional pattern tags, the platform, difficulty and a notes control. The problem
+title is the primary affordance and carries an external-link indicator.
+
+Frequency is no longer shown. It was a company-reporting percentage, which is a
+different question from whether a DSA topic has been practised, and it required a
+correlated subquery per row against `company_question_observations`. Company sheets
+keep their own windowed percentage.
 
 ## Database and setup
 
@@ -116,4 +166,4 @@ isolated loopback test database described above.
 
 ## Question row controls
 
-Question rows offer completion and private notes. Revision and bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show “Pattern pending”. Frequency is the highest reported all-time company percentage, or — when unavailable. Company rows retain their selected-window percentage.
+Question rows offer completion and private notes. Revision and bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show "Pattern pending". The per-row frequency column was removed; company rows retain their selected-window percentage.
