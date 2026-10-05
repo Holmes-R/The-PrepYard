@@ -147,36 +147,38 @@ function Question({
             </span>
           </a>
           {!hideTopics && (
-            <div className="dsa-tags" aria-label="Question patterns">
-              {!q.patterns.length && (
-                <span title="A verified pattern has not been assigned yet">
-                  Pattern pending
-                </span>
+            <>
+              <div className="dsa-tags" aria-label="Question patterns">
+                {!q.patterns.length && (
+                  <span title="A verified pattern has not been assigned yet">
+                    Pattern pending
+                  </span>
+                )}
+                {q.patterns.map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={
+                      "/patterns?" + paramsFor(filters, { pattern: p.slug })
+                    }
+                    title={"Filter by " + p.name}
+                    aria-current={
+                      filters.pattern === p.slug ? "true" : undefined
+                    }
+                  >
+                    {p.name}
+                  </Link>
+                ))}
+              </div>
+              {q.topics.length > 0 && (
+                <div className="dsa-topic-tags" aria-label="Question topics">
+                  {q.topics.map((t) => (
+                    <span key={t.slug}>{t.name}</span>
+                  ))}
+                </div>
               )}
-              {q.patterns.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={"/patterns?" + paramsFor(filters, { pattern: p.slug })}
-                  title={"Filter by " + p.name}
-                  aria-current={filters.pattern === p.slug ? "true" : undefined}
-                >
-                  {p.name}
-                </Link>
-              ))}
-            </div>
+            </>
           )}
         </div>
-        <a
-          className="dsa-platform"
-          href={q.canonical_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Open ${q.title} on ${q.platform} (new tab)`}
-        >
-          <Code2 size={21} />
-          <span>{q.platform}</span>
-          <ArrowUpRight size={14} />
-        </a>
         <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
           {q.difficulty ?? "Unrated"}
         </span>

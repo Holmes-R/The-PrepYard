@@ -22,6 +22,7 @@ export type PatternQuestion = {
   revision: boolean;
   has_note: boolean;
   patterns: Choice[];
+  topics: Choice[];
 };
 export type PatternRows = {
   rows: PatternQuestion[];

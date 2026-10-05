@@ -2,6 +2,7 @@ import "server-only";
 import { withStudentDatabase } from "@/lib/database/server";
 import {
   companiesSql,
+  companyLogos,
   companySheet,
   questionNote,
   type Filters,
@@ -25,6 +26,9 @@ export async function getCompanySheet(slug: string, filters: Filters) {
 }
 export async function getQuestionNote(questionId: string) {
   return withStudentDatabase((client) => questionNote(client, questionId));
+}
+export async function getCompanyLogos(slugs: string[]) {
+  return withStudentDatabase((client) => companyLogos(client, slugs));
 }
 export async function getCompanyLogo(slug: string) {
   return withStudentDatabase(async (client) => {

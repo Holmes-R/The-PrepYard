@@ -14,7 +14,7 @@ A sheet can be narrowed by question title, difficulty, window, topic, the caller
 
 LeetCode topic tags live in `public.topics` and `public.question_topics`, published from a committed artifact by `scripts/topics/fetch.mjs`. The application never calls leetcode.com; see `scripts/topics/README.md`.
 
-Brand marks live in `public.company_logos` as bytes, served by `/api/logos/{slug}` with an ETag taken from the stored sha256. Bytes rather than URLs mean no third-party request at page load and no broken image. Absence is the normal case and answers 404 so the card falls back to its monogram. See `scripts/logos/README.md`.
+Brand marks live in `public.company_logos` as bytes, served by `/api/logos/{slug}` with an ETag taken from the stored sha256. Bytes rather than URLs mean no third-party request at page load and no broken image. Absence is the normal case and answers 404 so the card falls back to its monogram. The directory never fans out one request per card: it resolves the visible set in a single `GET /api/logos/batch?slug=…` call (one middleware session check, one pooled transaction, one `= ANY($1)` query) and renders monograms instantly meanwhile, so logos pop in without shifting layout. See `scripts/logos/README.md`.
 
 ## Publish the reviewed fixture
 

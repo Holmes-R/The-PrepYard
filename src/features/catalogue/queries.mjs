@@ -96,6 +96,34 @@ export async function companyTopics(client, companyId) {
     )
   ).rows;
 }
+// Every logo for the visible cards in one query. The directory used to fire one
+// authenticated request per logo, and each of those paid for middleware session
+// validation, a pool checkout against a pool of five, and a full transaction.
+// This pays all three once no matter how many cards are on screen.
+export async function companyLogos(client, slugs) {
+  const clean = [...new Set(slugs ?? [])]
+    .filter(
+      (s) =>
+        typeof s === "string" &&
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s) &&
+        s.length <= 200,
+    )
+    .slice(0, 64);
+  if (!clean.length) return {};
+  const { rows } = await client.query(
+    `select c.slug,l.content_type,encode(l.image,'base64') as data,l.sha256
+     from public.company_logos l
+     join public.companies c on c.id=l.company_id
+     where c.slug = any($1)`,
+    [clean],
+  );
+  return Object.fromEntries(
+    rows.map((r) => [
+      r.slug,
+      { content_type: r.content_type, data: r.data, sha256: r.sha256 },
+    ]),
+  );
+}
 export async function companySheet(client, slug, filters) {
   const company = (
     await client.query(

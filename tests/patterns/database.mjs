@@ -85,6 +85,7 @@ try {
   // The list carries only whether a note exists; content loads on demand.
   assert.equal(rows.rows[0].has_note, true);
   assert.equal(rows.rows[0].note, undefined);
+  assert.ok(Array.isArray(rows.rows[0].topics));
   assert.equal(await questionNote(client, q), "private-a");
   await client.query("select set_config('prepyard.student_id',$1,true)", [b]);
   const other = await patternQuestions(

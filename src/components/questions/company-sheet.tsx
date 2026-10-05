@@ -1,6 +1,7 @@
 "use client";
 import {
   useEffect,
+  useMemo,
   useOptimistic,
   useState,
   useTransition,
@@ -63,16 +64,21 @@ function CompanyLogo({
   name,
   slug,
   available,
+  src,
 }: {
   name: string;
   slug: string;
   available?: boolean;
+  // A resolved data URL (string), a known miss (null), or not yet resolved
+  // (undefined). Unknown renders the monogram without firing a request: the
+  // directory resolves the whole visible set in one batched call instead of one
+  // authenticated request per card.
+  src?: string | null;
 }) {
-  // Most of the directory has no stored mark, and the route answers 404 for those.
-  // The monogram is the normal appearance, so it must not cost a request per card
-  // once it is known to be missing.
   const [failed, setFailed] = useState(false);
-  if (failed || available === false)
+  const direct =
+    src === undefined && available !== false ? "/api/logos/" + slug : src;
+  if (failed || !direct)
     return (
       <span
         className="company-logo"
@@ -88,7 +94,7 @@ function CompanyLogo({
           rather than trusted to lay out. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={"/api/logos/" + slug}
+        src={direct}
         alt=""
         width={40}
         height={40}
@@ -703,6 +709,7 @@ function CompanyPanel({
   onToggle,
   onApplied,
   sync,
+  logoSrc,
 }: {
   company: CompanyItem;
   initial?: Sheet;
@@ -713,6 +720,7 @@ function CompanyPanel({
   // Back/forward navigation can land on a filtered view from the address bar.
   // The tick bumps once per such navigation; the panel then loads those filters.
   sync?: { filters: Filters; tick: number } | null;
+  logoSrc?: string | null;
 }) {
   const { sheet, filters, loading, error, load } = useCompanySheet(
     company,
@@ -760,6 +768,7 @@ function CompanyPanel({
             name={company.name}
             slug={company.slug}
             available={company.has_logo}
+            src={logoSrc}
           />
           <span className="company-card-name">{company.name}</span>
           {open && (
@@ -925,14 +934,23 @@ export function CompanyDirectory({
     if (!next) commitUrl(null, viewRef.current.filters, search);
   };
   const term = search.trim().toLowerCase();
-  const matching = term
-    ? companies.filter(
-        (c) => c.name.toLowerCase().includes(term) || c.slug.includes(term),
-      )
-    : companies;
+  const matching = useMemo(
+    () =>
+      term
+        ? companies.filter(
+            (c) => c.name.toLowerCase().includes(term) || c.slug.includes(term),
+          )
+        : companies,
+    [companies, term],
+  );
   const pages = Math.max(1, Math.ceil(matching.length / PER_PAGE));
   const current = Math.min(page, pages);
-  const visible = matching.slice((current - 1) * PER_PAGE, current * PER_PAGE);
+  // Memoized so the logo effect below only re-runs when the visible set actually
+  // changes, not on every unrelated re-render (toggling a panel, saving progress).
+  const visible = useMemo(
+    () => matching.slice((current - 1) * PER_PAGE, current * PER_PAGE),
+    [matching, current],
+  );
   const activeSlug =
     openSlug && visible.some((c) => c.slug === openSlug) ? openSlug : null;
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -943,6 +961,51 @@ export function CompanyDirectory({
     if (wasActive.current && !activeSlug) headingRef.current?.focus();
     wasActive.current = activeSlug;
   });
+  // Logos for the visible cards arrive in one batched request, keyed by slug, with
+  // null marking a known miss. Cards whose flag says no mark exists never enter the
+  // request at all, and a failed batch degrades to monograms instead of retrying.
+  const [logoMap, setLogoMap] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    // Cards flagged as having no mark never enter the request. Everything else
+    // resolves here, once, instead of one authenticated request per card.
+    const needed = visible
+      .filter((c) => c.has_logo !== false && !(c.slug in logoMap))
+      .map((c) => c.slug);
+    if (!needed.length) return;
+    const controller = new AbortController();
+    const params = new URLSearchParams();
+    for (const slug of needed) params.append("slug", slug);
+    void fetch("/api/logos/batch?" + params.toString(), {
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (response.status === 401) {
+          router.push("/login");
+          return;
+        }
+        if (!response.ok) throw new Error();
+        const body = await response.json();
+        const found: Record<string, string | null> = {};
+        for (const slug of needed) {
+          const hit = body.logos?.[slug];
+          found[slug] =
+            hit && typeof hit.data === "string"
+              ? `data:${hit.content_type};base64,${hit.data}`
+              : null;
+        }
+        if (!controller.signal.aborted)
+          setLogoMap((prev) => ({ ...prev, ...found }));
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setLogoMap((prev) => {
+            const next = { ...prev };
+            for (const slug of needed) if (!(slug in next)) next[slug] = null;
+            return next;
+          });
+      });
+    return () => controller.abort();
+  }, [visible, logoMap, router]);
   return (
     <div className="company-sheet-theme">
       <header className="company-page-heading">
@@ -987,6 +1050,7 @@ export function CompanyDirectory({
             onToggle={() => handleToggle(company.slug)}
             onApplied={handleApplied}
             sync={company.slug === openSlug ? sync : null}
+            logoSrc={logoMap[company.slug] ?? null}
           />
         ))}
       </div>

@@ -53,6 +53,15 @@ export type CompanyLogo = {
   image: Uint8Array;
   sha256: string;
 };
+export type CompanyLogoEntry = {
+  content_type: string;
+  data: string;
+  sha256: string;
+};
+export function companyLogos(
+  client: PoolClient,
+  slugs: string[],
+): Promise<Record<string, CompanyLogoEntry>>;
 export function companyTopics(
   client: PoolClient,
   companyId: string,

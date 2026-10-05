@@ -122,7 +122,8 @@ export async function patternQuestions(client, f) {
       `select q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
  coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  exists(select 1 from public.notes n where n.question_id=q.id and n.user_id=private.student_id()) has_note,
- coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns
+ coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns,
+ coalesce((select jsonb_agg(jsonb_build_object('slug',t.slug,'name',t.name) order by t.name) from public.question_topics qt join public.topics t on t.id=qt.topic_id where qt.question_id=q.id),'[]'::jsonb) topics
  ${base} order by ${order} limit 30 offset ${add((page - 1) * 30)}`,
       args,
     )
