@@ -4,6 +4,7 @@ import {
   patternFilters,
   patternQuestions,
 } from "../../src/features/patterns/queries.mjs";
+import { questionNote } from "../../src/features/catalogue/queries.mjs";
 import { topicFor, topics } from "../../scripts/patterns/taxonomy.mjs";
 import { readFile } from "node:fs/promises";
 test("filters bound input and reject unsupported state", () => {
@@ -77,6 +78,40 @@ test("SQL binds filters, scopes student state and clamps pagination", async () =
   assert.equal(calls[1].args.at(-1), 0);
   // Frequency is a company-reporting metric and was removed from the sheet.
   assert.ok(!/company_question_observations/.test(calls[1].sql));
+  // Note content no longer travels with the list; only whether one exists.
+  assert.match(calls[1].sql, /has_note/);
+  assert.ok(!/as note/.test(calls[1].sql));
+});
+test("questionNote returns content for the owner and nothing otherwise", async () => {
+  const seen = [];
+  const client = {
+    query: async (sql, args) => {
+      seen.push([...args]);
+      return { rows: [{ note: "mine" }] };
+    },
+  };
+  assert.equal(
+    await questionNote(client, "30000000-0000-4000-8000-000000000001"),
+    "mine",
+  );
+  assert.deepEqual(seen[0], ["30000000-0000-4000-8000-000000000001"]);
+  const empty = { query: async () => ({ rows: [] }) };
+  assert.equal(
+    await questionNote(empty, "30000000-0000-4000-8000-000000000001"),
+    "",
+  );
+  // Malformed ids never reach the database.
+  let queried = false;
+  await questionNote(
+    {
+      query: async () => {
+        queried = true;
+        return { rows: [] };
+      },
+    },
+    "1; DROP TABLE notes;--",
+  );
+  assert.equal(queried, false);
 });
 test("search matches topic names as well as question titles", async () => {
   const calls = [];

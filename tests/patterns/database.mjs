@@ -11,6 +11,9 @@ const { publishPatterns } = await import(
 const { patternFilters, patternOverview, patternQuestions } = await import(
   pathToFileURL(root + "src/features/patterns/queries.mjs")
 );
+const { questionNote } = await import(
+  pathToFileURL(root + "src/features/catalogue/queries.mjs")
+);
 const target = new URL(
   process.env.PREPYARD_AUTH_TEST_DATABASE_URL || "https://invalid",
 );
@@ -79,13 +82,19 @@ try {
     }),
   );
   assert.equal(rows.total, 1);
-  assert.equal(rows.rows[0].note, "private-a");
+  // The list carries only whether a note exists; content loads on demand.
+  assert.equal(rows.rows[0].has_note, true);
+  assert.equal(rows.rows[0].note, undefined);
+  assert.equal(await questionNote(client, q), "private-a");
   await client.query("select set_config('prepyard.student_id',$1,true)", [b]);
   const other = await patternQuestions(
     client,
     patternFilters({ progress: "bookmarked" }),
   );
   assert.equal(other.total, 0);
+  // Another student's note content is unreachable through the endpoint query.
+  assert.equal(await questionNote(client, q), "");
+  assert.equal(await questionNote(client, "not a uuid!!"), "");
   const stranger = await patternOverview(
     client,
     patternFilters({ collection: "kushal-essential-patterns" }),

@@ -18,15 +18,21 @@ export default async function Page({
   if (!sheet) notFound();
   return (
     <div className="company-sheet-theme">
-      <Link href="/companies" className="sheet-back">
-        ← All companies
-      </Link>
+      <nav aria-label="Breadcrumb">
+        <ol className="sheet-crumbs">
+          <li>
+            <Link href="/companies">All companies</Link>
+          </li>
+          <li aria-current="page">{sheet.company.name}</li>
+        </ol>
+      </nav>
       <header className="company-page-heading">
         <p className="sheet-eyebrow">Company-wise practice</p>
         <h1>{sheet.company.name}</h1>
         <p>Practice the questions. Track every step.</p>
       </header>
       <CompanySection
+        key={JSON.stringify(filters)}
         company={{
           ...sheet.company,
           question_count: sheet.total,
@@ -34,6 +40,7 @@ export default async function Page({
         }}
         initial={sheet}
         initialFilters={filters}
+        syncUrl
       />
       <p className="sheet-footnote">
         Company tags are sorted by frequency within the selected window.

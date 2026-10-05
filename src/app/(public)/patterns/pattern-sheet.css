@@ -251,6 +251,7 @@ body:has(.dsa-sheet) > main {
   background: #17171b;
   border-radius: 20px;
   padding: 7px 14px;
+  min-height: 36px;
   font-size: 12px;
   font-weight: 600;
   color: #c9c9d3;
@@ -329,6 +330,11 @@ body:has(.dsa-sheet) > main {
   font-size: 12px;
   outline: none;
 }
+/* The input carries outline:none, so the ring lives on the pill around it. */
+.dsa-search > div:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+}
 .dsa-note button[type="submit"] {
   background: #adc8ef;
   border: 1px solid #adc8ef;
@@ -370,7 +376,7 @@ body:has(.dsa-sheet) > main {
   background: #212125;
   margin-bottom: 14px;
 }
-.dsa-topic h2 {
+.dsa-topic h3 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
@@ -431,7 +437,11 @@ body:has(.dsa-sheet) > main {
   color: #22c55e;
   display: flex;
   justify-content: center;
+  align-items: center;
   padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -8px;
 }
 .dsa-complete svg {
   width: 22px;
@@ -467,13 +477,13 @@ body:has(.dsa-sheet) > main {
 }
 .dsa-tags > a,
 .dsa-tags > span {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
-  color: #b8afd2;
+  color: #cfc6ec;
   background: #24212f;
   border: 1px solid #3b334c;
   border-radius: 4px;
-  padding: 2px 6px;
+  padding: 3px 8px;
 }
 .dsa-tags > a[aria-current="true"] {
   color: #ffc596;
@@ -519,7 +529,9 @@ body:has(.dsa-sheet) > main {
   border: 0;
   color: #93939e;
   width: 26px;
-  min-height: 32px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -6px;
 }
 .dsa-actions button.dsa-has-note {
   color: #adc8ef;
@@ -584,6 +596,7 @@ body:has(.dsa-sheet) > main {
   background: #29292e;
   padding: 8px 12px;
   border-radius: 6px;
+  min-height: 44px;
 }
 .dsa-empty {
   text-align: center;
@@ -733,6 +746,87 @@ body:has(.dsa-sheet) > main {
   }
   .dsa-results-heading h2 {
     font-size: 17px;
+  }
+}
+
+/* Skeleton rows mirror the question grid so loading never shifts layout. */
+.dsa-skeleton {
+  display: grid;
+  gap: 8px;
+}
+.dsa-skeleton-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 90px 34px;
+  gap: 16px;
+  align-items: center;
+  min-height: 80px;
+  padding: 18px 16px;
+  background: #0b111a;
+  border: 1px solid #252f3e;
+  border-radius: 8px;
+}
+.dsa-skeleton-row > span {
+  display: block;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #141b26 25%, #1e2735 50%, #141b26 75%);
+  background-size: 200% 100%;
+  animation: dsa-shimmer 1.4s linear infinite;
+}
+.dsa-skeleton-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.dsa-skeleton-lines {
+  display: grid;
+  gap: 8px;
+  background: none;
+}
+.dsa-skeleton-lines > span {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #141b26 25%, #1e2735 50%, #141b26 75%);
+  background-size: 200% 100%;
+  animation: dsa-shimmer 1.4s linear infinite;
+}
+.dsa-skeleton-lines > span:last-child {
+  width: 55%;
+}
+.dsa-skeleton-chip {
+  height: 16px;
+}
+@keyframes dsa-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Entry motion for an expanding topic. Collapse stays instant: exit animations on
+   conditionally rendered content fight screen readers. */
+.dsa-enter {
+  animation: dsa-topic-in 0.22s ease-out;
+}
+@keyframes dsa-topic-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsa-enter {
+    animation: none;
+  }
+  .dsa-skeleton-row > span,
+  .dsa-skeleton-lines > span {
+    animation: none;
   }
 }
 

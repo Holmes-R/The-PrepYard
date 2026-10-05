@@ -41,7 +41,7 @@ export type Sheet = {
     status: string;
     bookmarked: boolean;
     revision: boolean;
-    note: string;
+    has_note: boolean;
   }[];
   solved: number;
   total: number;
@@ -62,3 +62,11 @@ export function companySheet(
   slug: string,
   filters: Filters,
 ): Promise<Sheet | null>;
+export function filtersToParams(
+  filters: Filters,
+  openSlug?: string,
+): URLSearchParams;
+export function questionNote(
+  client: PoolClient,
+  questionId: string,
+): Promise<string>;

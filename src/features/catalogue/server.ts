@@ -1,6 +1,11 @@
 import "server-only";
 import { withStudentDatabase } from "@/lib/database/server";
-import { companiesSql, companySheet, type Filters } from "./queries.mjs";
+import {
+  companiesSql,
+  companySheet,
+  questionNote,
+  type Filters,
+} from "./queries.mjs";
 export async function listCompanies() {
   return withStudentDatabase(
     async (client) =>
@@ -17,6 +22,9 @@ export async function listCompanies() {
 }
 export async function getCompanySheet(slug: string, filters: Filters) {
   return withStudentDatabase((client) => companySheet(client, slug, filters));
+}
+export async function getQuestionNote(questionId: string) {
+  return withStudentDatabase((client) => questionNote(client, questionId));
 }
 export async function getCompanyLogo(slug: string) {
   return withStudentDatabase(async (client) => {

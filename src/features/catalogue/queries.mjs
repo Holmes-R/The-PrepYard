@@ -58,6 +58,28 @@ export function filtersFrom(params = {}) {
   };
 }
 export const companiesSql = `select c.slug,c.name,exists(select 1 from public.company_logos l where l.company_id=c.id) as has_logo,count(distinct o.question_id)::int as question_count,count(distinct o.question_id) filter(where u.status='solved')::int as solved_count from public.companies c join public.company_question_observations o on o.company_id=c.id left join public.user_question_state u on u.question_id=o.question_id group by c.id,c.slug,c.name order by lower(c.name),c.slug`;
+// Serializes applied filters for the address bar, so a filtered sheet is shareable
+// and survives reloads. Empty values are omitted so the reader on the other side
+// sees the documented defaults; `open` names the expanded company on /companies.
+export function filtersToParams(filters, openSlug = "") {
+  const params = new URLSearchParams();
+  if (openSlug) params.set("open", openSlug);
+  if (filters.q) params.set("q", filters.q);
+  if (filters.difficulty) params.set("difficulty", filters.difficulty);
+  if (filters.window && filters.window !== "all")
+    params.set("window", filters.window);
+  if (filters.sort && filters.sort !== "frequency-desc")
+    params.set("sort", filters.sort);
+  for (const topic of filters.topics ?? []) params.append("topics", topic);
+  if (filters.progress && filters.progress !== "any")
+    params.set("progress", filters.progress);
+  if (filters.minFrequency != null)
+    params.set("minFrequency", String(filters.minFrequency));
+  if (filters.minAcceptance != null)
+    params.set("minAcceptance", String(filters.minAcceptance));
+  if (filters.page > 1) params.set("page", String(filters.page));
+  return params;
+}
 // Topics the company actually has questions for, most used first. Drives the topic
 // filter so it never offers a tag that would return nothing.
 export async function companyTopics(client, companyId) {
@@ -168,7 +190,9 @@ export async function companySheet(client, slug, filters) {
  coalesce((select status from public.user_question_state u where u.question_id=q.id),'not_started') as status,
  coalesce((select bookmarked from public.user_question_state u where u.question_id=q.id),false) as bookmarked,
  (select next_revision_at from public.user_question_state u where u.question_id=q.id) is not null as revision,
- coalesce((select content from public.notes n where n.question_id=q.id),'') as note,
+  // Only whether a note exists travels with the list. Full content is up to 50KB
+  // per row and the editor is closed, so it is fetched on demand instead.
+  exists(select 1 from public.notes n where n.question_id=q.id) as has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) as patterns,
  coalesce((select jsonb_agg(t order by t.name) from (select tp.slug,tp.name from public.question_topics qt join public.topics tp on tp.id=qt.topic_id where qt.question_id=q.id) t),'[]'::jsonb) as topics,
  coalesce((select jsonb_agg(t order by t.frequency desc nulls last,t.name) from (select c.slug,c.name,max(x.frequency)::float8 as frequency from public.company_question_observations x join public.companies c on c.id=x.company_id where x.question_id=q.id and x.time_window=$2 and x.frequency_kind in ('percent','unknown') group by c.slug,c.name) t),'[]'::jsonb) as companies ` +
@@ -182,4 +206,16 @@ export async function companySheet(client, slug, filters) {
     )
   ).rows;
   return { company, available, topics, rows, total, page, pages, solved };
+}
+// A single private note, read when its editor opens. RLS scopes both the question
+// visibility and the note ownership to the caller, so this returns "" for anyone
+// else's question or a question the caller may not see.
+export async function questionNote(client, questionId) {
+  if (!/^[0-9a-f-]{1,100}$/i.test(questionId ?? "")) return "";
+  const { rows } = await client.query(
+    `select coalesce((select content from public.notes n where n.question_id=q.id),'') as note
+     from public.questions q where q.id=$1 and q.is_listed`,
+    [questionId],
+  );
+  return rows[0]?.note ?? "";
 }

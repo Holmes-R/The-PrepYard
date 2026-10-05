@@ -1,7 +1,13 @@
 "use client";
-import { useState, useTransition, useRef } from "react";
+import {
+  useEffect,
+  useOptimistic,
+  useState,
+  useTransition,
+  useRef,
+} from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Circle,
@@ -11,9 +17,12 @@ import {
   Search,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
+import { SaveMessage } from "@/components/feedback/save-message";
 import {
   windowLabels,
   progressLabels,
+  filtersFrom,
+  filtersToParams,
   type Sheet,
   type Filters,
 } from "@/features/catalogue/queries.mjs";
@@ -101,36 +110,75 @@ function QuestionRow({
 }) {
   const [pending, start] = useTransition();
   const [message, setMessage] = useState("");
+  const [savedKey, setSavedKey] = useState(0);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [note, setNote] = useState(question.note);
-  const save = (kind: "solved" | "note", value: boolean | string) =>
+  const [note, setNote] = useState("");
+  const [noteState, setNoteState] = useState<"idle" | "loading" | "ready">(
+    "idle",
+  );
+  // The toggle answers immediately; the server round-trip reconciles it. Reverts
+  // automatically if the save fails, because the base value never changed.
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(
+    question.status,
+  );
+  const solved = optimisticStatus === "solved";
+  const save = (kind: "solved" | "note", value: boolean | string) => {
+    if (kind === "solved")
+      // Transient only: un-solving an "attempted" question briefly reads as
+      // not-started until the reload lands with the true state.
+      setOptimisticStatus(value ? "solved" : "not_started");
     start(async () => {
       setMessage("");
       const result = await saveQuestionProgress(question.id, kind, value);
       if (result.ok) {
+        setSavedKey((key) => key + 1);
         await onSaved();
         if (kind === "note") setNotesOpen(false);
       } else setMessage(result.message);
     });
+  };
+  const noteId = "note-" + question.id;
+  const toggleNotes = () => {
+    if (notesOpen || noteState === "ready") {
+      setNotesOpen(!notesOpen);
+      return;
+    }
+    if (noteState === "loading") return;
+    // Content is not in the list payload, so the first open fetches it. A failed
+    // fetch leaves the editor closed: opening it empty would let Save silently
+    // overwrite the real note with nothing.
+    setNoteState("loading");
+    setMessage("");
+    void fetch("/api/notes/" + question.id, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        const body = await response.json();
+        setNote(typeof body.note === "string" ? body.note : "");
+        setNoteState("ready");
+        setNotesOpen(true);
+      })
+      .catch(() => {
+        setNoteState("idle");
+        setMessage("Could not load notes. Please try again.");
+      });
+  };
   return (
-    <div className="company-question-wrap">
+    <div className="company-question-wrap" role="listitem">
       <div className="company-question-row">
         <button
           className="completion-button"
-          title={question.status === "solved" ? "Mark unsolved" : "Mark solved"}
+          title={solved ? "Mark unsolved" : "Mark solved"}
           aria-label={
-            (question.status === "solved"
-              ? "Mark unsolved: "
-              : "Mark solved: ") + question.title
+            (solved ? "Mark unsolved: " : "Mark solved: ") + question.title
           }
-          aria-pressed={question.status === "solved"}
+          aria-pressed={solved}
           disabled={pending}
-          onClick={() => save("solved", question.status !== "solved")}
+          onClick={() => save("solved", !solved)}
         >
-          {question.status === "solved" ? (
-            <CircleCheck size={22} />
+          {solved ? (
+            <CircleCheck size={22} aria-hidden="true" />
           ) : (
-            <Circle size={22} />
+            <Circle size={22} aria-hidden="true" />
           )}
         </button>
         <div className="question-title-block">
@@ -225,30 +273,35 @@ function QuestionRow({
         </span>
         <div className="question-utilities">
           <button
-            className={"note-button " + (question.note ? "has-note" : "")}
+            className={"note-button " + (question.has_note ? "has-note" : "")}
             title="Question notes"
             aria-label={"Notes for " + question.title}
             aria-expanded={notesOpen}
-            onClick={() => {
-              setNotesOpen(!notesOpen);
-              setNote(question.note);
-            }}
+            aria-controls={noteId}
+            onClick={toggleNotes}
           >
-            <StickyNote size={23} />
+            <StickyNote size={23} aria-hidden="true" />
           </button>
         </div>
       </div>
+      {noteState === "loading" && !notesOpen && (
+        <p role="status" className="sheet-message">
+          Loading notes…
+        </p>
+      )}
       {notesOpen && (
         <form
           className="question-notes"
+          id={noteId}
           onSubmit={(event) => {
             event.preventDefault();
             save("note", note);
           }}
         >
-          <label>
+          <label htmlFor={noteId + "-input"}>
             Your private notes
             <textarea
+              id={noteId + "-input"}
               autoFocus
               value={note}
               maxLength={50000}
@@ -270,6 +323,9 @@ function QuestionRow({
         <p className="sheet-error" role="alert">
           {message}
         </p>
+      )}
+      {savedKey > 0 && !message && (
+        <SaveMessage key={savedKey} className="sheet-saved" />
       )}
     </div>
   );
@@ -346,13 +402,20 @@ function CompanyQuestions({
   loading,
   error,
   load,
+  onApplied,
 }: {
   sheet: Sheet | undefined;
   filters: Filters;
   loading: boolean;
   error: string;
   load: (next?: Filters) => Promise<void>;
+  // Called whenever the reader applies filters or turns a page, so the caller can
+  // mirror them into the address bar. Deliberately not called after saves, which
+  // refresh data without changing what is being viewed.
+  onApplied: (next: Filters) => void;
 }) {
+  const router = useRouter();
+  const [formError, setFormError] = useState("");
   // Offering a window the company has no observations for returns an empty sheet
   // that looks like a bug, so the options follow the data.
   const windows = (
@@ -368,17 +431,46 @@ function CompanyQuestions({
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    void load({
+    // A non-empty value that is not a number is a typo, not "any": say so instead
+    // of silently dropping it.
+    const rawMinFrequency = String(data.get("minFrequency") ?? "").trim();
+    const rawMinAcceptance = String(data.get("minAcceptance") ?? "").trim();
+    const minFrequency = rawMinFrequency ? percentValue(rawMinFrequency) : null;
+    const minAcceptance = rawMinAcceptance
+      ? percentValue(rawMinAcceptance)
+      : null;
+    if (
+      (rawMinFrequency && minFrequency === null) ||
+      (rawMinAcceptance && minAcceptance === null)
+    ) {
+      setFormError("Minimums must be numbers from 0 to 100.");
+      return;
+    }
+    setFormError("");
+    const next = {
       q: String(data.get("q") || ""),
       difficulty: String(data.get("difficulty") || ""),
       window: String(data.get("window") || "all"),
       sort: String(data.get("sort") || "frequency-desc"),
       topics: data.getAll("topics").map(String),
       progress: String(data.get("progress") || "any"),
-      minFrequency: percentValue(data.get("minFrequency")),
-      minAcceptance: percentValue(data.get("minAcceptance")),
+      minFrequency,
+      minAcceptance,
       page: 1,
-    });
+    };
+    void load(next);
+    onApplied(next);
+  };
+  const turnPage = (page: number) => {
+    const next = { ...filters, page };
+    void load(next);
+    onApplied(next);
+  };
+  // Mutations refresh the server tree too, so directory counts and the open panel's
+  // solved tally update without navigating away.
+  const refreshAfterSave = async () => {
+    await load();
+    router.refresh();
   };
   const topics = sheet?.topics ?? [];
   // The form is uncontrolled, so it is remounted whenever the applied filters change.
@@ -450,6 +542,8 @@ function CompanyQuestions({
             inputMode="decimal"
             placeholder="any"
             defaultValue={filters.minFrequency ?? ""}
+            aria-invalid={formError ? true : undefined}
+            aria-describedby={formError ? "sheet-filter-error" : undefined}
           />
         </label>
         <label className="sheet-field sheet-field-narrow">
@@ -463,6 +557,8 @@ function CompanyQuestions({
             inputMode="decimal"
             placeholder="any"
             defaultValue={filters.minAcceptance ?? ""}
+            aria-invalid={formError ? true : undefined}
+            aria-describedby={formError ? "sheet-filter-error" : undefined}
           />
         </label>
         <div className="sheet-filter-actions">
@@ -473,9 +569,13 @@ function CompanyQuestions({
             type="button"
             className="sheet-reset"
             disabled={loading}
-            onClick={() => void load({ ...defaultFilters })}
+            onClick={() => {
+              setFormError("");
+              void load({ ...defaultFilters });
+              onApplied({ ...defaultFilters });
+            }}
           >
-            <RotateCcw size={14} /> Reset
+            <RotateCcw size={14} aria-hidden="true" /> Reset
           </button>
         </div>
         <fieldset className="sheet-topics">
@@ -509,10 +609,31 @@ function CompanyQuestions({
           )}
         </fieldset>
       </form>
-      {loading && (
-        <p role="status" className="sheet-message">
-          Loading questions…
+      {formError && (
+        <p id="sheet-filter-error" className="sheet-error" role="alert">
+          {formError}
         </p>
+      )}
+      {loading && !sheet && (
+        <div
+          role="status"
+          className="sheet-skeleton"
+          aria-label="Loading questions"
+        >
+          <span className="sr-only">Loading questions…</span>
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="sheet-skeleton-row" aria-hidden="true">
+              <span className="sheet-skeleton-dot" />
+              <span className="sheet-skeleton-lines">
+                <span />
+                <span />
+              </span>
+              <span className="sheet-skeleton-chip" />
+              <span className="sheet-skeleton-chip" />
+              <span className="sheet-skeleton-dot" />
+            </div>
+          ))}
+        </div>
       )}
       {error && (
         <div className="sheet-error" role="alert">
@@ -522,24 +643,29 @@ function CompanyQuestions({
       )}
       {sheet && (
         <>
-          <div className="question-column-labels" aria-hidden>
+          <div className="question-column-labels" aria-hidden="true">
             <span>Question</span>
             <span>Platform</span>
             <span>Difficulty</span>
             <span>Frequency</span>
             <span>Notes</span>
           </div>
-          <div className="company-question-list" aria-busy={loading}>
+          <div
+            className="company-question-list"
+            role="list"
+            aria-label="Questions"
+            aria-busy={loading}
+          >
             {sheet.rows.map((question) => (
               <QuestionRow
                 key={question.id}
                 question={question}
                 window={filters.window}
-                onSaved={() => load()}
+                onSaved={refreshAfterSave}
               />
             ))}
           </div>
-          {!sheet.rows.length && (
+          {!sheet.rows.length && !loading && (
             <p className="sheet-message">
               No questions match these filters. Try another title, difficulty,
               topic, or window.
@@ -552,13 +678,13 @@ function CompanyQuestions({
             <div>
               <button
                 disabled={sheet.page <= 1 || loading}
-                onClick={() => void load({ ...filters, page: sheet.page - 1 })}
+                onClick={() => turnPage(sheet.page - 1)}
               >
                 Previous
               </button>
               <button
                 disabled={sheet.page >= sheet.pages || loading}
-                onClick={() => void load({ ...filters, page: sheet.page + 1 })}
+                onClick={() => turnPage(sheet.page + 1)}
               >
                 Next
               </button>
@@ -575,18 +701,43 @@ function CompanyPanel({
   initialFilters,
   open,
   onToggle,
+  onApplied,
+  sync,
 }: {
   company: CompanyItem;
   initial?: Sheet;
   initialFilters?: Filters;
   open: boolean;
   onToggle: () => void;
+  onApplied: (slug: string, next: Filters) => void;
+  // Back/forward navigation can land on a filtered view from the address bar.
+  // The tick bumps once per such navigation; the panel then loads those filters.
+  sync?: { filters: Filters; tick: number } | null;
 }) {
   const { sheet, filters, loading, error, load } = useCompanySheet(
     company,
     initial,
     initialFilters,
   );
+  const loadRef = useRef(load);
+  // Kept in an effect, not during render: effects and event handlers are the only
+  // places refs may be written.
+  useEffect(() => {
+    loadRef.current = load;
+  });
+  const didInit = useRef(false);
+  // Opened from a shared URL there is nothing to show yet, so fetch immediately
+  // with the filters the URL carried instead of waiting for a toggle.
+  useEffect(() => {
+    if (open && !sheet && !didInit.current) {
+      didInit.current = true;
+      void loadRef.current();
+    }
+  }, [open, sheet]);
+  useEffect(() => {
+    if (sync && open) void loadRef.current(sync.filters);
+    // The sync object identity changes once per history landing.
+  }, [sync, open]);
   const solved = sheet?.solved ?? company.solved_count;
   const total = sheet?.total ?? company.question_count;
   const panelId = "company-" + company.slug;
@@ -599,7 +750,10 @@ function CompanyPanel({
           aria-controls={panelId}
           onClick={() => {
             onToggle();
-            if (!open && !sheet && !loading) void load();
+            if (!open && !sheet && !loading) {
+              didInit.current = true;
+              void load();
+            }
           }}
         >
           <CompanyLogo
@@ -626,13 +780,14 @@ function CompanyPanel({
         </a>
       </div>
       {open && (
-        <div id={panelId}>
+        <div id={panelId} className="company-panel-enter">
           <CompanyQuestions
             sheet={sheet}
             filters={filters}
             loading={loading}
             error={error}
             load={load}
+            onApplied={(next) => onApplied(company.slug, next)}
           />
         </div>
       )}
@@ -643,12 +798,18 @@ export function CompanySection({
   company,
   initial,
   initialFilters = defaultFilters,
+  syncUrl = false,
 }: {
   company: CompanyItem;
   initial?: Sheet;
   initialFilters?: Filters;
+  // On the dedicated sheet page, applied filters replace the address bar so the
+  // exact view is shareable. The directory passes its own handler instead.
+  syncUrl?: boolean;
 }) {
   const [open, setOpen] = useState(Boolean(initial));
+  const router = useRouter();
+  const pathname = usePathname();
   return (
     <CompanyPanel
       company={company}
@@ -656,14 +817,113 @@ export function CompanySection({
       initialFilters={initialFilters}
       open={open}
       onToggle={() => setOpen(!open)}
+      onApplied={(_slug, next) => {
+        if (!syncUrl) return;
+        const query = filtersToParams(next).toString();
+        router.replace(query ? pathname + "?" + query : pathname, {
+          scroll: false,
+        });
+      }}
     />
   );
 }
 const PER_PAGE = 24;
-export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
-  const [search, setSearch] = useState("");
+export function CompanyDirectory({
+  companies,
+  initialOpen = null,
+  initialFilters = defaultFilters,
+  initialFind = "",
+}: {
+  companies: CompanyItem[];
+  initialOpen?: string | null;
+  initialFilters?: Filters;
+  initialFind?: string;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [search, setSearch] = useState(initialFind);
   const [page, setPage] = useState(1);
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [openSlug, setOpenSlug] = useState<string | null>(
+    initialOpen && companies.some((c) => c.slug === initialOpen)
+      ? initialOpen
+      : null,
+  );
+  // History travel lands on a filtered view; the tick bumps once per landing and the
+  // panel loads those filters. State, not a ref, because the map below reads it
+  // during render.
+  const [sync, setSync] = useState<{ filters: Filters; tick: number } | null>(
+    null,
+  );
+  // The single source of truth for the address bar. Panels report applied filters
+  // here; the directory search commits here debounced.
+  const viewRef = useRef({ open: openSlug, filters: initialFilters });
+  // A header search submits a full navigation to ?find=, which arrives as new props.
+  // This render-time adjustment keeps the box in step; it converges immediately
+  // because the guard goes false on the re-render it triggers.
+  const [prevFind, setPrevFind] = useState(initialFind);
+  if (initialFind !== prevFind) {
+    setPrevFind(initialFind);
+    setSearch(initialFind);
+    setPage(1);
+  }
+  const commitUrl = (open: string | null, filters: Filters, find: string) => {
+    viewRef.current = { open, filters };
+    const params = filtersToParams(filters, open ?? "");
+    if (find.trim()) params.set("find", find.trim());
+    const query = params.toString();
+    router.replace(query ? pathname + "?" + query : pathname, {
+      scroll: false,
+    });
+  };
+  // Back and forward buttons change the URL without touching state. replace() never
+  // fires popstate, so this only answers genuine history travel.
+  useEffect(() => {
+    const onPopState = () => {
+      const url = new URLSearchParams(window.location.search);
+      const slug = url.get("open");
+      const find = url.get("find") ?? "";
+      const next = filtersFrom({
+        ...Object.fromEntries(url.entries()),
+        topics: url.getAll("topics"),
+      });
+      setPrevFind(find);
+      setSearch(find);
+      setPage(1);
+      const valid =
+        slug && companies.some((c) => c.slug === slug) ? slug : null;
+      setOpenSlug(valid);
+      viewRef.current = { open: valid, filters: next };
+      if (valid)
+        setSync((prev) => ({ filters: next, tick: (prev?.tick ?? 0) + 1 }));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [companies]);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    [],
+  );
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setPage(1);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      commitUrl(viewRef.current.open, viewRef.current.filters, value);
+    }, 500);
+  };
+  const handleApplied = (slug: string, next: Filters) => {
+    commitUrl(slug, next, search);
+  };
+  const handleToggle = (slug: string) => {
+    const next = openSlug === slug ? null : slug;
+    setOpenSlug(next);
+    // Closing drops the company view from the URL; opening writes it once the
+    // panel reports its applied filters.
+    if (!next) commitUrl(null, viewRef.current.filters, search);
+  };
   const term = search.trim().toLowerCase();
   const matching = term
     ? companies.filter(
@@ -675,6 +935,14 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
   const visible = matching.slice((current - 1) * PER_PAGE, current * PER_PAGE);
   const activeSlug =
     openSlug && visible.some((c) => c.slug === openSlug) ? openSlug : null;
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const wasActive = useRef(activeSlug);
+  // The open card just vanished under the reader's fingers. Say where they are
+  // instead of leaving focus on a control whose panel disappeared.
+  useEffect(() => {
+    if (wasActive.current && !activeSlug) headingRef.current?.focus();
+    wasActive.current = activeSlug;
+  });
   return (
     <div className="company-sheet-theme">
       <header className="company-page-heading">
@@ -686,23 +954,22 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
         </p>
         <div className="company-directory-toolbar">
           <label className="company-search">
-            <Search size={18} />
+            <Search size={18} aria-hidden="true" />
             <input
               aria-label="Search companies"
               placeholder="Search all companies…"
               type="search"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => handleSearch(e.target.value)}
             />
           </label>
         </div>
       </header>
       <div className="company-directory-header">
-        <h2>All companies</h2>
-        <span className="company-directory-count">
+        <h2 ref={headingRef} tabIndex={-1}>
+          All companies
+        </h2>
+        <span role="status" className="company-directory-count">
           {term
             ? `${matching.length} of ${companies.length} companies`
             : `${matching.length} companies`}
@@ -713,10 +980,13 @@ export function CompanyDirectory({ companies }: { companies: CompanyItem[] }) {
           <CompanyPanel
             key={company.slug}
             company={company}
-            open={activeSlug === company.slug}
-            onToggle={() =>
-              setOpenSlug(activeSlug === company.slug ? null : company.slug)
+            initialFilters={
+              company.slug === initialOpen ? initialFilters : undefined
             }
+            open={activeSlug === company.slug}
+            onToggle={() => handleToggle(company.slug)}
+            onApplied={handleApplied}
+            sync={company.slug === openSlug ? sync : null}
           />
         ))}
       </div>

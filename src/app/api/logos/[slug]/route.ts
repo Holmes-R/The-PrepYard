@@ -3,7 +3,7 @@ import { getCompanyLogo } from "@/features/catalogue/server";
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const notFound = {
   status: 404,
-  headers: { "Cache-Control": "private, no-cache" },
+  headers: { "Cache-Control": "private, max-age=3600" },
 };
 // Logos are shared company metadata rather than student records, so a response may
 // be cached by the browser. The stored content hash is the validator, so replacing a
@@ -28,9 +28,11 @@ export async function GET(
     // Most of the directory has no stored mark. That is the normal case, so the
     // caller falls back to a generated monogram and this must not read as an error.
     if (!logo) return new Response(null, notFound);
+    // Not immutable: the URL is stable but a replaced mark changes content, so the
+    // ETag (the stored hash) stays the revalidation validator.
     const headers = new Headers({
       "Content-Type": logo.content_type,
-      "Cache-Control": "private, no-cache",
+      "Cache-Control": "private, max-age=3600, must-revalidate",
       ETag: `"${logo.sha256}"`,
       "Content-Length": String(logo.image.byteLength),
       "X-Content-Type-Options": "nosniff",

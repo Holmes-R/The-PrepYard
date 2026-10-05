@@ -20,7 +20,7 @@ export type PatternQuestion = {
   status: string;
   bookmarked: boolean;
   revision: boolean;
-  note: string;
+  has_note: boolean;
   patterns: Choice[];
 };
 export type PatternRows = {

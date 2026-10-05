@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   loginWithPassword,
@@ -24,6 +24,13 @@ export function AuthForm({
     { message: "" },
   );
   const [token, setToken] = useState("");
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const failed = Boolean(state.message) && !state.success;
+  // A failed submission otherwise leaves keyboard and screen-reader users on the
+  // submit button with no announcement of what went wrong.
+  useEffect(() => {
+    if (failed) errorRef.current?.focus();
+  }, [failed, state.message]);
   useEffect(() => {
     if (mode === "verify" || mode === "reset") {
       const fragmentToken = new URLSearchParams(
@@ -97,6 +104,8 @@ export function AuthForm({
               autoComplete="email"
               required
               maxLength={254}
+              aria-invalid={failed || undefined}
+              aria-describedby={failed ? "auth-error" : undefined}
             />
           </label>
         )}
@@ -113,6 +122,8 @@ export function AuthForm({
               required
               minLength={12}
               maxLength={128}
+              aria-invalid={failed || undefined}
+              aria-describedby={failed ? "auth-error" : undefined}
             />
             <span className="text-sm text-muted-foreground">
               {mode === "login"
@@ -145,9 +156,16 @@ export function AuthForm({
         >
           {pending ? "Please wait…" : labels[mode]}
         </button>
-        <p role="status" aria-live="polite">
-          {state.message}
-        </p>
+        {state.message && (
+          <p
+            ref={errorRef}
+            tabIndex={-1}
+            id="auth-error"
+            role={state.success ? "status" : "alert"}
+          >
+            {state.message}
+          </p>
+        )}
         {(mode === "verify" || mode === "reset") &&
           !token &&
           !state.success && (

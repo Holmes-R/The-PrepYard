@@ -2,7 +2,7 @@
 
 Students access /companies and /companies/1kosmos after login. Questions come from PostgreSQL using the restricted runtime connection, authenticated role and current student's internal ID. Publication visibility is enforced by row-level policies. The page projects only question fields, platform labels and safe observation columns; source IDs, revisions, dates and logs are never queried by the student catalogue.
 
-Search and difficulty filters use parameterized SQL. Window and sort values are allowlisted. Pages contain at most 50 questions, with stable tie-breaking. Each sheet displays reported percentage frequency for one window; unknown values sort last. If several active sources report the same association, the highest reported percentage is used; values are never summed across windows or mixed with counts/scores. Company tags use the same window and metric and sort by descending frequency. GET filter URLs can be bookmarked. Empty results, unknown companies, loading and database failures have dedicated states.
+Search and difficulty filters use parameterized SQL. Window and sort values are allowlisted. Pages contain at most 50 questions, with stable tie-breaking. Each sheet displays reported percentage frequency for one window; unknown values sort last. If several active sources report the same association, the highest reported percentage is used; values are never summed across windows or mixed with counts/scores. Company tags use the same window and metric and sort by descending frequency. GET filter URLs can be bookmarked. Applied filters and the expanded company are mirrored into the address bar (`?open={slug}&…`), so a filtered view is shareable and the back button restores it; the directory search commits to `?find=` debounced. Empty results, unknown companies, loading and database failures have dedicated states.
 
 ## Directory and filters
 
@@ -27,6 +27,8 @@ The command stages the fixed fixture if necessary, compares every question/obser
 On a migrated disposable local `_test` database, set PREPYARD_AUTH_TEST_DATABASE_URL to its administrator connection URL and run `node tests/catalogue/database.mjs`. After building, set PREPYARD_CATALOGUE_TESTS=1 and run `node tests/auth/password-flow.mjs` to verify signed-in HTML, links, filters, not-found pages, metadata hiding and guest redirects. The tests use isolated fixture data; they never connect to the application database.
 
 ## Complete directory and reference-style layout
+
+Completion toggles answer optimistically and reconcile on the server round-trip. List queries carry only whether a private note exists; content loads from `/api/notes/{questionId}` when the editor opens, and a failed fetch leaves the editor closed rather than risking an overwrite with empty text. Saves refresh the server tree so directory counts stay current.
 
 The directory covers all 656 company folders from the pinned repository, with 3,358 distinct questions and 39,353 company/window observations. Search companies by name; directory pages show 24 company cards. Questions load on demand, 50 at a time. The dark reference layout includes green completion controls, colored difficulty labels, golden bookmarks and private notes. The plus button schedules revision for tomorrow. Controls persist to the authenticated student’s existing state and notes tables, with RLS enforcing ownership.
 

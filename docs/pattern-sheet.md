@@ -54,6 +54,14 @@ Difficulty and progress are allowlisted; slugs must be slug-shaped; the search t
 trimmed and capped. Filter values are always bound parameters, and every statement
 binds exactly as many parameters as it references.
 
+Completion toggles answer optimistically and reconcile on the server round-trip.
+Success shows a self-dismissing `role="status"` confirmation; failures use
+`role="alert"`. List rows carry only whether a private note exists; content loads
+from `/api/notes/{questionId}` when the editor opens. Topic fetches go through one
+shared callback so opening a topic fires a single cancellable request. The shuffle
+control is a real `<button aria-pressed>`, and the topic overflow is a single toggle
+with `aria-expanded` and `aria-controls`.
+
 ## Layout and question rows
 
 The sheet spans the full application width rather than the narrow reading column, so

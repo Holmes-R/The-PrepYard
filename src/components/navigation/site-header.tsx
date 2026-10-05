@@ -1,10 +1,52 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Orbit, Menu, X, ArrowUpRight } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Orbit, Menu, Search, X, ArrowUpRight } from "lucide-react";
 import { sections } from "@/lib/site";
 import { signOut } from "@/lib/auth/actions";
+
+function SiteSearch({ onNavigate }: { onNavigate: () => void }) {
+  const router = useRouter();
+  return (
+    <form
+      role="search"
+      aria-label="Site search"
+      className="launch-search"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        const q = String(data.get("q") || "").trim();
+        if (!q) return;
+        onNavigate();
+        router.push(
+          data.get("scope") === "companies"
+            ? "/companies?find=" + encodeURIComponent(q)
+            : "/patterns?q=" + encodeURIComponent(q),
+        );
+      }}
+    >
+      <select
+        name="scope"
+        aria-label="Search problems or companies"
+        defaultValue="problems"
+      >
+        <option value="problems">Problems</option>
+        <option value="companies">Companies</option>
+      </select>
+      <input
+        name="q"
+        type="search"
+        maxLength={100}
+        placeholder="Search problems or companies…"
+        aria-label="Search problems or companies"
+      />
+      <button type="submit" aria-label="Search">
+        <Search size={16} aria-hidden="true" />
+      </button>
+    </form>
+  );
+}
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -50,6 +92,7 @@ export function SiteHeader() {
               aria-label="Main navigation"
               className={"launch-nav" + (open ? " is-open" : "")}
             >
+              <SiteSearch onNavigate={() => setOpen(false)} />
               {sections.map(({ href, title }) => (
                 <Link
                   key={href}

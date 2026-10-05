@@ -1,5 +1,11 @@
 "use client";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useOptimistic,
+  useState,
+  useTransition,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +19,7 @@ import {
   StickyNote,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
+import { SaveMessage } from "@/components/feedback/save-message";
 import type {
   Choice,
   PatternFilters,
@@ -63,10 +70,19 @@ function Question({
 }) {
   const [pending, start] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
-  const [note, setNote] = useState(q.note);
+  const [note, setNote] = useState("");
+  const [noteState, setNoteState] = useState<"idle" | "loading" | "ready">(
+    "idle",
+  );
   const [message, setMessage] = useState("");
+  const [savedKey, setSavedKey] = useState(0);
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(q.status);
+  const solved = optimisticStatus === "solved";
   const hideTopics = filters.hideTopics === "1";
+  const noteId = "note-" + q.id;
   function save(kind: "solved" | "note", value: boolean | string) {
+    if (kind === "solved")
+      setOptimisticStatus(value ? "solved" : "not_started");
     start(async () => {
       setMessage("");
       const result = await saveQuestionProgress(q.id, kind, value);
@@ -74,22 +90,47 @@ function Question({
         setMessage(result.message);
         return;
       }
-      setMessage("Saved");
+      setSavedKey((key) => key + 1);
       if (kind === "note") setNotesOpen(false);
       await onSaved();
     });
+  }
+  function toggleNotes() {
+    if (notesOpen || noteState === "ready") {
+      setNotesOpen(!notesOpen);
+      return;
+    }
+    if (noteState === "loading") return;
+    setNoteState("loading");
+    setMessage("");
+    void fetch("/api/notes/" + q.id, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        const body = await response.json();
+        setNote(typeof body.note === "string" ? body.note : "");
+        setNoteState("ready");
+        setNotesOpen(true);
+      })
+      .catch(() => {
+        setNoteState("idle");
+        setMessage("Could not load notes. Please try again.");
+      });
   }
   return (
     <article className="dsa-question">
       <div className="dsa-question-main">
         <button
           className="dsa-complete"
-          aria-label={`${q.status === "solved" ? "Mark unsolved" : "Mark solved"}: ${q.title}`}
-          aria-pressed={q.status === "solved"}
+          aria-label={`${solved ? "Mark unsolved" : "Mark solved"}: ${q.title}`}
+          aria-pressed={solved}
           disabled={pending}
-          onClick={() => save("solved", q.status !== "solved")}
+          onClick={() => save("solved", !solved)}
         >
-          {q.status === "solved" ? <CircleCheck /> : <Circle />}
+          {solved ? (
+            <CircleCheck aria-hidden="true" />
+          ) : (
+            <Circle aria-hidden="true" />
+          )}
         </button>
         <div className="dsa-question-title">
           <a
@@ -144,26 +185,31 @@ function Question({
             aria-label={`Notes: ${q.title}`}
             title="Private notes"
             aria-expanded={notesOpen}
-            aria-controls={"note-" + q.id}
-            className={q.note ? "dsa-has-note" : ""}
-            onClick={() => setNotesOpen(!notesOpen)}
+            aria-controls={noteId}
+            className={q.has_note ? "dsa-has-note" : ""}
+            onClick={toggleNotes}
           >
-            <StickyNote size={22} />
+            <StickyNote size={22} aria-hidden="true" />
           </button>
         </div>
       </div>
+      {noteState === "loading" && !notesOpen && (
+        <p role="status" className="dsa-message">
+          Loading notes…
+        </p>
+      )}
       {notesOpen && (
         <form
           className="dsa-note"
-          id={"note-" + q.id}
+          id={noteId}
           onSubmit={(e) => {
             e.preventDefault();
             save("note", note);
           }}
         >
-          <label htmlFor={"note-input-" + q.id}>Your private notes</label>
+          <label htmlFor={noteId + "-input"}>Your private notes</label>
           <textarea
-            id={"note-input-" + q.id}
+            id={noteId + "-input"}
             value={note}
             maxLength={50000}
             rows={4}
@@ -177,10 +223,7 @@ function Question({
             <button
               type="button"
               disabled={pending}
-              onClick={() => {
-                setNote(q.note);
-                setNotesOpen(false);
-              }}
+              onClick={() => setNotesOpen(false)}
             >
               Cancel
             </button>
@@ -188,9 +231,12 @@ function Question({
         </form>
       )}
       {message && (
-        <p className="dsa-save-message" role="status">
+        <p className="dsa-save-message" role="alert">
           {message}
         </p>
+      )}
+      {savedKey > 0 && !message && (
+        <SaveMessage key={savedKey} className="dsa-save-message" />
       )}
     </article>
   );
@@ -232,26 +278,17 @@ function Topic({
     },
     [url],
   );
+  // One fetch path for mount, retry, paging and post-save refresh. The effect only
+  // cancels it; the duplicated inline fetch it replaced double-fired on mount.
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
-    void fetch(url, { cache: "no-store", signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("Questions unavailable");
-        return (await response.json()) as PatternRows;
-      })
-      .then((body) => {
-        if (!controller.signal.aborted) setData(body);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted)
-          setError("Could not load these questions. Please try again.");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
+    // Fetching here is the effect's job (synchronizing remote rows with the open
+    // state), not a render cascade: it runs once per open/retry/page change.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchRows(controller.signal);
     return () => controller.abort();
-  }, [open, url, retry]);
+  }, [open, url, retry, fetchRows]);
   const saved = async () => {
     setLoading(true);
     setError("");
@@ -263,7 +300,7 @@ function Topic({
   return (
     <section className="dsa-topic">
       <Meter solved={solved} total={total} label={group.name + " completion"} />
-      <h2>
+      <h3>
         <button
           className="dsa-topic-toggle"
           aria-expanded={open}
@@ -283,19 +320,38 @@ function Topic({
           <span className="dsa-topic-count">
             {solved} / {total}
           </span>
-          <ChevronDown size={19} className={open ? "dsa-chevron-open" : ""} />
+          <ChevronDown
+            size={19}
+            aria-hidden="true"
+            className={open ? "dsa-chevron-open" : ""}
+          />
         </button>
-      </h2>
+      </h3>
       {open && (
         <div
           id={"topic-" + group.slug}
-          className="dsa-topic-body"
+          className="dsa-topic-body dsa-enter"
           aria-busy={loading}
         >
-          {loading && (
-            <p role="status" className="dsa-message">
-              Loading questions…
-            </p>
+          {loading && !data && (
+            <div
+              role="status"
+              className="dsa-skeleton"
+              aria-label="Loading questions"
+            >
+              <span className="sr-only">Loading questions…</span>
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="dsa-skeleton-row" aria-hidden="true">
+                  <span className="dsa-skeleton-dot" />
+                  <span className="dsa-skeleton-lines">
+                    <span />
+                    <span />
+                  </span>
+                  <span className="dsa-skeleton-chip" />
+                  <span className="dsa-skeleton-dot" />
+                </div>
+              ))}
+            </div>
           )}
           {error ? (
             <div className="dsa-message" role="alert">
@@ -403,6 +459,7 @@ export function PatternSheet({
   filters: PatternFilters;
 }) {
   const groups = overview.groups;
+  const router = useRouter();
   const [showAllTopics, setShowAllTopics] = useState(false);
   const shuffled = filters.sort === "random";
   // The selection is the reason the reader is here, so it is never hidden behind
@@ -422,7 +479,7 @@ export function PatternSheet({
       <header className="dsa-hero">
         <div>
           <p className="dsa-eyebrow">
-            <Code2 size={17} /> THE PRACTICE ROOM
+            <Code2 size={17} aria-hidden="true" /> THE PRACTICE ROOM
           </p>
           <h1>
             DSA Practice<span>.</span>
@@ -459,7 +516,7 @@ export function PatternSheet({
         <label className="dsa-filter dsa-search">
           <span className="sr-only">Filter problems or topics</span>
           <div>
-            <Search size={17} />
+            <Search size={17} aria-hidden="true" />
             <input
               type="search"
               name="q"
@@ -492,19 +549,24 @@ export function PatternSheet({
           <button type="submit" className="dsa-apply">
             Apply
           </button>
-          {/* A link, not a submit button: it needs no form round-trip and leaves whatever is
-              typed in the search box alone. It toggles, because with no Order
-              control this is the only way back to the recommended order. */}
-          <Link
+          {/* A button, not a link: it toggles a state (pressed or not) rather than
+              navigating to a destination, and aria-pressed is invalid on links.
+              Navigation happens through the router so the search box keeps
+              whatever is typed in it. */}
+          <button
+            type="button"
             className={"dsa-random" + (shuffled ? " is-active" : "")}
-            href={
-              "/patterns?" +
-              paramsFor(filters, { sort: shuffled ? "" : "random" })
-            }
             aria-pressed={shuffled}
+            onClick={() =>
+              router.push(
+                "/patterns?" +
+                  paramsFor(filters, { sort: shuffled ? "" : "random" }),
+              )
+            }
           >
-            <Shuffle size={15} /> {shuffled ? "Shuffled" : "Random"}
-          </Link>
+            <Shuffle size={15} aria-hidden="true" />{" "}
+            {shuffled ? "Shuffled" : "Random"}
+          </button>
           <label className="dsa-check">
             <input
               type="checkbox"
@@ -516,7 +578,7 @@ export function PatternSheet({
           </label>
         </div>
         {groups.length > 0 && (
-          <fieldset className="dsa-chips">
+          <fieldset className="dsa-chips" id="dsa-topic-chips">
             <legend>Topics</legend>
             <button
               type="submit"
@@ -539,23 +601,20 @@ export function PatternSheet({
                 {g.name} <em>{g.total}</em>
               </button>
             ))}
-            {hiddenTopics > 0 && (
+            {/*
+              One toggle, not two buttons: the expanded state always lives in one
+              place, so the control can honestly report it. The selection forces
+              the full list open (see above), which also counts as expanded.
+            */}
+            {(hiddenTopics > 0 || showAllTopics) && (
               <button
                 type="button"
                 className="dsa-chips-more"
-                aria-expanded={showAllTopics}
-                onClick={() => setShowAllTopics(true)}
+                aria-expanded={showAllTopics || selectedIndex >= CHIP_LIMIT}
+                aria-controls="dsa-topic-chips"
+                onClick={() => setShowAllTopics(!showAllTopics)}
               >
-                +{hiddenTopics} more
-              </button>
-            )}
-            {showAllTopics && visibleGroups.length > CHIP_LIMIT && (
-              <button
-                type="button"
-                className="dsa-chips-more"
-                onClick={() => setShowAllTopics(false)}
-              >
-                Show fewer
+                {showAllTopics ? "Show fewer" : `+${hiddenTopics} more`}
               </button>
             )}
           </fieldset>
@@ -595,6 +654,19 @@ export function PatternSheet({
         <h2>Explore your topics</h2>
         <span>{overview.total.toLocaleString()} questions</span>
       </div>
+      {filters.collection && (
+        <p className="dsa-active-filter">
+          Collection:{" "}
+          <strong>
+            {overview.collections.find((c) => c.slug === filters.collection)
+              ?.name ?? filters.collection}
+          </strong>{" "}
+          · {overview.total.toLocaleString()} questions
+          <Link href={"/patterns?" + paramsFor(filters, { collection: "" })}>
+            Clear collection ×
+          </Link>
+        </p>
+      )}
       {filters.pattern && (
         <p className="dsa-active-filter">
           Pattern:{" "}
@@ -618,7 +690,7 @@ export function PatternSheet({
         ))
       ) : (
         <div className="dsa-empty">
-          <Search size={28} />
+          <Search size={28} aria-hidden="true" />
           <h2>No matching questions</h2>
           <p>Try another topic or pattern, or clear your filters.</p>
           <Link href="/patterns">Reset filters</Link>

@@ -127,6 +127,53 @@ textarea {
   background: #d5e5fc;
   border-radius: 50%;
 }
+.launch-search {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #ffffff25;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff08;
+}
+.launch-search:focus-within {
+  border-color: #adc8ef;
+  box-shadow: 0 0 0 3px rgba(173, 200, 239, 0.25);
+}
+.launch-search select {
+  background: transparent;
+  border: 0;
+  border-right: 1px solid #ffffff18;
+  color: #aab2bf;
+  font-size: 12px;
+  padding: 8px 6px 8px 10px;
+  max-width: 118px;
+  color-scheme: dark;
+}
+.launch-search input {
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: #e8edf3;
+  font-size: 12px;
+  padding: 8px 10px;
+  width: 170px;
+  min-width: 0;
+}
+.launch-search input::placeholder {
+  color: #7c8595;
+}
+.launch-search button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 36px;
+  color: #aab2bf;
+}
+.launch-search button:hover {
+  color: #fff;
+}
 .launch-signout,
 .launch-auth-link {
   display: flex;
@@ -450,7 +497,7 @@ body > footer {
   color: #9fb5d3;
   margin-bottom: 24px;
 }
-.launch-feature h3 {
+.launch-feature h2 {
   font-size: 21px;
   font-weight: 550;
   letter-spacing: -0.6px;
@@ -652,6 +699,9 @@ body > footer {
   }
   .launch-nav form {
     padding: 8px 12px;
+  }
+  .launch-nav .launch-search input {
+    flex: 1;
   }
   .launch-hero {
     padding-top: 30px;

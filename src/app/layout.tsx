@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteHeader } from "@/components/navigation/site-header";
 import "./globals.css";
 import "./launch-theme.css";
@@ -31,7 +32,16 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="border-t px-5 py-7 text-center text-sm text-muted-foreground">
-          The PrepYard · Built for students. Free with an account.
+          <nav
+            aria-label="Footer"
+            className="mb-3 flex flex-wrap justify-center gap-x-6 gap-y-2"
+          >
+            <Link href="/">Home</Link>
+            <Link href="/companies">Companies</Link>
+            <Link href="/patterns">Patterns</Link>
+            <Link href="/about">About</Link>
+          </nav>
+          <p>The PrepYard · Built for students. Free with an account.</p>
         </footer>
       </body>
     </html>

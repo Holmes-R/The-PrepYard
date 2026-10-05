@@ -58,7 +58,7 @@ export default async function Page() {
             <div className="feature-icon">
               <Icon />
             </div>
-            <h3>{title}</h3>
+            <h2>{title}</h2>
             <p>{text}</p>
             <span className="feature-link">
               Continue <ArrowUpRight size={16} />
