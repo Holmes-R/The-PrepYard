@@ -1,0 +1,143 @@
+{
+  "companies": 656,
+  "attached": 629,
+  "existingArtwork": 205,
+  "additional": 424,
+  "unresolved": [
+    {
+      "slug": "affinity",
+      "name": "Affinity",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "allincall",
+      "name": "Allincall",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "alphonso",
+      "name": "Alphonso",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "analytics-quotient",
+      "name": "Analytics Quotient",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "argo-ai",
+      "name": "Argo Ai",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "ascend",
+      "name": "Ascend",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "bolt",
+      "name": "Bolt",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "code-studio",
+      "name": "Code Studio",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "deltax",
+      "name": "Deltax",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "drawbridge",
+      "name": "Drawbridge",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "dream11",
+      "name": "Dream11",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "fast",
+      "name": "Fast",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "fidessa",
+      "name": "Fidessa",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "gameskraft",
+      "name": "Gameskraft",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "hive",
+      "name": "Hive",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "info-edge",
+      "name": "Info Edge",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "jingchi",
+      "name": "Jingchi",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "leap-motion",
+      "name": "Leap Motion",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "netease",
+      "name": "Netease",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "park",
+      "name": "Park",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "pickrr",
+      "name": "Pickrr",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "polar",
+      "name": "Polar",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "radius",
+      "name": "Radius",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "slice",
+      "name": "Slice",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "ta-digital",
+      "name": "Ta Digital",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "tusimple",
+      "name": "Tusimple",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    },
+    {
+      "slug": "zip",
+      "name": "Zip",
+      "reason": "Employer identity ambiguous or no reliable asset obtainable. Initials retained pending review."
+    }
+  ]
+}

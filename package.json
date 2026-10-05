@@ -25,7 +25,8 @@
     "test:patterns": "node --test tests/patterns/*.test.mjs",
     "test:patterns:database": "node tests/patterns/database.mjs",
     "collections:publish": "node scripts/patterns/collections.mjs",
-    "test:collections:database": "node tests/patterns/collections-database.mjs"
+    "test:collections:database": "node tests/patterns/collections-database.mjs",
+    "logos:publish-reviewed": "node scripts/logos/publish-reviewed.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",
