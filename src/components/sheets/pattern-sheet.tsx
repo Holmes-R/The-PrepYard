@@ -1,4 +1,5 @@
 "use client";
+import { CompletionToggle } from "@/components/ui/selection-control";
 import {
   useCallback,
   useEffect,
@@ -11,7 +12,6 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   ChevronDown,
-  Check,
   FolderOpen,
   Layers3,
   BookOpen,
@@ -143,19 +143,14 @@ function Question({
       <div
         className={"dsa-question-main" + (hideTopics ? " dsa-hide-topics" : "")}
       >
-        <button
+        <CompletionToggle
           className="dsa-complete"
           aria-label={`${solved ? "Mark unsolved" : "Mark solved"}: ${q.title}`}
-          aria-pressed={solved}
+          checked={solved}
           disabled={pending}
+          aria-busy={pending || undefined}
           onClick={() => save("solved", !solved)}
-        >
-          {solved ? (
-            <Check size={15} aria-hidden="true" />
-          ) : (
-            <span aria-hidden="true" />
-          )}
-        </button>
+        />
         <div className="dsa-question-title">
           <a
             className="dsa-problem-link"

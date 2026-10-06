@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import localFont from "next/font/local";
 import { SiteHeader } from "@/components/navigation/site-header";
 import "./globals.css";
 import "./launch-theme.css";
 import "./stitch-theme.css";
+import "./control-theme.css";
+
+const inter = localFont({
+  src: "./fonts/Inter-variable.ttf",
+  display: "swap",
+  variable: "--font-inter",
+  weight: "100 900",
+});
 import { currentUser } from "@/lib/auth/server";
 
 export const metadata: Metadata = {
@@ -22,7 +31,7 @@ export default async function RootLayout({
 }) {
   const user = await currentUser();
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body>
         <a href="#main-content" className="skip-link">
           Skip to content

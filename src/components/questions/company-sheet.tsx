@@ -1,4 +1,5 @@
 "use client";
+import { CompletionToggle } from "@/components/ui/selection-control";
 import {
   useEffect,
   useMemo,
@@ -13,7 +14,6 @@ import {
   ArrowUpRight,
   RotateCcw,
   History,
-  Check,
   ArrowRight,
   StickyNote,
   Search,
@@ -175,22 +175,17 @@ function QuestionRow({
   return (
     <div className="company-question-wrap" role="listitem">
       <div className="company-question-row">
-        <button
+        <CompletionToggle
           className="completion-button"
           title={solved ? "Mark unsolved" : "Mark solved"}
           aria-label={
             (solved ? "Mark unsolved: " : "Mark solved: ") + question.title
           }
-          aria-pressed={solved}
+          checked={solved}
           disabled={pending}
+          aria-busy={pending || undefined}
           onClick={() => save("solved", !solved)}
-        >
-          {solved ? (
-            <Check size={15} aria-hidden="true" />
-          ) : (
-            <span aria-hidden="true" />
-          )}
-        </button>
+        />
         <div className="question-title-block">
           <a
             href={question.canonical_url}

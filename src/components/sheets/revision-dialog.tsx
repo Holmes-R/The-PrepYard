@@ -207,6 +207,7 @@ export function RevisionDialog({
             type="button"
             className="dsa-dialog-submit"
             disabled={confidence === null || pending}
+            aria-busy={pending || undefined}
             onClick={submit}
           >
             {pending ? "Saving…" : "Mark as Revised"}

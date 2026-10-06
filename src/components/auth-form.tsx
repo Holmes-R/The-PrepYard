@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -146,16 +147,17 @@ export function AuthForm({
             />
           </label>
         )}
-        <button
+        <Button
+          type="submit"
+          loading={pending}
           disabled={
             pending ||
             state.success ||
             ((mode === "verify" || mode === "reset") && !token)
           }
-          className="rounded-full bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:opacity-50"
         >
           {pending ? "Please wait…" : labels[mode]}
-        </button>
+        </Button>
         {state.message && (
           <p
             ref={errorRef}

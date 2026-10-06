@@ -108,3 +108,9 @@ The interface follows the supplied Google Stitch designs: horizontal navigation,
 The dashboard shows real student progress, completion rate, due revisions, saved notes, collection progress, recent practice updates, and seven days of recorded revision activity. Company search supports alphabetical, question-count, and solved-count sorting. Practice offers Topics, Patterns, and Collections browsing modes. Questions keep separate Difficulty, Topics, Revision, and Notes cells; company rows also show frequency. Revision history retains the confidence selected for each event.
 
 Notes remain private, show their content only when expanded, support deletion, and are paginated newest first. Ctrl/Cmd+K focuses the contextual quick search. See [the Stitch interface guide](docs/stitch-ui.md).
+
+### Interface components
+
+After signing in, open `/components` to review the reusable button variants and states, native checkboxes (including mixed state), radios, filter chips, typography, an example company question, and a compact note. Preview interactions use local state and do not write account data.
+
+Shared components live in `src/components/ui`; control and typography tokens are defined in `src/app/control-theme.css`. Buttons use 40px regular and 32px compact sizes, with 44px mobile targets, visible keyboard focus, and a loading indicator. Inter is bundled locally with its OFL license in `src/app/fonts`, so rendering does not depend on a font service.
