@@ -28,7 +28,7 @@ export default async function Page({
       </nav>
       <header className="company-page-heading">
         <p className="sheet-eyebrow">Company-wise practice</p>
-        <h1>{sheet.company.name}</h1>
+        <h1>{sheet.company.name} Interview Questions</h1>
         <p>Practice the questions. Track every step.</p>
       </header>
       <CompanySection
@@ -44,8 +44,7 @@ export default async function Page({
       />
       <p className="sheet-footnote">
         Company tags are sorted by frequency within the selected window.
-        Checkmarks, bookmarks, revision reminders, and notes are private to your
-        account.
+        Completion, revision history, and notes are private to your account.
       </p>
     </div>
   );

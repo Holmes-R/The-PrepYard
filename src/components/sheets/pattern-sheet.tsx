@@ -11,8 +11,10 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   ChevronDown,
-  Circle,
-  CircleCheck,
+  Check,
+  FolderOpen,
+  Layers3,
+  BookOpen,
   Code2,
   History,
   Search,
@@ -149,9 +151,9 @@ function Question({
           onClick={() => save("solved", !solved)}
         >
           {solved ? (
-            <CircleCheck aria-hidden="true" />
+            <Check size={15} aria-hidden="true" />
           ) : (
-            <Circle aria-hidden="true" />
+            <span aria-hidden="true" />
           )}
         </button>
         <div className="dsa-question-title">
@@ -200,10 +202,10 @@ function Question({
             </div>
           )}
         </div>
-        {!hideTopics && <QuestionTopics topics={q.topics} />}
         <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
           {q.difficulty ?? "Unrated"}
         </span>
+        {!hideTopics && <QuestionTopics topics={q.topics} />}
         <div className="dsa-actions dsa-revision-cell">
           <button
             aria-label={`Revision: ${q.title}`}
@@ -212,7 +214,8 @@ function Question({
             className={q.revision ? "dsa-has-revision" : ""}
             onClick={() => setRevisionOpen(true)}
           >
-            <History size={22} aria-hidden="true" />
+            <History size={16} aria-hidden="true" />
+            <span>Revision</span>
           </button>
         </div>
         <div className="dsa-actions dsa-notes-cell">
@@ -224,7 +227,8 @@ function Question({
             className={q.has_note ? "dsa-has-note" : ""}
             onClick={toggleNotes}
           >
-            <StickyNote size={22} aria-hidden="true" />
+            <StickyNote size={17} aria-hidden="true" />
+            <span>{q.has_note ? "Note" : "Add note"}</span>
           </button>
         </div>
       </div>
@@ -389,8 +393,8 @@ function Topic({
           >
             <span />
             <span>Question</span>
-            {filters.hideTopics !== "1" && <span>Topics</span>}
             <span>Difficulty</span>
+            {filters.hideTopics !== "1" && <span>Topics</span>}
             <span>Revision</span>
             <span>Notes</span>
           </div>
@@ -523,6 +527,13 @@ export function PatternSheet({
   const groups = overview.groups;
   const router = useRouter();
   const [showAllTopics, setShowAllTopics] = useState(false);
+  const [mode, setMode] = useState<"topics" | "patterns" | "collections">(
+    filters.collection
+      ? "collections"
+      : filters.pattern
+        ? "patterns"
+        : "topics",
+  );
   const shuffled = filters.sort === "random";
   // The selection is the reason the reader is here, so it is never hidden behind
   // the "+N more" control.
@@ -543,11 +554,10 @@ export function PatternSheet({
           <p className="dsa-eyebrow">
             <Code2 size={17} aria-hidden="true" /> THE PRACTICE ROOM
           </p>
-          <h1>
-            DSA Practice<span>.</span>
-          </h1>
+          <h1>DSA Practice Hub</h1>
           <p className="dsa-description">
-            One topic at a time. Find the patterns. Build your confidence.
+            Master algorithms through core topics, reusable patterns, and
+            curated interview sheets.
           </p>
           <div className="dsa-hero-tags">
             <span>{overview.groups.length} topics</span>
@@ -574,6 +584,94 @@ export function PatternSheet({
           </p>
         </div>
       </header>
+      <div className="prep-mode-tabs" aria-label="Practice browsing mode">
+        {[
+          {
+            id: "topics",
+            name: "Topics",
+            count: groups.length,
+            icon: FolderOpen,
+          },
+          {
+            id: "patterns",
+            name: "Patterns",
+            count: overview.patterns.length,
+            icon: Layers3,
+          },
+          {
+            id: "collections",
+            name: "Collections",
+            count: overview.collections.length,
+            icon: BookOpen,
+          },
+        ].map(({ id, name, count, icon: Icon }) => (
+          <button
+            type="button"
+            key={id}
+            aria-pressed={mode === id}
+            onClick={() => setMode(id as typeof mode)}
+          >
+            <Icon size={18} />
+            <span>
+              {name}
+              <small>Mode</small>
+            </span>
+            <em>{count}</em>
+          </button>
+        ))}
+      </div>
+      {mode !== "topics" && (
+        <section className="prep-practice-library">
+          <header>
+            <h2>
+              {mode === "patterns"
+                ? "Algorithm patterns"
+                : "Curated practice sheets"}
+            </h2>
+            <p>
+              {mode === "patterns"
+                ? "Choose a pattern to focus your practice."
+                : "Your question progress follows you across every collection."}
+            </p>
+          </header>
+          <div>
+            {(mode === "patterns"
+              ? overview.patterns
+              : overview.collections
+            ).map((item) => (
+              <Link
+                key={item.slug}
+                href={
+                  "/patterns?" +
+                  paramsFor(
+                    filters,
+                    mode === "patterns"
+                      ? { pattern: item.slug, collection: "" }
+                      : { collection: item.slug, pattern: "" },
+                  )
+                }
+                aria-current={
+                  (mode === "patterns"
+                    ? filters.pattern
+                    : filters.collection) === item.slug
+                    ? "page"
+                    : undefined
+                }
+              >
+                <span>
+                  {mode === "patterns" ? (
+                    <Layers3 size={18} />
+                  ) : (
+                    <BookOpen size={18} />
+                  )}
+                </span>
+                <strong>{item.name}</strong>
+                <ArrowUpRight size={15} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       <form action="/patterns" method="get" className="dsa-filters">
         <label className="dsa-filter dsa-search">
           <span className="sr-only">Filter problems or topics</span>

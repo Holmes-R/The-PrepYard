@@ -29,11 +29,13 @@ export async function loginWithPassword(
       redirectTo: safeDestination(form.get("next")),
     });
   } catch (error) {
-    if (error instanceof AuthError)
+    if (error instanceof AuthError) {
+      if (error.type !== "CredentialsSignin") return unavailable;
       return {
         message:
-          "Unable to log in. Check your email and PrepYard password, verify your email, or try again later.",
+          "Unable to log in. Check your email and PrepYard password, or verify your email.",
       };
+    }
     throw error;
   }
   return { message: "" };

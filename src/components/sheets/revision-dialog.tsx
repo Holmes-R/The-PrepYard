@@ -141,6 +141,7 @@ export function RevisionDialog({
           <h3 id={titleId} className="dsa-dialog-title">
             Rate your confidence
           </h3>
+          <p className="prep-revision-question">{questionTitle}</p>
           <div
             className="dsa-confidence"
             role="radiogroup"

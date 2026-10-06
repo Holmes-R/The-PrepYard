@@ -180,8 +180,12 @@ export async function companySheet(client, slug, filters) {
     where.push(
       "exists(select 1 from public.user_question_state u where u.question_id=q.id and u.next_revision_at is not null)",
     );
-  const clause = (...extra) =>
-    " where " + [...where, ...extra].filter(Boolean).join(" and ");
+  // No conditions at all is the default sheet, so the clause must vanish
+  // entirely: a bare "where" with nothing after it is a syntax error.
+  const clause = (...extra) => {
+    const conditions = [...where, ...extra].filter(Boolean);
+    return conditions.length ? " where " + conditions.join(" and ") : "";
+  };
   const total = Number(
     (await client.query("select count(*) as total " + base + clause(), args))
       .rows[0].total,
@@ -212,14 +216,14 @@ export async function companySheet(client, slug, filters) {
       )
     ).rows[0].n,
   );
+  // Only whether a note exists travels with the list. Full content is up to
+  // 50KB per row and the editor is closed, so it is fetched on demand instead.
   const rows = (
     await client.query(
       `select q.id,q.title,q.canonical_url,q.difficulty,p.name as platform,o.frequency::float8 as frequency,o.acceptance::float8 as acceptance,
  coalesce((select status from public.user_question_state u where u.question_id=q.id),'not_started') as status,
  coalesce((select bookmarked from public.user_question_state u where u.question_id=q.id),false) as bookmarked,
  (select next_revision_at from public.user_question_state u where u.question_id=q.id) is not null as revision,
-  // Only whether a note exists travels with the list. Full content is up to 50KB
-  // per row and the editor is closed, so it is fetched on demand instead.
   exists(select 1 from public.notes n where n.question_id=q.id) as has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) as patterns,
  coalesce((select jsonb_agg(t order by t.name) from (select tp.slug,tp.name from public.question_topics qt join public.topics tp on tp.id=qt.topic_id where qt.question_id=q.id) t),'[]'::jsonb) as topics,

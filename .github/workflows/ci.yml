@@ -29,6 +29,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm test:import
+      - run: pnpm test:catalogue
       - run: pnpm test:auth
       - run: pnpm typecheck
       - run: pnpm build

@@ -103,6 +103,8 @@ are documented in [the pattern sheet guide](docs/pattern-sheet.md).
 
 ### Application appearance
 
-The interface uses a LaunchPad-inspired dark theme: a subtle star background, soft blue glow, rounded panels, pale primary buttons, and responsive navigation. Home shows live catalogue totals and links to company practice, patterns, and collections. All practice areas remain protected by account login. Question rows keep frequency, verified pattern tags, completion, and private notes. Decorative previews contain navigation links rather than simulated progress. Reduced-motion preferences are respected.
+The interface follows the supplied Google Stitch designs: horizontal navigation, white primary buttons, charcoal panels, mint/blue progress accents, compact company cards, dense question tables, and a mobile navigation menu. The home route opens the authenticated dashboard.
 
-The redesigned dashboard reads the current student’s saved progress. The private notebook shows up to 100 non-empty notes in question-title order, with original question links and a shortcut to locate the question in practice.
+The dashboard shows real student progress, completion rate, due revisions, saved notes, collection progress, recent practice updates, and seven days of recorded revision activity. Company search supports alphabetical, question-count, and solved-count sorting. Practice offers Topics, Patterns, and Collections browsing modes. Questions keep separate Difficulty, Topics, Revision, and Notes cells; company rows also show frequency. Revision history retains the confidence selected for each event.
+
+Notes remain private, show their content only when expanded, support deletion, and are paginated newest first. Ctrl/Cmd+K focuses the contextual quick search. See [the Stitch interface guide](docs/stitch-ui.md).

@@ -11,13 +11,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
-  Circle,
-  CircleCheck,
   RotateCcw,
+  History,
+  Check,
+  ArrowRight,
   StickyNote,
   Search,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
+import { RevisionDialog } from "@/components/sheets/revision-dialog";
 import { SaveMessage } from "@/components/feedback/save-message";
 import { patternColour } from "@/lib/pattern-colour";
 import {
@@ -119,6 +121,7 @@ function QuestionRow({
   const [message, setMessage] = useState("");
   const [savedKey, setSavedKey] = useState(0);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [revisionOpen, setRevisionOpen] = useState(false);
   const [note, setNote] = useState("");
   const [noteState, setNoteState] = useState<"idle" | "loading" | "ready">(
     "idle",
@@ -183,9 +186,9 @@ function QuestionRow({
           onClick={() => save("solved", !solved)}
         >
           {solved ? (
-            <CircleCheck size={22} aria-hidden="true" />
+            <Check size={15} aria-hidden="true" />
           ) : (
-            <Circle size={22} aria-hidden="true" />
+            <span aria-hidden="true" />
           )}
         </button>
         <div className="question-title-block">
@@ -253,43 +256,49 @@ function QuestionRow({
             )}
           </div>
         </div>
-        <a
-          className="platform-link"
-          href={question.canonical_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={"Open on " + question.platform}
-          title={question.platform}
-        >
-          <svg width="24" height="28" viewBox="0 0 24 28" aria-hidden="true">
-            <path
-              d="M16 3 4 15a5 5 0 0 0 0 7l3 3a5 5 0 0 0 7 0l3-3"
-              fill="none"
-              stroke="#f5a623"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="m10 9 6 6M9 19h13"
-              fill="none"
-              stroke="#e8e8ed"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
-        </a>
         <span className={"difficulty difficulty-" + question.difficulty}>
           {question.difficulty
             ? question.difficulty[0].toUpperCase() +
               question.difficulty.slice(1)
             : "Unknown"}
         </span>
+        <div className="company-question-topics" aria-label="Topics">
+          {question.topics.length ? (
+            question.topics.map((topic) => (
+              <span key={topic.slug}>{topic.name}</span>
+            ))
+          ) : (
+            <span className="prep-muted">Not available</span>
+          )}
+        </div>
         <span
           className="question-frequency"
           title="Relative frequency in the selected window"
         >
           {question.frequency === null ? "—" : question.frequency + "%"}
+          {question.frequency !== null && (
+            <span className="prep-meter">
+              <span
+                style={{
+                  width: `${Math.min(100, Math.max(0, question.frequency))}%`,
+                }}
+              />
+            </span>
+          )}
         </span>
+        <div className="company-revision-cell">
+          <button
+            className={
+              "prep-row-action" + (question.revision ? " is-saved" : "")
+            }
+            aria-label={"Revision: " + question.title}
+            aria-haspopup="dialog"
+            onClick={() => setRevisionOpen(true)}
+          >
+            <History size={16} />
+            <span>Revision</span>
+          </button>
+        </div>
         <div className="question-utilities">
           <button
             className={"note-button " + (question.has_note ? "has-note" : "")}
@@ -299,10 +308,18 @@ function QuestionRow({
             aria-controls={noteId}
             onClick={toggleNotes}
           >
-            <StickyNote size={23} aria-hidden="true" />
+            <StickyNote size={17} aria-hidden="true" />
+            <span>{question.has_note ? "Note" : "Add note"}</span>
           </button>
         </div>
       </div>
+      <RevisionDialog
+        questionId={question.id}
+        questionTitle={question.title}
+        open={revisionOpen}
+        onClose={() => setRevisionOpen(false)}
+        onDone={onSaved}
+      />
       {noteState === "loading" && !notesOpen && (
         <p role="status" className="sheet-message">
           Loading notes…
@@ -663,10 +680,12 @@ function CompanyQuestions({
       {sheet && (
         <>
           <div className="question-column-labels" aria-hidden="true">
-            <span>Question</span>
-            <span>Platform</span>
+            <span>Status</span>
+            <span>Question & pattern</span>
             <span>Difficulty</span>
+            <span>Topics</span>
             <span>Frequency</span>
+            <span>Revision</span>
             <span>Notes</span>
           </div>
           <div
@@ -801,6 +820,29 @@ function CompanyPanel({
           <ArrowUpRight size={17} aria-hidden="true" />
         </a>
       </div>
+      {!open && (
+        <div className="prep-company-summary">
+          <div>
+            <span>Question pool</span>
+            <strong>{total.toLocaleString()} questions</strong>
+          </div>
+          <div>
+            <span>Progress</span>
+            <strong className="prep-solved">
+              {solved} / {total} solved (
+              {total ? Math.round((100 * solved) / total) : 0}%)
+            </strong>
+          </div>
+          <div className="prep-meter">
+            <span
+              style={{ width: total ? (100 * solved) / total + "%" : "0%" }}
+            />
+          </div>
+          <Link href={"/companies/" + company.slug}>
+            Open company <ArrowRight size={16} />
+          </Link>
+        </div>
+      )}
       {open && (
         <div id={panelId} className="company-panel-enter">
           <CompanyQuestions
@@ -849,7 +891,7 @@ export function CompanySection({
     />
   );
 }
-const PER_PAGE = 24;
+const PER_PAGE = 12;
 export function CompanyDirectory({
   companies,
   initialOpen = null,
@@ -864,6 +906,8 @@ export function CompanyDirectory({
   const router = useRouter();
   const pathname = usePathname();
   const [search, setSearch] = useState(initialFind);
+  const [sort, setSort] = useState("questions");
+  const [practicedOnly, setPracticedOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [openSlug, setOpenSlug] = useState<string | null>(
     initialOpen && companies.some((c) => c.slug === initialOpen)
@@ -956,13 +1000,27 @@ export function CompanyDirectory({
         : companies,
     [companies, term],
   );
-  const pages = Math.max(1, Math.ceil(matching.length / PER_PAGE));
+  const ordered = useMemo(
+    () =>
+      [...matching]
+        .filter((c) => !practicedOnly || c.solved_count > 0)
+        .sort((a, b) =>
+          sort === "name"
+            ? a.name.localeCompare(b.name)
+            : sort === "solved"
+              ? b.solved_count - a.solved_count || a.name.localeCompare(b.name)
+              : b.question_count - a.question_count ||
+                a.name.localeCompare(b.name),
+        ),
+    [matching, sort, practicedOnly],
+  );
+  const pages = Math.max(1, Math.ceil(ordered.length / PER_PAGE));
   const current = Math.min(page, pages);
   // Memoized so the logo effect below only re-runs when the visible set actually
   // changes, not on every unrelated re-render (toggling a panel, saving progress).
   const visible = useMemo(
-    () => matching.slice((current - 1) * PER_PAGE, current * PER_PAGE),
-    [matching, current],
+    () => ordered.slice((current - 1) * PER_PAGE, current * PER_PAGE),
+    [ordered, current],
   );
   const activeSlug =
     openSlug && visible.some((c) => c.slug === openSlug) ? openSlug : null;
@@ -1023,7 +1081,7 @@ export function CompanyDirectory({
     <div className="company-sheet-theme">
       <header className="company-page-heading">
         <p className="sheet-eyebrow">Company-wise practice</p>
-        <h1>Company questions</h1>
+        <h1>Companies Directory</h1>
         <p>
           Choose your company. Practice, track your progress, and keep your
           notes in one place.
@@ -1033,12 +1091,46 @@ export function CompanyDirectory({
             <Search size={18} aria-hidden="true" />
             <input
               aria-label="Search companies"
-              placeholder="Search all companies…"
+              placeholder="Search companies by name…"
               type="search"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
             />
           </label>
+          <label className="prep-directory-sort">
+            <span className="sr-only">Sort companies</span>
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="questions">Question count: high to low</option>
+              <option value="name">Company name: A–Z</option>
+              <option value="solved">Most solved</option>
+            </select>
+          </label>
+          <div className="prep-directory-tabs">
+            <button
+              aria-pressed={!practicedOnly}
+              onClick={() => {
+                setPracticedOnly(false);
+                setPage(1);
+              }}
+            >
+              All companies <span>{companies.length}</span>
+            </button>
+            <button
+              aria-pressed={practicedOnly}
+              onClick={() => {
+                setPracticedOnly(true);
+                setPage(1);
+              }}
+            >
+              Your practice
+            </button>
+          </div>
         </div>
       </header>
       <div className="company-directory-header">
@@ -1047,8 +1139,8 @@ export function CompanyDirectory({
         </h2>
         <span role="status" className="company-directory-count">
           {term
-            ? `${matching.length} of ${companies.length} companies`
-            : `${matching.length} companies`}
+            ? `${ordered.length} of ${companies.length} companies`
+            : `${ordered.length} companies`}
         </span>
       </div>
       <div className="company-grid">
@@ -1072,7 +1164,9 @@ export function CompanyDirectory({
       )}
       <nav className="sheet-pagination" aria-label="Company pages">
         <span>
-          Page {current} of {pages}
+          Showing {ordered.length ? (current - 1) * PER_PAGE + 1 : 0}–
+          {Math.min(current * PER_PAGE, ordered.length)} of {ordered.length}{" "}
+          companies · Page {current} of {pages}
         </span>
         <div>
           <button disabled={current <= 1} onClick={() => setPage(current - 1)}>
