@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { SaveMessage } from "@/components/feedback/save-message";
+import { patternColour } from "@/lib/pattern-colour";
 import {
   windowLabels,
   progressLabels,
@@ -203,6 +204,7 @@ function QuestionRow({
                 <Link
                   key={pattern.slug}
                   href={"/patterns?pattern=" + encodeURIComponent(pattern.slug)}
+                  style={{ color: patternColour(pattern.slug) }}
                 >
                   {pattern.name}
                 </Link>

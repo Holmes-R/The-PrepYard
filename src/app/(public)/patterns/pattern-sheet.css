@@ -425,11 +425,37 @@ body:has(.dsa-sheet) > main {
 }
 .dsa-question-main {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 76px 32px;
+  grid-template-columns: 28px minmax(0, 1fr) 150px 76px 32px;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
   min-height: 64px;
+}
+.dsa-question-main.dsa-hide-topics {
+  grid-template-columns: 28px minmax(0, 1fr) 76px 32px;
+}
+/* LeetCode topic column. One glanceable name plus a count; the full list is in
+   the accessible name and on hover, since a narrow column cannot fit it. */
+.dsa-question-topics {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  color: #c9d4e8;
+}
+.dsa-question-topics-primary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dsa-question-topics-more {
+  flex: none;
+  color: #8b93a7;
+  font-variant-numeric: tabular-nums;
+}
+.dsa-question-topics-none {
+  color: #555b6b;
 }
 .dsa-complete {
   background: none;
@@ -492,12 +518,22 @@ body:has(.dsa-sheet) > main {
 }
 /* LeetCode topic tags sit alongside the pattern tags. Spans, not links: topics
    have no filter on this page, so a link would promise navigation that does not
-   exist. Blue tint sets them apart from the neutral pattern chips. */
+   exist. Blue tint sets them apart from the neutral pattern chips.
+   Shown only below the tablet breakpoint, where the grid has no room for the
+   dedicated topic column; hidden on desktop to avoid showing every topic twice. */
 .dsa-topic-tags {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 5px;
   margin-top: 4px;
+}
+@media (max-width: 1000px) {
+  .dsa-question-topics {
+    display: none;
+  }
+  .dsa-topic-tags {
+    display: flex;
+  }
 }
 .dsa-topic-tags > span {
   font-size: 12px;
@@ -761,7 +797,7 @@ body:has(.dsa-sheet) > main {
 }
 .dsa-skeleton-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 90px 34px;
+  grid-template-columns: 28px minmax(0, 1fr) 130px 90px 34px;
   gap: 16px;
   align-items: center;
   min-height: 64px;
@@ -769,6 +805,9 @@ body:has(.dsa-sheet) > main {
   background: #121212;
   border: 1px solid #313131;
   border-radius: 8px;
+}
+.dsa-skeleton-bar {
+  height: 12px;
 }
 .dsa-skeleton-row > span {
   display: block;
@@ -884,4 +923,287 @@ body:has(.dsa-sheet) > main {
 .dsa-segmented input:checked + span {
   background: #ededed;
   color: #171717;
+}
+
+/* Revision dialog. A native <dialog> carries the top layer, focus trap and
+   Escape handling; styling only needs the panel, backdrop and controls. */
+.dsa-dialog {
+  background: #141414;
+  color: #e7e7e7;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 0;
+  width: min(420px, calc(100vw - 32px));
+}
+.dsa-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+.dsa-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #2c2c2c;
+  padding: 12px 8px 0 12px;
+}
+.dsa-dialog-head [role="tablist"] {
+  display: flex;
+  gap: 4px;
+}
+.dsa-dialog-head [role="tab"] {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #8b8b8b;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px 10px;
+  cursor: pointer;
+}
+.dsa-dialog-head [role="tab"].is-active {
+  color: #fff;
+  border-bottom-color: #ff914d;
+}
+.dsa-dialog-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: #8b8b8b;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.dsa-dialog-close:hover {
+  color: #fff;
+}
+.dsa-dialog [role="tabpanel"] {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+.dsa-dialog-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+.dsa-confidence {
+  display: grid;
+  gap: 8px;
+}
+.dsa-confidence-option {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  background: #1b1b1b;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-height: 48px;
+  cursor: pointer;
+  text-align: left;
+}
+.dsa-confidence-option.is-selected {
+  border-color: #e7e7e7;
+  background: #222;
+}
+.dsa-confidence-label {
+  font-size: 15px;
+  font-weight: 700;
+}
+.dsa-confidence-hint {
+  color: #9a9a9a;
+  font-size: 13px;
+}
+.dsa-dialog-submit {
+  background: #ededed;
+  color: #171717;
+  border: 1px solid #ededed;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dsa-dialog-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.dsa-dialog-error {
+  color: #ff7a7a;
+  font-size: 13px;
+  margin: 0;
+}
+.dsa-dialog-muted {
+  color: #8b8b8b;
+  font-size: 13px;
+  margin: 0;
+}
+.dsa-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+.dsa-history-list li {
+  background: #1b1b1b;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.dsa-actions button.dsa-has-revision {
+  color: #ff914d;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dsa-dialog {
+    animation: dsa-dialog-in 0.15s ease-out;
+  }
+  @keyframes dsa-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+    }
+  }
+}
+
+/* Topic and action columns share a grid so labels align with question rows. */
+.dsa-question-main,
+.dsa-column-headings {
+  grid-template-columns: 28px minmax(0, 1fr) minmax(105px, 150px) 76px 96px;
+}
+.dsa-column-headings {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 14px;
+  color: #a3a3a3;
+  font-size: 11px;
+}
+.dsa-question-main.dsa-hide-topics,
+.dsa-column-headings.dsa-hide-topics {
+  grid-template-columns: 28px minmax(0, 1fr) 76px 96px;
+}
+.dsa-question-topics {
+  display: flex;
+  color: #d4d4d4;
+}
+.dsa-question-topics-primary {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.dsa-actions {
+  gap: 4px;
+}
+.dsa-actions button {
+  width: 44px;
+  min-height: 44px;
+  margin: 0;
+}
+.dsa-dialog {
+  margin: auto;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.dsa-confidence-option {
+  flex-wrap: wrap;
+}
+.dsa-dialog button:focus-visible {
+  outline: 2px solid #ff914d;
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .dsa-column-headings {
+    display: none;
+  }
+  .dsa-question-main,
+  .dsa-question-main.dsa-hide-topics {
+    grid-template-columns: 24px minmax(0, 1fr) 96px;
+    gap: 6px 10px;
+  }
+  .dsa-complete {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .dsa-question-title {
+    grid-column: 2 / -1;
+    grid-row: 1;
+  }
+  .dsa-question-topics {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 11px;
+  }
+  .dsa-question-topics::before {
+    content: "Topic:";
+    color: #a3a3a3;
+  }
+  .dsa-difficulty {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .dsa-actions {
+    grid-column: 3;
+    grid-row: 2 / 4;
+    gap: 4px;
+  }
+  .dsa-hide-topics .dsa-difficulty {
+    grid-row: 2;
+  }
+}
+
+/* Dedicated topic, revision and notes columns. */
+.dsa-question-main,
+.dsa-column-headings {
+  grid-template-columns: 28px minmax(0, 1fr) minmax(100px, 150px) 76px 64px 44px;
+}
+.dsa-question-main.dsa-hide-topics,
+.dsa-column-headings.dsa-hide-topics {
+  grid-template-columns: 28px minmax(0, 1fr) 76px 64px 44px;
+}
+.dsa-revision-cell,
+.dsa-notes-cell {
+  justify-content: center;
+}
+.dsa-history-list li {
+  display: grid;
+  gap: 6px;
+}
+.dsa-history-list time {
+  color: #a3a3a3;
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .dsa-question-main,
+  .dsa-question-main.dsa-hide-topics {
+    grid-template-columns: 24px minmax(0, 1fr) 64px 44px;
+  }
+  .dsa-question-title {
+    grid-column: 2 / -1;
+  }
+  .dsa-revision-cell {
+    grid-column: 3;
+    grid-row: 2 / 4;
+    flex-direction: column;
+  }
+  .dsa-notes-cell {
+    grid-column: 4;
+    grid-row: 2 / 4;
+    flex-direction: column;
+  }
+  .dsa-revision-cell::before {
+    content: "Revision";
+    color: #a3a3a3;
+    font-size: 10px;
+  }
+  .dsa-notes-cell::before {
+    content: "Notes";
+    color: #a3a3a3;
+    font-size: 10px;
+  }
 }

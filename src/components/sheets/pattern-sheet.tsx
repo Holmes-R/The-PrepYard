@@ -14,12 +14,15 @@ import {
   Circle,
   CircleCheck,
   Code2,
+  History,
   Search,
   Shuffle,
   StickyNote,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { SaveMessage } from "@/components/feedback/save-message";
+import { RevisionDialog } from "./revision-dialog";
+import { patternColour } from "@/lib/pattern-colour";
 import type {
   Choice,
   PatternFilters,
@@ -59,6 +62,40 @@ function Meter({
     </div>
   );
 }
+// DSA topic column. Shows the assigned topic; the full list is
+// exposed to assistive tech and on hover, since a narrow column cannot fit it.
+function QuestionTopics({ topics }: { topics: Choice[] }) {
+  if (!topics.length)
+    return (
+      <div className="dsa-question-topics" aria-label="No topics assigned">
+        <span className="dsa-question-topics-none" aria-hidden="true">
+          —
+        </span>
+      </div>
+    );
+  const [primary, ...rest] = topics;
+  return (
+    <div
+      className="dsa-question-topics"
+      aria-label={"Topics: " + topics.map((t) => t.name).join(", ")}
+    >
+      <span
+        className="dsa-question-topics-primary"
+        title={topics.map((t) => t.name).join(", ")}
+      >
+        {primary.name}
+      </span>
+      {rest.length > 0 && (
+        <span
+          className="dsa-question-topics-more"
+          title={topics.map((t) => t.name).join(", ")}
+        >
+          +{rest.length}
+        </span>
+      )}
+    </div>
+  );
+}
 function Question({
   question: q,
   filters,
@@ -76,6 +113,7 @@ function Question({
   );
   const [message, setMessage] = useState("");
   const [savedKey, setSavedKey] = useState(0);
+  const [revisionOpen, setRevisionOpen] = useState(false);
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(q.status);
   const solved = optimisticStatus === "solved";
   const hideTopics = filters.hideTopics === "1";
@@ -118,7 +156,9 @@ function Question({
   }
   return (
     <article className="dsa-question">
-      <div className="dsa-question-main">
+      <div
+        className={"dsa-question-main" + (hideTopics ? " dsa-hide-topics" : "")}
+      >
         <button
           className="dsa-complete"
           aria-label={`${solved ? "Mark unsolved" : "Mark solved"}: ${q.title}`}
@@ -147,42 +187,42 @@ function Question({
             </span>
           </a>
           {!hideTopics && (
-            <>
-              <div className="dsa-tags" aria-label="Question patterns">
-                {!q.patterns.length && (
-                  <span title="A verified pattern has not been assigned yet">
-                    Pattern pending
-                  </span>
-                )}
-                {q.patterns.map((p) => (
-                  <Link
-                    key={p.slug}
-                    href={
-                      "/patterns?" + paramsFor(filters, { pattern: p.slug })
-                    }
-                    title={"Filter by " + p.name}
-                    aria-current={
-                      filters.pattern === p.slug ? "true" : undefined
-                    }
-                  >
-                    {p.name}
-                  </Link>
-                ))}
-              </div>
-              {q.topics.length > 0 && (
-                <div className="dsa-topic-tags" aria-label="Question topics">
-                  {q.topics.map((t) => (
-                    <span key={t.slug}>{t.name}</span>
-                  ))}
-                </div>
+            <div className="dsa-tags" aria-label="Question patterns">
+              {!q.patterns.length && (
+                <span title="A verified pattern has not been assigned yet">
+                  Pattern pending
+                </span>
               )}
-            </>
+              {q.patterns.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={"/patterns?" + paramsFor(filters, { pattern: p.slug })}
+                  title={"Filter by " + p.name}
+                  aria-current={filters.pattern === p.slug ? "true" : undefined}
+                  style={{ color: patternColour(p.slug) }}
+                >
+                  {p.name}
+                </Link>
+              ))}
+            </div>
           )}
         </div>
+        {!hideTopics && <QuestionTopics topics={q.topics} />}
         <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
           {q.difficulty ?? "Unrated"}
         </span>
-        <div className="dsa-actions">
+        <div className="dsa-actions dsa-revision-cell">
+          <button
+            aria-label={`Revision: ${q.title}`}
+            title="Add revision"
+            aria-haspopup="dialog"
+            className={q.revision ? "dsa-has-revision" : ""}
+            onClick={() => setRevisionOpen(true)}
+          >
+            <History size={22} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="dsa-actions dsa-notes-cell">
           <button
             aria-label={`Notes: ${q.title}`}
             title="Private notes"
@@ -239,6 +279,18 @@ function Question({
       )}
       {savedKey > 0 && !message && (
         <SaveMessage key={savedKey} className="dsa-save-message" />
+      )}
+      {revisionOpen && (
+        <RevisionDialog
+          questionId={q.id}
+          questionTitle={q.title}
+          open={revisionOpen}
+          onClose={() => setRevisionOpen(false)}
+          onDone={async () => {
+            setSavedKey((key) => key + 1);
+            await onSaved();
+          }}
+        />
       )}
     </article>
   );
@@ -335,6 +387,20 @@ function Topic({
           className="dsa-topic-body dsa-enter"
           aria-busy={loading}
         >
+          <div
+            className={
+              "dsa-column-headings" +
+              (filters.hideTopics === "1" ? " dsa-hide-topics" : "")
+            }
+            aria-hidden="true"
+          >
+            <span />
+            <span>Question</span>
+            {filters.hideTopics !== "1" && <span>Topic</span>}
+            <span>Difficulty</span>
+            <span>Revision</span>
+            <span>Notes</span>
+          </div>
           {loading && !data && (
             <div
               role="status"
@@ -349,6 +415,7 @@ function Topic({
                     <span />
                     <span />
                   </span>
+                  <span className="dsa-skeleton-bar" />
                   <span className="dsa-skeleton-chip" />
                   <span className="dsa-skeleton-dot" />
                 </div>

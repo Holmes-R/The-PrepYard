@@ -81,9 +81,9 @@ test("SQL binds filters, scopes student state and clamps pagination", async () =
   // Note content no longer travels with the list; only whether one exists.
   assert.match(calls[1].sql, /has_note/);
   assert.ok(!/as note/.test(calls[1].sql));
-  // Each row carries its LeetCode topic tags alongside the pattern tags.
-  assert.match(calls[1].sql, /from public.question_topics/);
-  assert.match(calls[1].sql, /join public\.topics t on/);
+  // Each row carries its populated DSA topic alongside the pattern tags.
+  assert.match(calls[1].sql, /join public.question_dsa_topics/);
+  assert.match(calls[1].sql, /join public\.dsa_topics t on/);
 });
 test("questionNote returns content for the owner and nothing otherwise", async () => {
   const seen = [];

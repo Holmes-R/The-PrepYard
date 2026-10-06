@@ -67,9 +67,16 @@ with `aria-expanded` and `aria-controls`.
 The sheet spans the full application width rather than the narrow reading column, so
 the filter panel has room for the topic chips without wrapping on a laptop.
 
-Each row shows completion, the problem title linking straight to the platform,
-optional pattern tags, the platform, difficulty and a notes control. The problem
-title is the primary affordance and carries an external-link indicator.
+Each row shows completion, the problem title linking straight to the platform, a
+LeetCode topic column beside difficulty, optional pattern tags, the platform,
+difficulty and notes plus revision controls. The problem title is the primary
+affordance and carries an external-link indicator.
+
+The topic column shows the primary LeetCode topic with a count for the rest; the
+full list is in the accessible name and on hover, since a narrow column cannot fit
+it. Below the tablet breakpoint the column hides and the full tag list returns, so
+touch users never depend on hover. "Hide topics" removes the column (and the
+fallback tags) and the grid collapses back to four tracks.
 
 Frequency is no longer shown. It was a company-reporting percentage, which is a
 different question from whether a DSA topic has been practised, and it required a
@@ -124,6 +131,9 @@ learning organization, not a claim that a question has only one possible solutio
   overview counts, deterministic ordering and pagination.
 - `src/components/sheets/pattern-sheet.tsx`: independent responsive sheet with
   accessible accordion buttons, progress bars, filters and save feedback.
+- `src/components/sheets/revision-dialog.tsx`: confidence rating plus revision
+  history in a native dialog; per-pattern colours live in
+  `src/lib/pattern-colour.ts` so both sheets agree.
 - `/api/patterns`: authenticated, private/no-store lazy question loading.
 - Existing progress action: validates values and question identity, then saves
   student-owned data; invalidates both Companies and Patterns.
@@ -174,4 +184,16 @@ isolated loopback test database described above.
 
 ## Question row controls
 
-Question rows offer completion and private notes. Revision and bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show "Pattern pending". The per-row frequency column was removed; company rows retain their selected-window percentage.
+Question rows offer completion, private notes and revision. Bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show "Pattern pending". The per-row frequency column was removed; company rows retain their selected-window percentage.
+
+The revision button opens a native `<dialog>` with Add Revision and History tabs.
+Add Revision asks for a confidence rating — Struggled, Tough, Got it, Nailed it,
+stored as `user_question_state.confidence` 1–4 — and Mark as Revised stays disabled
+until one is chosen. Saving also schedules tomorrow's reminder
+(`next_revision_at`) and appends a `practice_events` row of type `reviewed`, all in
+one transaction; this action only inserts history, and owner access policies keep it private.
+The History tab lists those entries newest-first and lazy-loads on selection. Each new history entry stores its selected confidence in `practice_events.confidence`, added by migration `20261006001000_revision_confidence.sql`. Older entries remain null and display "Rating not recorded"; their ratings cannot be recovered from the latest question state.
+
+The Topic column sits beside Difficulty on desktop. On narrow screens it wraps below the question title, keeping both revision and notes buttons reachable. Hiding topics removes that column. Confidence selection supports arrow keys; the dialog supports Escape, focus trapping, loading states and history retry.
+
+The Topic column uses the populated `question_dsa_topics` / `dsa_topics` classification, not the optional imported `question_topics` table. Revision and Notes have separate columns. History displays the rating selected for each revision together with its date and time.
