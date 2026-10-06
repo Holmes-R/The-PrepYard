@@ -210,8 +210,19 @@ function QuestionRow({
                 </Link>
               ))
             ) : (
-              <span title="A verified pattern has not been assigned yet">
-                Pattern pending
+              <span
+                title={
+                  question.topics[0]
+                    ? "Topic: " + question.topics[0].name
+                    : "A verified pattern has not been assigned yet"
+                }
+                style={
+                  question.topics[0]
+                    ? { color: patternColour(question.topics[0].slug) }
+                    : undefined
+                }
+              >
+                {question.topics[0]?.name ?? "Pattern pending"}
               </span>
             )}
           </div>

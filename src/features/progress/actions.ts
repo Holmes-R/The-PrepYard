@@ -57,6 +57,7 @@ export async function saveQuestionProgress(
     });
     revalidatePath("/companies", "layout");
     revalidatePath("/patterns", "layout");
+    if (kind === "note") revalidatePath("/notes");
     return { ok: true, message: "Saved" };
   } catch {
     return { ok: false, message: "Could not save. Please try again." };
@@ -136,5 +137,30 @@ export async function getRevisionHistory(questionId: string): Promise<{
     };
   } catch {
     return { ok: false, message: "Could not load history.", entries: [] };
+  }
+}
+// Explicit delete for the Notes page. Saving an empty note already removed the
+// row from the sheet editors; this is the same owner-scoped delete with a
+// message that says so.
+export async function deleteNote(
+  questionId: string,
+): Promise<{ ok: boolean; message: string }> {
+  if (!validStudentId(questionId))
+    return { ok: false, message: "Invalid question." };
+  try {
+    await withStudentDatabase(async (client) => {
+      // Missing note or someone else's: zero rows, RLS scopes the owner. No
+      // pre-check needed; a no-op delete is the safe outcome either way.
+      await client.query(
+        "delete from public.notes where user_id=private.student_id() and question_id=$1",
+        [questionId],
+      );
+    });
+    revalidatePath("/companies", "layout");
+    revalidatePath("/patterns", "layout");
+    revalidatePath("/notes");
+    return { ok: true, message: "Note deleted" };
+  } catch {
+    return { ok: false, message: "Could not delete. Please try again." };
   }
 }

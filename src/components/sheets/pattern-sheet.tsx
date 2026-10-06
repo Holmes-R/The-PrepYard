@@ -62,36 +62,18 @@ function Meter({
     </div>
   );
 }
-// DSA topic column. Shows the assigned topic; the full list is
-// exposed to assistive tech and on hover, since a narrow column cannot fit it.
+// Display platform topic tags separately from curated pattern tags.
 function QuestionTopics({ topics }: { topics: Choice[] }) {
-  if (!topics.length)
-    return (
-      <div className="dsa-question-topics" aria-label="No topics assigned">
-        <span className="dsa-question-topics-none" aria-hidden="true">
-          —
-        </span>
-      </div>
-    );
-  const [primary, ...rest] = topics;
   return (
-    <div
-      className="dsa-question-topics"
-      aria-label={"Topics: " + topics.map((t) => t.name).join(", ")}
-    >
-      <span
-        className="dsa-question-topics-primary"
-        title={topics.map((t) => t.name).join(", ")}
-      >
-        {primary.name}
-      </span>
-      {rest.length > 0 && (
-        <span
-          className="dsa-question-topics-more"
-          title={topics.map((t) => t.name).join(", ")}
-        >
-          +{rest.length}
-        </span>
+    <div className="dsa-question-topics" aria-label="Topics">
+      {topics.length ? (
+        topics.map((topic) => (
+          <span key={topic.slug} className="dsa-platform-topic">
+            {topic.name}
+          </span>
+        ))
+      ) : (
+        <span className="dsa-topics-unavailable">Not available</span>
       )}
     </div>
   );
@@ -189,8 +171,19 @@ function Question({
           {!hideTopics && (
             <div className="dsa-tags" aria-label="Question patterns">
               {!q.patterns.length && (
-                <span title="A verified pattern has not been assigned yet">
-                  Pattern pending
+                <span
+                  title={
+                    q.topics[0]
+                      ? "Topic: " + q.topics[0].name
+                      : "A verified pattern has not been assigned yet"
+                  }
+                  style={
+                    q.topics[0]
+                      ? { color: patternColour(q.topics[0].slug) }
+                      : undefined
+                  }
+                >
+                  {q.topics[0]?.name ?? "Pattern pending"}
                 </span>
               )}
               {q.patterns.map((p) => (
@@ -396,7 +389,7 @@ function Topic({
           >
             <span />
             <span>Question</span>
-            {filters.hideTopics !== "1" && <span>Topic</span>}
+            {filters.hideTopics !== "1" && <span>Topics</span>}
             <span>Difficulty</span>
             <span>Revision</span>
             <span>Notes</span>

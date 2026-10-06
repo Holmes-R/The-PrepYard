@@ -2,21 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, StickyNote } from "lucide-react";
 import { withStudentDatabase } from "@/lib/database/server";
+import { studentNotes } from "@/features/notes/queries.mjs";
+import { DeleteNoteButton } from "@/components/notes/delete-note-button";
 export const metadata: Metadata = { title: "Notes" };
-export default async function Page() {
-  const notes = await withStudentDatabase(
-    async (client) =>
-      (
-        await client.query<{
-          id: string;
-          title: string;
-          canonical_url: string;
-          content: string;
-        }>(
-          `select q.id,q.title,q.canonical_url,n.content from public.notes n join public.questions q on q.id=n.question_id where n.user_id=private.student_id() and length(btrim(n.content))>0 order by lower(q.title),q.id limit 100`,
-        )
-      ).rows,
-  );
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const requested = Array.isArray(params.page) ? params.page[0] : params.page;
+  const {
+    rows: notes,
+    total,
+    page,
+    pages,
+  } = await withStudentDatabase((client) => studentNotes(client, requested));
   return (
     <>
       <header className="launch-page-heading">
@@ -26,14 +27,29 @@ export default async function Page() {
           Your approaches, edge cases, and reminders. Add or edit a note beside
           any question in a company or practice sheet.
         </p>
+        {total > 0 && (
+          <p className="text-sm">
+            {total} {total === 1 ? "saved note" : "saved notes"} · Recently
+            updated first
+          </p>
+        )}
       </header>
       {notes.length ? (
         <div className="launch-notes-grid">
           {notes.map((n) => (
             <article className="launch-note-card" key={n.id}>
-              <StickyNote size={19} />
-              <h2>{n.title}</h2>
-              <p>{n.content}</p>
+              <header className="note-card-heading">
+                <StickyNote size={17} aria-hidden="true" />
+                <h2>{n.title}</h2>
+              </header>
+              <details className="note-disclosure">
+                <summary>
+                  <span className="note-view-label">View note</span>
+                  <span className="note-hide-label">Hide note</span>
+                  <span className="sr-only"> for {n.title}</span>
+                </summary>
+                <p>{n.content}</p>
+              </details>
               <div>
                 <a
                   href={n.canonical_url}
@@ -45,6 +61,7 @@ export default async function Page() {
                 <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
                   Find in practice
                 </Link>
+                <DeleteNoteButton questionId={n.id} title={n.title} />
               </div>
             </article>
           ))}
@@ -62,11 +79,31 @@ export default async function Page() {
           </Link>
         </section>
       )}
-      {notes.length === 100 && (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Showing the first 100 notes in title order. All your notes remain
-          available beside their questions.
-        </p>
+      {pages > 1 && (
+        <nav
+          aria-label="Notes pages"
+          className="mt-8 flex flex-wrap items-center justify-center gap-5"
+        >
+          {page > 1 && (
+            <Link
+              className="launch-secondary"
+              href={"/notes?page=" + (page - 1)}
+            >
+              Previous
+            </Link>
+          )}
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {pages}
+          </span>
+          {page < pages && (
+            <Link
+              className="launch-secondary"
+              href={"/notes?page=" + (page + 1)}
+            >
+              Next
+            </Link>
+          )}
+        </nav>
       )}
     </>
   );

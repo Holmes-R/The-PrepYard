@@ -1207,3 +1207,31 @@ body:has(.dsa-sheet) > main {
     font-size: 10px;
   }
 }
+
+/* Platform topic chips mirror the reference Topics section. */
+.dsa-question-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dsa-platform-topic {
+  display: inline-block;
+  background: #292929;
+  color: #e5e5e5;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.dsa-topics-unavailable {
+  color: #a3a3a3;
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .dsa-question-topics::before {
+    content: "Topics:";
+    width: 100%;
+  }
+}

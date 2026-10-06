@@ -184,7 +184,7 @@ isolated loopback test database described above.
 
 ## Question row controls
 
-Question rows offer completion, private notes and revision. Bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification show "Pattern pending". The per-row frequency column was removed; company rows retain their selected-window percentage.
+Question rows offer completion, private notes and revision. Bookmark controls are removed. Each row shows verified pattern tags; questions awaiting classification display their first platform topic as a fallback tag. If neither a pattern nor a platform topic exists, they show "Pattern pending". The per-row frequency column was removed; company rows retain their selected-window percentage.
 
 The revision button opens a native `<dialog>` with Add Revision and History tabs.
 Add Revision asks for a confidence rating — Struggled, Tough, Got it, Nailed it,
@@ -196,4 +196,8 @@ The History tab lists those entries newest-first and lazy-loads on selection. Ea
 
 The Topic column sits beside Difficulty on desktop. On narrow screens it wraps below the question title, keeping both revision and notes buttons reachable. Hiding topics removes that column. Confidence selection supports arrow keys; the dialog supports Escape, focus trapping, loading states and history retry.
 
-The Topic column uses the populated `question_dsa_topics` / `dsa_topics` classification, not the optional imported `question_topics` table. Revision and Notes have separate columns. History displays the rating selected for each revision together with its date and time.
+DSA section headings use `question_dsa_topics`; the Topics column uses published platform metadata in `question_topics`. Revision and Notes have separate columns. History displays the rating selected for each revision together with its date and time.
+
+The Topics column now displays all available platform topic tags as chips (for example, Two Sum: Array, Hash Table), separately from the DSA group heading and curated pattern tags. Publish the reviewed topic snapshot with `pnpm topics:fetch -- --publish` and `IMPORT_DATABASE_URL`. Questions without platform metadata show "Not available" rather than an inferred platform tag.
+
+The topic fallback applies to both pattern and company question rows. It is a display-only label; it does not create a reviewed pattern assignment or link to an unrelated pattern filter.

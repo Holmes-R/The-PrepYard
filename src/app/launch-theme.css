@@ -958,3 +958,143 @@ body > footer {
     border-color: #353535;
   }
 }
+
+/* Compact notebook cards keep the saved message collapsed until requested. */
+.launch-notes-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.launch-note-card {
+  padding: 16px;
+  border-radius: 10px;
+}
+.note-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.note-card-heading svg {
+  flex: none;
+  color: #ff914d;
+}
+.launch-note-card h2 {
+  font-size: 15px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.launch-note-card > div {
+  gap: 14px;
+  margin-top: 8px;
+}
+.note-disclosure {
+  margin-top: 8px;
+}
+.note-disclosure summary {
+  width: fit-content;
+  min-height: 36px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: #ffb47f;
+  font-size: 12px;
+}
+.note-disclosure summary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.note-hide-label {
+  display: none;
+}
+.note-disclosure[open] .note-view-label {
+  display: none;
+}
+.note-disclosure[open] .note-hide-label {
+  display: inline;
+}
+.note-disclosure p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 260px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #d4d4d4;
+  margin: 4px 0 12px;
+}
+/* Inline two-step delete in the card footer. The wrapper spans the flex gap so
+   the confirm buttons stay grouped with the links they sit beside. */
+.note-delete-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+button.note-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  min-height: 30px;
+  color: #d97a7a;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button.note-delete:hover {
+  color: #ff9d9d;
+}
+.note-delete-confirm {
+  color: #ffb4b4;
+  font-size: 11px;
+}
+.note-delete-yes {
+  background: #c33f3f;
+  border: 1px solid #c33f3f;
+  border-radius: 6px;
+  padding: 6px 12px;
+  min-height: 30px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.note-delete-yes:hover {
+  background: #d64545;
+}
+.note-delete-cancel {
+  background: none;
+  border: 1px solid #ffffff2e;
+  border-radius: 6px;
+  padding: 6px 12px;
+  min-height: 30px;
+  color: #dfdfdf;
+  font-size: 11px;
+  cursor: pointer;
+}
+.note-delete-wrap button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.note-delete-error {
+  color: #ff7a7a;
+  font-size: 11px;
+  width: 100%;
+}
+.note-delete-wrap :is(button, a):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (max-width: 1000px) {
+  .launch-notes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .launch-notes-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
