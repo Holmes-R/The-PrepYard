@@ -12,6 +12,8 @@ export type PatternFilters = {
   page: number;
 };
 export type PatternQuestion = {
+  reported_frequency?: string | number;
+  company_count?: number;
   id: string;
   title: string;
   canonical_url: string;

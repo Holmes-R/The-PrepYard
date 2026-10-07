@@ -6,7 +6,7 @@ import {
 } from "../../src/features/patterns/queries.mjs";
 import { questionNote } from "../../src/features/catalogue/queries.mjs";
 import { topicFor, topics } from "../../scripts/patterns/taxonomy.mjs";
-import { readFile } from "node:fs/promises";
+
 test("filters bound input and reject unsupported state", () => {
   const f = patternFilters({
     q: "x".repeat(1000),
@@ -23,17 +23,22 @@ test("filters bound input and reject unsupported state", () => {
   assert.equal(f.progress, "");
   assert.equal(f.sort, "recommended");
 });
-test("reference has 180 memberships and 178 canonical questions", async () => {
-  const fixture = JSON.parse(
-    await readFile(
-      new URL("../../scripts/patterns/kushal-patterns.json", import.meta.url),
-    ),
-  );
-  assert.equal(fixture.groups.flatMap((g) => g.questions).length, 180);
-  assert.equal(new Set(fixture.groups.flatMap((g) => g.questions)).size, 178);
+test("retired third-party collection links are not accepted", () => {
+  for (const collection of [
+    "striver-sde",
+    "striver-a2z",
+    "neetcode-150",
+    "blind-75",
+    "kushal-essential-patterns",
+    "prepyard-foundations",
+    "prepyard-sequence-strategies",
+    "prepyard-structure-traversal",
+    "prepyard-search-and-dp",
+  ])
+    assert.equal(patternFilters({ collection }).collection, "");
   assert.equal(
-    fixture.groups.find((g) => g.name === "Prefix Sum").questions.length,
-    5,
+    patternFilters({ collection: "interview-launchpad" }).collection,
+    "interview-launchpad",
   );
 });
 test("DSA headings stay separate from patterns and topic classification is deterministic", () => {
@@ -64,7 +69,7 @@ test("SQL binds filters, scopes student state and clamps pagination", async () =
     patternFilters({
       q: "x' OR 1=1--",
       pattern: "prefix-sum",
-      collection: "kushal-essential-patterns",
+      collection: "interview-launchpad",
       progress: "bookmarked",
       page: "99999",
     }),
@@ -159,9 +164,11 @@ test("every statement binds exactly as many parameters as it references", async 
   const placeholderCount = (sql) =>
     new Set([...sql.matchAll(/\$(\d+)/g)].map((m) => Number(m[1]))).size;
   for (const params of [
-    { sort: "random", collection: "neetcode-150" },
+    { sort: "random", collection: "dsa-deep-dive" },
+    { collection: "interview-hotlist", topic: "arrays", difficulty: "easy" },
+    { sort: "random", collection: "interview-hotlist" },
     { sort: "random" },
-    { collection: "neetcode-150" },
+    { collection: "dsa-deep-dive" },
     { q: "graph", difficulty: "hard", progress: "bookmarked" },
   ]) {
     const calls = [];

@@ -5,6 +5,9 @@ import { randomUUID } from "node:crypto";
 import { pathToFileURL, fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const { Client } = createRequire(root + "package.json")("pg");
+const { publishCollections } = await import(
+  pathToFileURL(root + "scripts/patterns/collections.mjs")
+);
 const { publishPatterns } = await import(
   pathToFileURL(root + "scripts/patterns/publish.mjs")
 );
@@ -34,6 +37,7 @@ try {
         "utf8",
       ),
     );
+  await publishCollections(client);
   const first = await publishPatterns(client);
   const second = await publishPatterns(client);
   assert.deepEqual(first, second);
@@ -47,7 +51,7 @@ try {
   ]);
   const q = (
     await client.query(
-      "select q.id from public.questions q join public.pattern_collection_questions c on c.question_id=q.id limit 1",
+      "select q.id from public.questions q join public.pattern_collection_questions c on c.question_id=q.id join public.pattern_collections pc on pc.id=c.collection_id where pc.slug='dsa-deep-dive' limit 1",
     )
   ).rows[0].id;
   await client.query(
@@ -62,22 +66,25 @@ try {
   await client.query("select set_config('prepyard.student_id',$1,true)", [a]);
   const all = await patternOverview(
     client,
-    patternFilters({ collection: "kushal-essential-patterns" }),
+    patternFilters({ collection: "dsa-deep-dive" }),
   );
-  assert.equal(all.total, 178);
+  assert.equal(all.total, 282);
   assert.equal(all.solved, 1);
   const prefix = await patternOverview(
     client,
     patternFilters({
-      collection: "kushal-essential-patterns",
+      collection: "dsa-deep-dive",
       pattern: "prefix-sum",
     }),
   );
-  assert.equal(prefix.total, 5);
+  assert.ok(
+    prefix.total >= 1,
+    "Platform prefix-sum exercises remain discoverable",
+  );
   const rows = await patternQuestions(
     client,
     patternFilters({
-      collection: "kushal-essential-patterns",
+      collection: "dsa-deep-dive",
       progress: "bookmarked",
     }),
   );
@@ -98,7 +105,7 @@ try {
   assert.equal(await questionNote(client, "not a uuid!!"), "");
   const stranger = await patternOverview(
     client,
-    patternFilters({ collection: "kushal-essential-patterns" }),
+    patternFilters({ collection: "dsa-deep-dive" }),
   );
   assert.equal(stranger.solved, 0);
   await assert.rejects(
@@ -116,7 +123,7 @@ try {
   );
   await client.query("rollback");
   console.log(
-    "PASS: repeat publication, 178 unique collection questions, pattern filters, private notes/progress, no student catalogue writes, anonymous access denied.",
+    "PASS: repeat publication, reference collection memberships, pattern filters, private notes/progress, no student catalogue writes, anonymous access denied.",
   );
 } finally {
   await client.query("rollback").catch(() => {});

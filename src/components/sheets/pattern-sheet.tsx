@@ -152,6 +152,16 @@ function Question({
           onClick={() => save("solved", !solved)}
         />
         <div className="dsa-question-title">
+          {q.reported_frequency != null && (
+            <span
+              className="dsa-frequency"
+              title="Highest reported all-time company percentage; not an interview probability"
+            >
+              Peak frequency {Number(q.reported_frequency).toFixed(1)}% ·{" "}
+              {q.company_count}{" "}
+              {q.company_count === 1 ? "company" : "companies"}
+            </span>
+          )}
           <a
             className="dsa-problem-link"
             href={q.canonical_url}
@@ -621,12 +631,12 @@ export function PatternSheet({
             <h2>
               {mode === "patterns"
                 ? "Algorithm patterns"
-                : "Curated practice sheets"}
+                : "PrepYard practice tracks"}
             </h2>
             <p>
               {mode === "patterns"
                 ? "Choose a pattern to focus your practice."
-                : "Your question progress follows you across every collection."}
+                : "Focused practice collections. Your progress follows you across every track."}
             </p>
           </header>
           <div>
@@ -805,6 +815,12 @@ export function PatternSheet({
           </Link>
         </div>
       </form>
+      {filters.collection === "interview-hotlist" && (
+        <p className="dsa-description">
+          Up to 20 questions per topic, ranked by peak reported company
+          frequency. Filters narrow this shortlist.
+        </p>
+      )}
       <div className="dsa-results-heading">
         <h2>Explore your topics</h2>
         <span>{overview.total.toLocaleString()} questions</span>

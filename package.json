@@ -27,7 +27,11 @@
     "test:patterns:database": "node tests/patterns/database.mjs",
     "collections:publish": "node scripts/patterns/collections.mjs",
     "test:collections:database": "node tests/patterns/collections-database.mjs",
-    "logos:publish-reviewed": "node scripts/logos/publish-reviewed.mjs"
+    "logos:publish-reviewed": "node scripts/logos/publish-reviewed.mjs",
+    "collections:sql": "node scripts/patterns/sql-editor.mjs",
+    "test:publication:database": "node tests/patterns/publication-sql-database.mjs",
+    "test:hotlist:database": "node tests/patterns/hotlist-database.mjs",
+    "test:difficulty:database": "node tests/catalogue/difficulty-counts-database.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

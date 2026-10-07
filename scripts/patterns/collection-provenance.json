@@ -1,0 +1,31 @@
+[
+  {
+    "slug": "interview-launchpad",
+    "referenceUrl": "https://codolio.com/question-tracker/sheet/manasi-deshmane-dsa-sheet?category=all",
+    "originalName": "Manasi Deshmane’s DSA Sheet",
+    "sourceRows": 70,
+    "uniqueQuestions": 66,
+    "duplicateMappingsRemoved": [
+      "67db1be6cb0a3908228c6822",
+      "67db1be6cb0a3908228c682a",
+      "67db1c6bcb0a3908228c68e9",
+      "67db1d00cb0a3908228c694f"
+    ],
+    "sha256": "4e6cb90389ea252e0fcbbce02be1fce0bb1b0a6aee97964da858f9012233c2b0"
+  },
+  {
+    "slug": "dsa-deep-dive",
+    "referenceUrl": "https://codolio.com/question-tracker/sheet/arsh-dsa-sheet?category=all",
+    "originalName": "Arsh DSA Sheet",
+    "sourceRows": 287,
+    "uniqueQuestions": 282,
+    "duplicateMappingsRemoved": [
+      "66e9adfb8a15c1adcdfc58ef",
+      "66e9adfc8a15c1adcdfc59b5",
+      "66e9adfd8a15c1adcdfc5b1c",
+      "66e9adfe8a15c1adcdfc5cf1",
+      "66e9adfe8a15c1adcdfc5d71"
+    ],
+    "sha256": "5ac5bb77832f9dd0998f66fb5c09692dc231127e2db29607091e2f937241a492"
+  }
+]

@@ -29,14 +29,48 @@ import {
   filtersToParams,
   type Sheet,
   type Filters,
+  type DifficultyCounts,
 } from "@/features/catalogue/queries.mjs";
-export type CompanyItem = {
+export type CompanyItem = DifficultyCounts & {
   slug: string;
   name: string;
   has_logo?: boolean;
   question_count: number;
   solved_count: number;
 };
+function DifficultyDot({ difficulty }: { difficulty: string | null }) {
+  const kind = ["easy", "medium", "hard"].includes(difficulty ?? "")
+    ? difficulty
+    : "unknown";
+  return (
+    <span className={"company-difficulty-dot " + kind} aria-hidden="true" />
+  );
+}
+function DifficultyTotals({ counts }: { counts: DifficultyCounts }) {
+  return (
+    <div
+      className="company-difficulty-totals"
+      role="list"
+      aria-label="Question difficulty totals"
+    >
+      {(["easy", "medium", "hard"] as const).map((kind) => {
+        const label = kind[0].toUpperCase() + kind.slice(1);
+        const count = counts[(kind + "_count") as keyof DifficultyCounts];
+        return (
+          <span
+            key={kind}
+            role="listitem"
+            title={label + ": " + count}
+            aria-label={count + " " + label + " questions"}
+          >
+            <DifficultyDot difficulty={kind} />
+            <span>{count.toLocaleString()}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 const LOGO_COLOURS = [
   "#e5322d",
   "#0052cc",
@@ -251,11 +285,17 @@ function QuestionRow({
             )}
           </div>
         </div>
-        <span className={"difficulty difficulty-" + question.difficulty}>
-          {question.difficulty
-            ? question.difficulty[0].toUpperCase() +
-              question.difficulty.slice(1)
-            : "Unknown"}
+        <span
+          className="difficulty company-difficulty-indicator"
+          title={
+            question.difficulty
+              ? question.difficulty[0].toUpperCase() +
+                question.difficulty.slice(1)
+              : "Unrated"
+          }
+        >
+          <DifficultyDot difficulty={question.difficulty} />
+          <span className="sr-only">{question.difficulty ?? "Unrated"}</span>
         </span>
         <div className="company-question-topics" aria-label="Topics">
           {question.topics.length ? (
@@ -815,6 +855,7 @@ function CompanyPanel({
           <ArrowUpRight size={17} aria-hidden="true" />
         </a>
       </div>
+      <DifficultyTotals counts={sheet ?? company} />
       {!open && (
         <div className="prep-company-summary">
           <div>

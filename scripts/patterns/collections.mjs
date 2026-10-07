@@ -3,10 +3,16 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { topics, topicFor, generalPatterns, patternSlug } from "./taxonomy.mjs";
 
+import {
+  staticCollectionSlugs as prepYardCollectionSlugs,
+  prepYardCollections,
+} from "../../src/features/patterns/collections.mjs";
 export function validateCollections(manifest) {
   if (
     manifest.version !== 1 ||
+    manifest.curation?.origin !== "referenced" ||
     !Array.isArray(manifest.collections) ||
+    manifest.collections.length !== prepYardCollectionSlugs.length ||
     !manifest.collections.length
   )
     throw new Error("Invalid collection manifest");
@@ -15,9 +21,15 @@ export function validateCollections(manifest) {
     if (
       !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(sheet.slug) ||
       slugs.has(sheet.slug) ||
+      !prepYardCollectionSlugs.includes(sheet.slug) ||
+      typeof sheet.description !== "string" ||
+      !sheet.description.trim() ||
       typeof sheet.name !== "string" ||
       !sheet.name.trim() ||
-      sheet.name.length > 200
+      sheet.name.length > 200 ||
+      !/^https:\/\/codolio\.com\/question-tracker\/sheet\/[a-z0-9-]+\?category=all$/.test(
+        sheet.referenceUrl ?? "",
+      )
     )
       throw new Error("Invalid collection identity");
     slugs.add(sheet.slug);
@@ -31,12 +43,12 @@ export function validateCollections(manifest) {
       urls = new Set();
     for (const q of sheet.questions) {
       const url = new URL(q.url);
-      const expected =
-        q.platform === "leetcode"
-          ? "leetcode.com"
-          : q.platform === "takeuforward"
-            ? "takeuforward.org"
-            : null;
+      const expected = {
+        leetcode: "leetcode.com",
+        takeuforward: "takeuforward.org",
+        geeksforgeeks: "www.geeksforgeeks.org",
+        spoj: "www.spoj.com",
+      }[q.platform];
       if (
         !expected ||
         url.protocol !== "https:" ||
@@ -50,12 +62,17 @@ export function validateCollections(manifest) {
         throw new Error("Invalid platform URL");
       if (
         !url.pathname.startsWith(
-          q.platform === "leetcode" ? "/problems/" : "/practice/dsa/",
+          q.platform === "leetcode" || q.platform === "spoj"
+            ? "/problems/"
+            : q.platform === "takeuforward"
+              ? "/practice/dsa/"
+              : "/",
         )
       )
         throw new Error("Invalid problem path");
       if (
-        !/^\d+$/.test(q.externalId) ||
+        !/^[a-zA-Z0-9_-]{1,200}$/.test(q.externalId) ||
+        (q.platform === "leetcode" && !/^\d+$/.test(q.externalId)) ||
         !q.title?.trim() ||
         q.title.length > 500 ||
         ![null, "easy", "medium", "hard"].includes(q.difficulty) ||
@@ -69,6 +86,17 @@ export function validateCollections(manifest) {
         )
       )
         throw new Error("Invalid pattern");
+      if (
+        !Array.isArray(q.topics) ||
+        q.topics.some(
+          (tag) =>
+            !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(tag.slug) ||
+            typeof tag.name !== "string" ||
+            !tag.name.trim() ||
+            tag.name.length > 100,
+        )
+      )
+        throw new Error("Invalid topic tags");
       const key = q.platform + ":" + q.externalId;
       if (ids.has(key) || urls.has(q.url))
         throw new Error("Duplicate collection question");
@@ -96,6 +124,34 @@ export async function publishCollections(client, input) {
     await client.query(
       "select pg_advisory_xact_lock(hashtext('prepyard-patterns-v1'))",
     );
+    // Only retire sheet membership and imported editorial mappings. Student data
+    // references canonical questions, which are never deleted here.
+    await client.query(
+      "delete from public.pattern_collections where slug=any($1::text[])",
+      [
+        [
+          "striver-sde",
+          "striver-a2z",
+          "neetcode-150",
+          "blind-75",
+          "kushal-essential-patterns",
+          "prepyard-foundations",
+          "prepyard-sequence-strategies",
+          "prepyard-structure-traversal",
+          "prepyard-search-and-dp",
+        ],
+      ],
+    );
+    await client.query(
+      "delete from public.question_patterns where mapping_source=any($1::text[])",
+      [
+        [
+          "prepyard-patterns-v1",
+          "prepyard-collections-v1",
+          "prepyard-editorial-v1",
+        ],
+      ],
+    );
     const topicIds = new Map();
     for (const [position, [slug, name]] of topics.entries()) {
       const row = (
@@ -110,6 +166,8 @@ export async function publishCollections(client, input) {
     for (const [slug, name, base] of [
       ["leetcode", "LeetCode", "https://leetcode.com"],
       ["takeuforward", "takeUforward", "https://takeuforward.org"],
+      ["geeksforgeeks", "GeeksforGeeks", "https://www.geeksforgeeks.org"],
+      ["spoj", "SPOJ", "https://www.spoj.com"],
     ]) {
       const row = (
         await client.query(
@@ -142,6 +200,11 @@ export async function publishCollections(client, input) {
       ),
     );
     const summaries = [];
+    for (const c of prepYardCollections.filter((c) => c.kind === "dynamic"))
+      await client.query(
+        "insert into public.pattern_collections(slug,name) values($1,$2) on conflict(slug) do update set name=excluded.name",
+        [c.slug, c.name],
+      );
     for (const sheet of sheets) {
       const collection = (
         await client.query(
@@ -153,7 +216,11 @@ export async function publishCollections(client, input) {
       for (const [position, q] of sheet.questions.entries()) {
         const platformId = platformIds.get(q.platform);
         const key = platformId + ":" + q.externalId;
-        let row = byIdentity.get(key) ?? byUrl.get(normal(q.url));
+        const identity = byIdentity.get(key),
+          urlIdentity = byUrl.get(normal(q.url));
+        if (identity && urlIdentity && identity.id !== urlIdentity.id)
+          throw new Error("Conflicting question identity");
+        let row = identity ?? urlIdentity;
         if (
           row &&
           (row.platform_id !== platformId ||
@@ -184,6 +251,13 @@ export async function publishCollections(client, input) {
             "insert into public.question_dsa_topics(question_id,topic_id) values($1,$2) on conflict(question_id) do nothing",
             [row.id, topicIds.get(topic)],
           );
+          assigned.add(row.id);
+        }
+        {
+          const tags =
+            q.platform === "leetcode"
+              ? (catalogue[q.externalId]?.topics ?? []).map((t) => t.slug)
+              : [];
           const names = [
             ...new Set([
               ...(q.patterns ?? []),
@@ -205,11 +279,22 @@ export async function publishCollections(client, input) {
               patterns.set(slug, id);
             }
             await client.query(
-              "insert into public.question_patterns(question_id,pattern_id,mapping_source,reviewed) values($1,$2,'prepyard-collections-v1',true) on conflict(question_id,pattern_id) do nothing",
+              "insert into public.question_patterns(question_id,pattern_id,mapping_source,reviewed) values($1,$2,'prepyard-editorial-v1',true) on conflict(question_id,pattern_id) do nothing",
               [row.id, id],
             );
           }
-          assigned.add(row.id);
+        }
+        for (const tag of q.topics ?? []) {
+          const topic = (
+            await client.query(
+              "insert into public.topics(slug,name) values($1,$2) on conflict(slug) do update set name=excluded.name returning id",
+              [tag.slug, tag.name],
+            )
+          ).rows[0];
+          await client.query(
+            "insert into public.question_topics(question_id,topic_id,source) values($1,$2,'practice-reference-v1') on conflict do nothing",
+            [row.id, topic.id],
+          );
         }
         items.push({ question_id: row.id, position });
       }

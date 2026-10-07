@@ -91,7 +91,65 @@ try {
       401,
       "Invalid session cannot reach protected endpoint",
     );
+    assert.ok(
+      response.headers
+        .getSetCookie()
+        .some(
+          (value) =>
+            value.startsWith(salt + "=;") && value.includes("Max-Age=0"),
+        ),
+      "Invalid session cookie must expire",
+    );
+    const login = await fetch(base + "/login", {
+      headers: { Cookie: salt + "=" + invalid + "; preference=dark" },
+    });
+    assert.equal(
+      login.status,
+      200,
+      "Rejected cookie must not break the login page",
+    );
+    const empty = await (
+      await fetch(base + "/api/auth/session", {
+        headers: { Cookie: salt + "=" + invalid },
+      })
+    ).json();
+    assert.ok(!empty?.user, "Rejected cookie cannot authenticate via Auth.js");
   }
+  const badChunks = await fetch(base + "/login", {
+    headers: { Cookie: salt + ".0=invalid; " + salt + ".1=chunks" },
+  });
+  assert.equal(badChunks.status, 200);
+  for (const name of [salt + ".0", salt + ".1"])
+    assert.ok(
+      badChunks.headers
+        .getSetCookie()
+        .some(
+          (value) =>
+            value.startsWith(name + "=;") && value.includes("Max-Age=0"),
+        ),
+      "Invalid chunk must expire",
+    );
+  assert.ok(
+    !output.includes("JWTSessionError"),
+    "Invalid-cookie requests should recover before Auth.js logs JWTSessionError: " +
+      output,
+  );
+  const validShape = await encode({
+    secret,
+    salt,
+    token: { ...token, passwordVersion: 1 },
+    maxAge: 3600,
+  });
+  const databaseDown = await fetch(base + "/api/health", {
+    headers: { Cookie: salt + "=" + validShape },
+  });
+  assert.equal(databaseDown.status, 401, "Database failure must deny access");
+  assert.ok(
+    !databaseDown.headers
+      .getSetCookie()
+      .some((value) => value.startsWith(salt + "=;")),
+    "Database failure must not delete a cryptographically valid cookie",
+  );
   const legacy = await fetch(base + "/auth/confirm?token_hash=unused", options);
   assert.equal(legacy.status, 307, "Legacy session cannot reach removed route");
   const signInRedirect = await fetch(base + "/api/auth/signin", {

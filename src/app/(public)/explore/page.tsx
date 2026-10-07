@@ -1,30 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Building2, Layers3, Code2 } from "lucide-react";
+import { prepYardCollections } from "@/features/patterns/collections.mjs";
 export const metadata: Metadata = { title: "Explore" };
-const sheets = [
-  [
-    "striver-sde",
-    "Striver SDE",
-    "A focused collection for interview preparation.",
-  ],
-  [
-    "striver-a2z",
-    "Striver A2Z",
-    "Build your foundation across standard DSA topics.",
-  ],
-  [
-    "neetcode-150",
-    "NeetCode 150",
-    "Practice a structured set of interview problems.",
-  ],
-  ["blind-75", "Blind 75", "Work through a compact collection of essentials."],
-  [
-    "kushal-essential-patterns",
-    "20 Essential DSA Patterns",
-    "Connect related questions through Kushal’s pattern collection.",
-  ],
-];
+const sheets = prepYardCollections.map((c) => [c.slug, c.name, c.description]);
 export default function Page() {
   return (
     <>

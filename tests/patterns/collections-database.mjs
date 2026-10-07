@@ -86,7 +86,7 @@ try {
   }
   await client.query("rollback");
   console.log(
-    "PASS: all four counts, idempotence, rollback on identity conflict, selected-sheet ordering and shared student progress.",
+    "PASS: both referenced collection counts, idempotence, rollback on identity conflict, selected-sheet ordering and shared student progress.",
   );
   console.log(first);
 } finally {

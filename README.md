@@ -91,15 +91,7 @@ The Companies section now includes all 656 repository companies, expandable dark
 
 ## DSA topics and patterns
 
-The authenticated `/patterns` practice sheet groups questions by standard DSA topics
-and offers clickable pattern tags, a Kushal Vijay collection filter, search, difficulty,
-progress filters, pagination, bookmarks, revision flags, and private notes. See
-[setup and data model](docs/pattern-sheet.md). Apply migration `20261004000900_dsa_sheet.sql`,
-then run `pnpm patterns:publish` with `IMPORT_DATABASE_URL` set.
-
-Practice collections also include Striver A2Z, Striver SDE, NeetCode 150 and Blind 75.
-Use `pnpm collections:publish` to publish their reviewed fixtures; details and counts
-are documented in [the pattern sheet guide](docs/pattern-sheet.md).
+The authenticated `/patterns` page groups questions by standard DSA topics, with separate generic pattern filters and two attributed reference collections and a dynamic frequency shortlist. Progress, private notes, and revision history are shared across all views. For an existing database, run `scripts/patterns/publish-prepyard.sql` in Supabase SQL Editor, or follow the admin publication workflow in [the pattern guide](docs/pattern-sheet.md).
 
 ### Application appearance
 
@@ -114,3 +106,7 @@ Notes remain private, show their content only when expanded, support deletion, a
 After signing in, open `/components` to review the reusable button variants and states, native checkboxes (including mixed state), radios, filter chips, typography, an example company question, and a compact note. Preview interactions use local state and do not write account data.
 
 Shared components live in `src/components/ui`; control and typography tokens are defined in `src/app/control-theme.css`. Buttons use 40px regular and 32px compact sizes, with 44px mobile targets, visible keyboard focus, and a loading indicator. Inter is bundled locally with its OFL license in `src/app/fonts`, so rendering does not depend on a font service.
+
+### Original PrepYard practice tracks
+
+Explore and Practice offer Interview Launchpad (66 unique questions), DSA Deep Dive (282 unique questions across three platforms), and Interview Hotlist (up to 20 questions per topic ranked dynamically by reported company frequency). Old collection memberships are retired while saved progress, notes, and revisions remain. Run the generated `scripts/patterns/publish-prepyard.sql` in Supabase SQL Editor, or apply pending migrations and run `pnpm patterns:publish` with an administrative connection. See [publication](docs/pattern-sheet.md) and [reference attribution](docs/collection-attribution.md). Display names do not change reuse rights.

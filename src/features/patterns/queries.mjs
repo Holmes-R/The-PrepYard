@@ -1,3 +1,4 @@
+import { prepYardCollectionSlugs, hotlistSlug } from "./collections.mjs";
 export function patternFilters(params = {}) {
   const one = (key) => (typeof params[key] === "string" ? params[key] : "");
   const slug = (key) =>
@@ -7,7 +8,9 @@ export function patternFilters(params = {}) {
     q: term,
     topic: slug("topic"),
     pattern: slug("pattern"),
-    collection: slug("collection"),
+    collection: prepYardCollectionSlugs.includes(slug("collection"))
+      ? slug("collection")
+      : "",
     difficulty: ["easy", "medium", "hard"].includes(one("difficulty"))
       ? one("difficulty")
       : "",
@@ -51,7 +54,7 @@ function queryParts(f) {
         add(f.pattern) +
         ")",
     );
-  if (f.collection)
+  if (f.collection && f.collection !== hotlistSlug)
     where.push(
       "exists(select 1 from public.pattern_collection_questions cq join public.pattern_collections c on c.id=cq.collection_id where cq.question_id=q.id and c.slug=" +
         add(f.collection) +
@@ -64,7 +67,7 @@ function queryParts(f) {
   return {
     args,
     add,
-    base: `from public.questions q join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id() where ${where.join(" and ")}`,
+    base: `from public.questions q ${f.collection === hotlistSlug ? "join public.topic_frequency_questions hot on hot.question_id=q.id" : ""} join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id() where ${where.join(" and ")}`,
   };
 }
 export async function patternOverview(client, f) {
@@ -84,7 +87,8 @@ export async function patternOverview(client, f) {
   ).rows;
   const collections = (
     await client.query(
-      "select slug,name from public.pattern_collections order by name",
+      "select slug,name from public.pattern_collections where slug=any($1::text[]) order by name",
+      [prepYardCollectionSlugs],
     )
   ).rows;
   return {
@@ -112,14 +116,16 @@ export async function patternQuestions(client, f) {
     f.sort === "random"
       ? // Re-evaluated per query, so reloading an identical URL really reshuffles.
         "random()"
-      : f.collection
-        ? "coalesce((select cq.position from public.pattern_collection_questions cq join public.pattern_collections pc on pc.id=cq.collection_id where cq.question_id=q.id and pc.slug=" +
-          add(f.collection) +
-          "),2147483647),lower(q.title),q.id"
-        : "coalesce((select min(cq.position) from public.pattern_collection_questions cq where cq.question_id=q.id),2147483647),case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id";
+      : f.collection === hotlistSlug
+        ? "t.position,hot.position,q.id"
+        : f.collection
+          ? "coalesce((select cq.position from public.pattern_collection_questions cq join public.pattern_collections pc on pc.id=cq.collection_id where cq.question_id=q.id and pc.slug=" +
+            add(f.collection) +
+            "),2147483647),lower(q.title),q.id"
+          : "case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id";
   const rows = (
     await client.query(
-      `select q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
+      `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
  coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  exists(select 1 from public.notes n where n.question_id=q.id and n.user_id=private.student_id()) has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns,

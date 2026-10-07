@@ -23,7 +23,12 @@ export type CompanyTag = {
 };
 export type TopicTag = { slug: string; name: string };
 export type CompanyTopic = TopicTag & { uses: number };
-export type Sheet = {
+export type DifficultyCounts = {
+  easy_count: number;
+  medium_count: number;
+  hard_count: number;
+};
+export type Sheet = DifficultyCounts & {
   company: { id: string; slug: string; name: string };
   available: string[];
   topics: CompanyTopic[];

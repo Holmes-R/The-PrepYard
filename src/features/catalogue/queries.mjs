@@ -57,7 +57,16 @@ export function filtersFrom(params = {}) {
     page: /^[1-9][0-9]{0,3}$/.test(one("page")) ? Number(one("page")) : 1,
   };
 }
-export const companiesSql = `select c.slug,c.name,exists(select 1 from public.company_logos l where l.company_id=c.id) as has_logo,count(distinct o.question_id)::int as question_count,count(distinct o.question_id) filter(where u.status='solved')::int as solved_count from public.companies c join public.company_question_observations o on o.company_id=c.id left join public.user_question_state u on u.question_id=o.question_id group by c.id,c.slug,c.name order by lower(c.name),c.slug`;
+export const companiesSql = `select c.slug,c.name,exists(select 1 from public.company_logos l where l.company_id=c.id) as has_logo,
+ count(distinct q.id)::int as question_count,
+ count(distinct q.id) filter(where u.status='solved')::int as solved_count,
+ count(distinct q.id) filter(where q.difficulty='easy')::int as easy_count,
+ count(distinct q.id) filter(where q.difficulty='medium')::int as medium_count,
+ count(distinct q.id) filter(where q.difficulty='hard')::int as hard_count
+ from public.companies c join public.company_question_observations o on o.company_id=c.id
+ join public.questions q on q.id=o.question_id and q.is_listed
+ left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id()
+ group by c.id,c.slug,c.name order by lower(c.name),c.slug`;
 // Serializes applied filters for the address bar, so a filtered sheet is shareable
 // and survives reloads. Empty values are omitted so the reader on the other side
 // sees the documented defaults; `open` names the expanded company on /companies.
@@ -186,10 +195,20 @@ export async function companySheet(client, slug, filters) {
     const conditions = [...where, ...extra].filter(Boolean);
     return conditions.length ? " where " + conditions.join(" and ") : "";
   };
-  const total = Number(
-    (await client.query("select count(*) as total " + base + clause(), args))
-      .rows[0].total,
-  );
+  const summary = (
+    await client.query(
+      "select count(*) as total,count(*) filter(where q.difficulty='easy')::int as easy_count,count(*) filter(where q.difficulty='medium')::int as medium_count,count(*) filter(where q.difficulty='hard')::int as hard_count " +
+        base +
+        clause(),
+      args,
+    )
+  ).rows[0];
+  const total = Number(summary.total);
+  const difficultyCounts = {
+    easy_count: Number(summary.easy_count),
+    medium_count: Number(summary.medium_count),
+    hard_count: Number(summary.hard_count),
+  };
   const pages = Math.max(1, Math.ceil(total / 50));
   const page = Math.min(filters.page, pages);
   const order =
@@ -237,7 +256,17 @@ export async function companySheet(client, slug, filters) {
       args,
     )
   ).rows;
-  return { company, available, topics, rows, total, page, pages, solved };
+  return {
+    company,
+    available,
+    topics,
+    rows,
+    total,
+    page,
+    pages,
+    solved,
+    ...difficultyCounts,
+  };
 }
 // A single private note, read when its editor opens. RLS scopes both the question
 // visibility and the note ownership to the caller, so this returns "" for anyone

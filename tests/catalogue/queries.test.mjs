@@ -23,7 +23,10 @@ const recordingClient = (calls) => ({
     if (sql.startsWith("select distinct time_window"))
       return { rows: [{ time_window: "all" }] };
     if (sql.includes("as uses")) return { rows: [] };
-    if (sql.includes("as total")) return { rows: [{ total: "3" }] };
+    if (sql.includes("as total"))
+      return {
+        rows: [{ total: "3", easy_count: 1, medium_count: 2, hard_count: 0 }],
+      };
     if (/^select count\(\*\) as n /.test(sql)) return { rows: [{ n: "2" }] };
     return { rows: [] };
   },
@@ -43,6 +46,10 @@ test("default filters never emit a dangling where or comments inside SQL", async
   const calls = [];
   const sheet = await companySheet(recordingClient(calls), "acme", filters);
   assert.equal(sheet.total, 3);
+  assert.deepEqual(
+    [sheet.easy_count, sheet.medium_count, sheet.hard_count],
+    [1, 2, 0],
+  );
   assert.ok(calls.length >= 6);
   for (const { sql } of calls) {
     assert.ok(

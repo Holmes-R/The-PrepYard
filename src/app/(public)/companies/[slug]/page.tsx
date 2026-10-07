@@ -37,6 +37,9 @@ export default async function Page({
           ...sheet.company,
           question_count: sheet.total,
           solved_count: sheet.solved,
+          easy_count: sheet.easy_count,
+          medium_count: sheet.medium_count,
+          hard_count: sheet.hard_count,
         }}
         initial={sheet}
         initialFilters={filters}

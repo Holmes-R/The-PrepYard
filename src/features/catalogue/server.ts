@@ -17,6 +17,9 @@ export async function listCompanies() {
           has_logo: boolean;
           question_count: number;
           solved_count: number;
+          easy_count: number;
+          medium_count: number;
+          hard_count: number;
         }>(companiesSql)
       ).rows,
   );

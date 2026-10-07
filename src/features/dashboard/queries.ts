@@ -1,3 +1,4 @@
+import { prepYardCollectionSlugs } from "@/features/patterns/collections.mjs";
 import type { PoolClient } from "pg";
 export async function dashboardData(client: PoolClient) {
   const stats = (
@@ -28,13 +29,17 @@ export async function dashboardData(client: PoolClient) {
       name: string;
       total: number;
       solved: number;
-    }>(`
+    }>(
+      `
     select c.slug,c.name,count(q.id)::int total,count(q.id) filter(where u.status='solved')::int solved
-    from public.pattern_collections c join public.pattern_collection_questions cq on cq.collection_id=c.id
+    from public.pattern_collections c join (select pc.slug,cq.question_id from public.pattern_collection_questions cq join public.pattern_collections pc on pc.id=cq.collection_id union all select 'interview-hotlist',question_id from public.topic_frequency_questions) cq on cq.slug=c.slug
     join public.questions q on q.id=cq.question_id and q.is_listed
     left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id()
+    where c.slug=any($1::text[])
     group by c.id order by count(q.id) filter(where u.status='solved') desc,c.name limit 5
-  `)
+  `,
+      [prepYardCollectionSlugs],
+    )
   ).rows;
   const recent = (
     await client.query<{

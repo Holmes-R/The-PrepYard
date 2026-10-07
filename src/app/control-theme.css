@@ -844,3 +844,62 @@ body .dsa-difficulty {
 body .prep-button:active:not([aria-disabled="true"]) {
   filter: brightness(0.9);
 }
+
+body .dsa-frequency {
+  display: block;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground, #aeb6b8);
+  margin-bottom: 4px;
+}
+
+/* Difficulty is a compact dot; names remain available to assistive technology. */
+body .company-difficulty-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #a1a1aa;
+}
+body .company-difficulty-dot.easy {
+  background: #34d399;
+}
+body .company-difficulty-dot.medium {
+  background: #facc15;
+}
+body .company-difficulty-dot.hard {
+  background: #f87171;
+}
+body .company-difficulty-totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px 12px;
+  color: #e4e4e7;
+  font-size: 13px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+body .company-difficulty-totals > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+body .company-question-row .company-difficulty-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  min-width: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+@media (max-width: 700px) {
+  body .company-difficulty-totals {
+    gap: 12px;
+    padding: 0 10px 10px;
+  }
+}

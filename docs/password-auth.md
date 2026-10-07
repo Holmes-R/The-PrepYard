@@ -25,3 +25,11 @@ Run pnpm test:auth, pnpm lint, pnpm typecheck, pnpm build, then pnpm test:access
 For the real HTTP credentials flow after building and migrating the disposable cluster, set `PREPYARD_AUTH_TEST_DATABASE_URL` to its administrator connection URL (loopback host, database ending in `_test`) and run `node tests/auth/password-flow.mjs`. This starts a test server on port 3114, creates and removes a test account, and verifies CSRF denial, login, reset revocation, and attempt limits without sending email. The test cluster must allow the `prepyard_web` test login to connect.
 
 Apply migration 7 (`20261002000700_remove_google_sign_in.sql`) after migration 6. It removes the Google registration function while preserving existing records. Remove unused AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET deployment variables. Resend remains required for email verification and password reset.
+
+## Recovering JWT session errors
+
+Auth.js logs JWTSessionError internally; a try/catch around auth() cannot prevent that message. Expired, tampered, unsupported legacy, or old-secret cookies are now removed from the forwarded request and expired by the proxy, including numbered cookie chunks. CSRF and other cookies are preserved. Database failures still deny access, but do not cause the proxy to delete a cryptographically valid cookie.
+
+Keep AUTH_SECRET stable across restarts and deployment instances. After intentional secret rotation, users must log in again. Restart pnpm dev after environment changes.
+
+A JWTSessionError can also wrap a database exception from password-session validation. Check the nested cause. ECONNREFUSED means the configured database endpoint refused the connection; running a local PostgreSQL service does not help when DATABASE_URL points to Supabase. Verify project availability and the current Session pooler host and port in Supabase Connect. Check network restrictions and banned IPs; Supabase documents that failed password attempts may temporarily block an IP: https://supabase.com/docs/guides/troubleshooting/error-connection-refused-when-trying-to-connect-to-supabase-database-hwG0Dr . Preserve the restricted prepyard_web login; never substitute the administrator account in the application runtime URL. Do not share the URL or password in logs.
