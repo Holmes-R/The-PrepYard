@@ -62,13 +62,18 @@ try {
     redirect: "manual",
     headers: { Cookie: `${salt}=${cookie}` },
   };
-  for (const route of ["/", "/companies", "/dashboard", "/notes"]) {
+  for (const route of ["/companies", "/dashboard", "/notes"]) {
     assert.equal(
       (await fetch(base + route, options)).status,
       307,
       "Legacy Google session denied",
     );
   }
+  assert.equal(
+    (await fetch(base + "/", options)).status,
+    200,
+    "A legacy cookie can only view the public landing page",
+  );
   assert.equal((await fetch(base + "/api/health", options)).status, 401);
   const session = await (
     await fetch(base + "/api/auth/session", options)

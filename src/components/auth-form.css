@@ -1,0 +1,29 @@
+.launch-auth-card .auth-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+body .launch-auth-card .auth-access-actions .prep-button {
+  min-height: 40px;
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.4;
+  white-space: normal;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+.auth-access-actions .prep-button:active {
+  background: #343438;
+}
+@media (max-width: 600px) {
+  body .launch-auth-card .auth-access-actions .prep-button {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .launch-auth-card .auth-access-actions .prep-button {
+    transition: none;
+  }
+}

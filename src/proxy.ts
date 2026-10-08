@@ -9,6 +9,7 @@ import {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const publicRoute =
+    pathname === "/" ||
     pathname === "/login" ||
     pathname === "/signup" ||
     ["/forgot-password", "/reset-password", "/verify-email"].includes(

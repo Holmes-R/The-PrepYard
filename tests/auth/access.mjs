@@ -48,7 +48,6 @@ try {
   }
   assert.ok(ready, output);
   for (const route of [
-    "/",
     "/explore",
     "/companies",
     "/patterns",
@@ -70,6 +69,19 @@ try {
     );
     assert.match(response.headers.get("cache-control"), /no-store/);
   }
+  const landing = await fetch(base + "/", {
+    redirect: "manual",
+    headers: { Cookie: "authjs.session-token=forged-session" },
+  });
+  assert.equal(
+    landing.status,
+    200,
+    "Landing page is available without an account",
+  );
+  const landingHtml = await landing.text();
+  assert.match(landingHtml, /next interview/);
+  assert.match(landingHtml, /Create free account/);
+  assert.doesNotMatch(landingHtml, /Welcome back|Your practice updates/);
   const api = await fetch(base + "/api/health", { redirect: "manual" });
   assert.equal(api.status, 401);
   for (const route of ["/login"]) {

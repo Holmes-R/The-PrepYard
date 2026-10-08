@@ -95,9 +95,9 @@ export function Question({
   const hideTopics = filters.hideTopics === "1";
   const noteId = "note-" + q.id;
   function save(kind: "solved" | "note", value: boolean | string) {
-    if (kind === "solved")
-      setOptimisticStatus(value ? "solved" : "not_started");
     start(async () => {
+      if (kind === "solved")
+        setOptimisticStatus(value ? "solved" : "not_started");
       setMessage("");
       const result = await saveQuestionProgress(q.id, kind, value);
       if (!result.ok) {

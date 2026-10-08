@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft, KeyRound, UserPlus } from "lucide-react";
+import "./auth-form.css";
 import {
   loginWithPassword,
   requestAccountEmail,
@@ -184,29 +186,26 @@ export function AuthForm({
           )}
       </form>
 
-      <nav
-        aria-label="Account options"
-        className="mt-6 flex flex-wrap gap-4 text-sm"
-      >
+      <nav aria-label="Account options" className="auth-access-actions">
         {mode !== "login" && (
-          <Link
-            className="underline"
-            href={"/login?next=" + encodeURIComponent(next)}
-          >
-            Back to log in
-          </Link>
+          <Button asChild variant="secondary" size="compact">
+            <Link href={"/login?next=" + encodeURIComponent(next)}>
+              <ArrowLeft size={15} aria-hidden="true" /> Back to log in
+            </Link>
+          </Button>
         )}
         {mode === "login" && (
           <>
-            <Link
-              className="underline"
-              href={"/signup?next=" + encodeURIComponent(next)}
-            >
-              New here? Sign up
-            </Link>
-            <Link className="underline" href="/forgot-password">
-              Forgot password?
-            </Link>
+            <Button asChild variant="secondary" size="compact">
+              <Link href={"/signup?next=" + encodeURIComponent(next)}>
+                <UserPlus size={15} aria-hidden="true" /> New here? Sign up
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="compact">
+              <Link href="/forgot-password">
+                <KeyRound size={15} aria-hidden="true" /> Forgot password?
+              </Link>
+            </Button>
           </>
         )}
       </nav>

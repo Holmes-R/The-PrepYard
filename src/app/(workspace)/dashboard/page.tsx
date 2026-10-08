@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BarChart3,
-  Building2,
-  CheckCheck,
-  Code2,
-  History,
-  Layers3,
-  Play,
-  StickyNote,
-} from "lucide-react";
+import { ArrowRight, Building2, ChevronDown } from "lucide-react";
 import { requireUser } from "@/lib/auth/server";
 import { withStudentDatabase } from "@/lib/database/server";
 import { dashboardData } from "@/features/dashboard/queries";
+import { prepYardCollections } from "@/features/patterns/collections.mjs";
+import "./dashboard.css";
+
 export const metadata: Metadata = { title: "My dashboard" };
+const formatCount = (count: number) => count.toLocaleString("en-IN");
 export default async function Page() {
   const user = await requireUser();
   const { stats, collections, recent, activity } =
@@ -23,272 +17,333 @@ export default async function Page() {
     ? Math.round((100 * stats.solved) / stats.attempted)
     : 0;
   const maxActivity = Math.max(1, ...activity.map((day) => day.count));
-  const events = activity.reduce((sum, day) => sum + day.count, 0);
+  const revisions = activity.reduce((sum, day) => sum + day.count, 0);
   return (
-    <div className="prep-dashboard">
-      <section className="prep-welcome">
-        <div className="prep-welcome-copy">
-          <p className="prep-session-label">
-            <span />
-            YOUR PRACTICE SPACE
-          </p>
+    <div className="prep-dashboard prep-dashboard-clean">
+      <header className="dashboard-heading">
+        <div>
+          <p className="dashboard-kicker">Your dashboard</p>
           <h1>
             Welcome back{user.name ? ", " + user.name.split(" ")[0] : ""}.
           </h1>
-          <p>
-            {stats.due
-              ? `Your revision queue has ${stats.due} questions ready for review. Keep the momentum going.`
-              : "Build your confidence, one question at a time. Your next opportunity starts with today’s practice."}
+          <p className="dashboard-intro">
+            Choose your next practice session and keep track of what you’ve
+            learned.
           </p>
+        </div>
+        <div className="dashboard-heading-actions">
           <Link
-            href={
-              recent[0]
-                ? "/patterns?q=" + encodeURIComponent(recent[0].title)
-                : "/patterns"
-            }
-            className="prep-primary"
+            href="/patterns"
+            className="dashboard-button dashboard-button-primary"
           >
-            Resume practice <ArrowRight size={17} />
+            Practice now <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+          <Link
+            href="/companies"
+            className="dashboard-button dashboard-button-secondary"
+          >
+            <Building2 size={17} aria-hidden="true" /> Browse companies
           </Link>
         </div>
-        <div className="prep-welcome-overview">
-          <div className="prep-completion-ring">
-            <svg viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r="40" />
-              <circle
-                className="prep-completion-ring-value"
-                cx="50"
-                cy="50"
-                r="40"
-                strokeDasharray="251.33"
-                strokeDashoffset={251.33 * (1 - completion / 100)}
-              />
-            </svg>
-            <div>
-              <strong>{completion}%</strong>
-              <span>Completion</span>
-            </div>
-          </div>
-          <strong>
-            {stats.solved} of {stats.attempted} attempted questions solved
-          </strong>
-          <p>Progress across your practice</p>
-        </div>
-      </section>
-      <div className="prep-stats">
-        <article>
-          <header>
-            Questions completed
-            <CheckCheck size={19} />
-          </header>
-          <strong>
-            {stats.solved}
-            <small> / {stats.total.toLocaleString()}</small>
-          </strong>
-          <p>Across your practice catalogue</p>
-        </article>
-        <article>
-          <header>
-            Completion rate
-            <BarChart3 size={19} />
-          </header>
-          <strong>
-            {completion}%<small> of attempted</small>
-          </strong>
-          <div className="prep-difficulty-summary">
-            <span className="easy">E: {stats.easy}</span>
-            <span className="medium">M: {stats.medium}</span>
-            <span className="hard">H: {stats.hard}</span>
-          </div>
-        </article>
-        <article>
-          <header>
-            Revision due
-            <History size={19} />
-          </header>
-          <strong>
-            {stats.due}
-            <small> questions</small>
-          </strong>
-          <Link href="/patterns">
-            Review your practice <ArrowRight size={14} />
-          </Link>
-        </article>
-        <article>
-          <header>
-            Saved notes
-            <StickyNote size={19} />
-          </header>
-          <strong>
-            {stats.notes}
-            <small> notes</small>
-          </strong>
-          <Link href="/notes">
-            Open your notebook <ArrowRight size={14} />
-          </Link>
-        </article>
-      </div>
-      <div className="prep-dashboard-grid">
-        <div>
-          <section className="prep-panel">
-            <header className="prep-panel-heading">
-              <h2>
-                <Play size={19} />
-                Continue practicing
-              </h2>
-              <Link href="/patterns">
-                View all sheets <ArrowRight size={14} />
-              </Link>
-            </header>
-            <div className="prep-continue-list">
-              {collections.slice(0, 2).map((sheet) => (
-                <Link
-                  key={sheet.slug}
-                  href={"/patterns?collection=" + sheet.slug}
-                  className="prep-continue"
-                >
-                  <span className="prep-sheet-icon">
-                    <Code2 size={24} />
-                  </span>
-                  <div>
-                    <h3>{sheet.name}</h3>
-                    <p>
-                      {sheet.solved} of {sheet.total} questions solved
-                    </p>
-                    <div className="prep-meter">
-                      <span
-                        style={{
-                          width: `${sheet.total ? (100 * sheet.solved) / sheet.total : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span className="prep-continue-cta">
-                    Continue <ArrowRight size={14} />
-                  </span>
-                </Link>
-              ))}
-              {!collections.length && (
-                <p className="prep-empty">
-                  Choose a topic or company to start your practice.
-                </p>
-              )}
-            </div>
-          </section>
-          <section className="prep-panel">
-            <header className="prep-panel-heading">
-              <h2>
-                <BarChart3 size={20} />
-                Weekly revision activity
-              </h2>
-              <span>{events} revisions</span>
-            </header>
-            <p className="prep-muted">
-              Your recorded revision sessions over the last seven days · India
-              time
-            </p>
-            <div
-              className="prep-activity"
-              aria-label="Revision sessions in the last seven days"
-            >
-              {activity.map((day) => (
-                <div key={day.day}>
-                  <strong>{day.count}</strong>
-                  <div className="prep-bar-track">
+      </header>
+
+      <section aria-labelledby="dashboard-progress-title">
+        <h2 className="sr-only" id="dashboard-progress-title">
+          Your practice progress
+        </h2>
+        <dl className="dashboard-stats">
+          <div>
+            <dt>Questions solved</dt>
+            <dd className="dashboard-stat-value">
+              {formatCount(stats.solved)}
+            </dd>
+            <dd className="dashboard-stat-detail">
+              <p>Of {formatCount(stats.total)} available questions</p>
+              <ul
+                className="dashboard-difficulty-counts"
+                aria-label="Solved questions by difficulty"
+              >
+                {[
+                  { name: "Easy", count: stats.easy, kind: "easy" },
+                  { name: "Medium", count: stats.medium, kind: "medium" },
+                  { name: "Hard", count: stats.hard, kind: "hard" },
+                ].map((item) => (
+                  <li key={item.kind}>
                     <span
-                      style={{
-                        height: `${day.count ? Math.max(6, (100 * day.count) / maxActivity) : 0}%`,
-                      }}
+                      className={"dashboard-dot " + item.kind}
+                      aria-hidden="true"
                     />
-                  </div>
-                  <span>
-                    {new Date(day.day + "T12:00:00Z").toLocaleDateString("en", {
-                      weekday: "short",
-                      timeZone: "Asia/Kolkata",
-                    })}
+                    {item.name} {formatCount(item.count)}
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+          <div>
+            <dt>Completion rate</dt>
+            <dd className="dashboard-stat-value">
+              {completion}
+              <span>%</span>
+            </dd>
+            <dd className="dashboard-stat-detail">
+              <p>
+                {stats.attempted
+                  ? `Of ${formatCount(stats.attempted)} attempted questions`
+                  : "Solve your first question to get started"}
+              </p>
+            </dd>
+          </div>
+          <div>
+            <dt>Revision due</dt>
+            <dd className="dashboard-stat-value">{formatCount(stats.due)}</dd>
+            <dd className="dashboard-stat-detail">
+              <p>
+                {stats.due
+                  ? "Ready for another attempt"
+                  : "No overdue revisions"}
+              </p>
+              <Link
+                href="/patterns?sort=revision"
+                className="dashboard-text-link"
+              >
+                Review queue
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            </dd>
+          </div>
+          <div>
+            <dt>Saved notes</dt>
+            <dd className="dashboard-stat-value">{formatCount(stats.notes)}</dd>
+            <dd className="dashboard-stat-detail">
+              <p>Your approaches and reminders</p>
+              <Link href="/notes" className="dashboard-text-link">
+                View notes
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section
+        className="dashboard-collections"
+        aria-labelledby="dashboard-collections-title"
+      >
+        <header className="dashboard-section-heading">
+          <div>
+            <h2 id="dashboard-collections-title">
+              Choose a practice collection
+            </h2>
+            <p>
+              A collection is a focused set of questions to guide your practice.
+              Pick the one that fits your goal.
+            </p>
+          </div>
+        </header>
+        <div className="dashboard-collection-grid">
+          {prepYardCollections.map((collection, index) => {
+            const progress = collections.find(
+              (item) => item.slug === collection.slug,
+            );
+            const total = progress?.total ?? 0,
+              solved = progress?.solved ?? 0;
+            const percentage = total ? Math.round((100 * solved) / total) : 0;
+            return (
+              <article
+                className="dashboard-collection-card"
+                key={collection.slug}
+                aria-labelledby={"collection-" + collection.slug}
+              >
+                <div className="dashboard-collection-top">
+                  <span
+                    className="dashboard-collection-number"
+                    aria-hidden="true"
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="dashboard-collection-kind">
+                    {collection.kind === "dynamic"
+                      ? "Frequency priorities"
+                      : index === 0
+                        ? "Focused essentials"
+                        : "Broader coverage"}
                   </span>
                 </div>
-              ))}
-            </div>
-            {!events && (
-              <p className="prep-empty">
-                Mark a question as revised to begin your activity history.
-              </p>
-            )}
-          </section>
-        </div>
-        <div>
-          <section className="prep-panel">
-            <header className="prep-panel-heading">
-              <h2>
-                <Layers3 size={19} />
-                Curated sheets
-              </h2>
-            </header>
-            <div className="prep-quick-sheets">
-              {collections.map((sheet) => (
-                <Link
-                  key={sheet.slug}
-                  href={"/patterns?collection=" + sheet.slug}
-                >
-                  <span>{sheet.name}</span>
-                  <strong>
-                    {sheet.solved}/{sheet.total}
-                  </strong>
-                </Link>
-              ))}
-            </div>
-            <Link className="prep-company-shortcut" href="/companies">
-              <Building2 size={18} />
-              Prepare for your target company
-              <ArrowRight size={16} />
-            </Link>
-          </section>
-          <section className="prep-panel">
-            <header className="prep-panel-heading">
-              <h2>
-                <History size={19} />
-                Recent practice
-              </h2>
-            </header>
-            <div className="prep-recent">
-              {recent.map((q) => (
-                <Link
-                  key={q.id}
-                  href={"/patterns?q=" + encodeURIComponent(q.title)}
-                >
+                <h3 id={"collection-" + collection.slug}>{collection.name}</h3>
+                <p className="dashboard-collection-description">
+                  {collection.description}
+                </p>
+                <p className="dashboard-collection-purpose">
+                  <strong>Best for:</strong> {collection.bestFor}
+                </p>
+                <div className="dashboard-collection-progress">
                   <div>
-                    <strong>{q.title}</strong>
-                    <span className={"prep-badge " + q.difficulty}>
-                      {q.difficulty || "Unrated"}
-                    </span>
-                  </div>
-                  <p>
                     <span>
-                      {q.status === "solved"
-                        ? "Solved"
-                        : q.status === "attempted"
-                          ? "Attempted"
-                          : "Progress updated"}
+                      {formatCount(solved)} / {formatCount(total)} solved
                     </span>
-                    <time dateTime={q.updated_at.toISOString()}>
-                      {q.updated_at.toLocaleDateString("en-IN", {
+                    <strong>{percentage}%</strong>
+                  </div>
+                  <progress
+                    value={solved}
+                    max={Math.max(1, total)}
+                    aria-label={
+                      collection.name +
+                      ": " +
+                      formatCount(solved) +
+                      " of " +
+                      formatCount(total) +
+                      " questions solved"
+                    }
+                  />
+                  {!total && (
+                    <p>No questions available in this collection yet.</p>
+                  )}
+                </div>
+                <Link
+                  href={"/patterns?collection=" + collection.slug}
+                  className="dashboard-button dashboard-button-secondary"
+                  aria-label={"Open collection: " + collection.name}
+                >
+                  Open collection <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </article>
+            );
+          })}
+        </div>
+        <details className="dashboard-collection-help">
+          <summary>
+            How collections work <ChevronDown size={17} aria-hidden="true" />
+          </summary>
+          <div>
+            <p>
+              <strong>One question, one progress record.</strong> A question can
+              appear in several collections. Solving it, adding a note, or
+              marking it revised updates that question everywhere; your overall
+              solved count counts it once.
+            </p>
+            <p>
+              <strong>Choose your own pace.</strong> Open a collection, choose a
+              topic, and narrow questions by difficulty. Your notes are private,
+              and revision history keeps the confidence level you selected.
+            </p>
+            <p>
+              <strong>Hotlist counts can vary.</strong> Interview Hotlist
+              includes up to 20 questions per topic with eligible company
+              frequency data. Frequency helps you prioritize; it does not
+              guarantee a question will appear in an interview.
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <div className="dashboard-detail-grid">
+        <section
+          className="dashboard-panel"
+          aria-labelledby="dashboard-recent-title"
+        >
+          <header className="dashboard-section-heading">
+            <h2 id="dashboard-recent-title">Recent practice</h2>
+            <Link href="/patterns" className="dashboard-text-link">
+              All questions <ArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </header>
+          {recent.length ? (
+            <ul className="dashboard-recent-list">
+              {recent.map((question) => (
+                <li key={question.id}>
+                  <Link
+                    href={"/patterns?q=" + encodeURIComponent(question.title)}
+                  >
+                    <span>{question.title}</span>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                  <div>
+                    <span>
+                      {question.status === "solved"
+                        ? "Solved"
+                        : question.status === "attempted"
+                          ? "Attempted"
+                          : "Progress saved"}
+                    </span>
+                    <time dateTime={question.updated_at.toISOString()}>
+                      {question.updated_at.toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         timeZone: "Asia/Kolkata",
                       })}
                     </time>
-                  </p>
-                </Link>
+                  </div>
+                </li>
               ))}
-              {!recent.length && (
-                <p className="prep-empty">
-                  Your practice updates will appear here.
-                </p>
-              )}
+            </ul>
+          ) : (
+            <div className="dashboard-empty">
+              <p>
+                Your recent questions will appear here once you start
+                practicing.
+              </p>
+              <Link href="/patterns" className="dashboard-text-link">
+                Find your first question{" "}
+                <ArrowRight size={14} aria-hidden="true" />
+              </Link>
             </div>
-          </section>
-        </div>
+          )}
+        </section>
+        <section
+          className="dashboard-panel"
+          aria-labelledby="dashboard-activity-title"
+        >
+          <header className="dashboard-section-heading">
+            <h2 id="dashboard-activity-title">Revision this week</h2>
+            <span className="dashboard-activity-total">
+              {formatCount(revisions)}{" "}
+              {revisions === 1 ? "revision" : "revisions"}
+            </span>
+          </header>
+          <p className="dashboard-caption">Your last seven days · India time</p>
+          <ul
+            className="dashboard-activity-list"
+            aria-label="Daily revision counts"
+          >
+            {activity.map((day) => {
+              const date = new Date(day.day + "T12:00:00Z");
+              return (
+                <li key={day.day}>
+                  <span className="sr-only">
+                    {date.toLocaleDateString("en-IN", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      timeZone: "Asia/Kolkata",
+                    })}
+                    : {day.count} {day.count === 1 ? "revision" : "revisions"}
+                  </span>
+                  <div aria-hidden="true">
+                    <strong>{day.count}</strong>
+                    <div className="dashboard-bar-track">
+                      <span
+                        style={{
+                          height: `${day.count ? Math.max(8, (100 * day.count) / maxActivity) : 0}%`,
+                        }}
+                      />
+                    </div>
+                    <time dateTime={day.day}>
+                      {date.toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        timeZone: "Asia/Kolkata",
+                      })}
+                    </time>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {!revisions && (
+            <p className="dashboard-caption dashboard-activity-empty">
+              Mark a question as revised to start your activity record.
+            </p>
+          )}
+        </section>
       </div>
     </div>
   );

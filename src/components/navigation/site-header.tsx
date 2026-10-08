@@ -42,12 +42,13 @@ export function SiteHeader({
     "/verify-email",
   ].includes(pathname);
   const name = user?.name || user?.email?.split("@")[0] || "Your account";
+  const quickSearchEnabled = !authPage && pathname !== "/";
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (
         (event.metaKey || event.ctrlKey) &&
         event.key.toLowerCase() === "k" &&
-        !authPage
+        quickSearchEnabled
       ) {
         event.preventDefault();
         searchRef.current?.focus();
@@ -56,19 +57,23 @@ export function SiteHeader({
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [authPage]);
+  }, [quickSearchEnabled]);
   useEffect(() => {
     if (open)
       panelRef.current?.querySelector<HTMLAnchorElement>("a[href]")?.focus();
-    else if (wasOpen.current) menuRef.current?.focus();
+    else if (wasOpen.current) menuRef.current?.focus({ preventScroll: true });
     wasOpen.current = open;
   }, [open]);
   const brand = (
     <Link
-      href="/dashboard"
+      href={pathname === "/" || !user ? "/" : "/dashboard"}
       className="prep-brand"
       onClick={() => setOpen(false)}
-      aria-label="The PrepYard dashboard"
+      aria-label={
+        pathname === "/" || !user
+          ? "The PrepYard home"
+          : "The PrepYard dashboard"
+      }
     >
       Prep<span>Yard</span>
     </Link>
@@ -83,6 +88,88 @@ export function SiteHeader({
         </Link>
       </header>
     );
+  if (pathname === "/") {
+    const landingLinks = (
+      <nav aria-label="Landing navigation">
+        {[
+          ["#features", "Features"],
+          ["#collections", "Collections"],
+          ["#how-it-works", "How it works"],
+          ["#faq", "FAQ"],
+        ].map(([href, title]) => (
+          <a key={href} href={href} onClick={() => setOpen(false)}>
+            {title}
+          </a>
+        ))}
+      </nav>
+    );
+    const accountLinks = (
+      <div className="yard-header-auth">
+        {user ? (
+          <Link
+            className="yard-header-signup"
+            href="/dashboard"
+            onClick={() => setOpen(false)}
+          >
+            Go to dashboard <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
+        ) : (
+          <>
+            <Link
+              className="yard-header-login"
+              href="/login"
+              onClick={() => setOpen(false)}
+            >
+              Log in
+            </Link>
+            <Link
+              className="yard-header-signup"
+              href="/signup"
+              onClick={() => setOpen(false)}
+            >
+              Create account
+            </Link>
+          </>
+        )}
+      </div>
+    );
+    return (
+      <header className="prep-landing-navigation">
+        <div className="yard-header-inner">
+          {brand}
+          <div className="yard-header-desktop">
+            {landingLinks}
+            {accountLinks}
+          </div>
+          <button
+            ref={menuRef}
+            type="button"
+            className="yard-header-toggle"
+            aria-label={open ? "Close navigation" : "Open navigation"}
+            aria-expanded={open}
+            aria-controls="landing-mobile-navigation"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? (
+              <X size={21} aria-hidden="true" />
+            ) : (
+              <Menu size={21} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+        {open && (
+          <div
+            ref={panelRef}
+            className="yard-header-mobile"
+            id="landing-mobile-navigation"
+          >
+            {landingLinks}
+            {accountLinks}
+          </div>
+        )}
+      </header>
+    );
+  }
   const navigation = (
     <nav aria-label="Main navigation">
       {links.map(({ href, title, icon: Icon }) => (

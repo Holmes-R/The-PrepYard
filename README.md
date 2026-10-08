@@ -55,9 +55,9 @@ private.students owns application UUIDs. Verified password identities resolve th
 | /login            | Email and PrepYard password                         |
 | /signup           | Create an email/password account                    |
 | /api/auth/*       | Auth.js password/session endpoints                  |
-| /                 | Protected home                                      |
+| /                 | Public landing page                                 |
 | /companies        | Published company directory and question sheets     |
-| /dashboard /notes | Protected workspace placeholders                    |
+| /dashboard /notes | Protected dashboard and private notebook            |
 | /sources          | Removed; not found after sign-in                    |
 | /api/health       | Protected application liveness, not database health |
 
@@ -114,3 +114,11 @@ Explore and Practice offer Interview Launchpad (66 unique questions), DSA Deep D
 ## Pattern roadmap
 
 Practice exposes 22 numbered pattern groups in the learning order of the pinned DSA Patterns Roadmap. Dedicated pages prioritize its reference exercises already present in the catalogue, followed by matching verified topic tags and reviewed mappings. Existing topic browsing, explicit sorting, notes and revisions remain available. No database migration is needed for this catalogue/order change. See [roadmap matching and verification](docs/pattern-roadmap.md).
+
+## Readable student dashboard
+
+The dashboard presents four progress stats, three explained practice collections, recent practice and a seven-day revision chart. Collection cards show their purpose, who they suit and live solved/available totals. A keyboard-accessible “How collections work” disclosure explains shared progress, private notes and the Hotlist ranking. The interface uses scoped styles, labelled progress indicators, text alongside difficulty colors, visible keyboard focus and at least 44px action targets.
+
+## Public landing page
+
+The root route `/` introduces PrepYard with an interactive practice preview, company/pattern/notes/revision features, three collection guides, getting-started steps and keyboard-accessible FAQs. The preview switches between curated popular topics, patterns and companies; it does not query student data or claim live popularity rankings. Arrow keys, Home and End navigate its tabs. Each choice opens its practice destination for signed-in users, or sends guests to login with that destination preserved. Visitors can create an account or log in; signed-in students also get dashboard links. `/dashboard`, question pages and application APIs still require a valid account. Account navigation uses compact icon buttons with visible keyboard focus and mobile touch targets of at least 44px.

@@ -170,11 +170,11 @@ function QuestionRow({
   );
   const solved = optimisticStatus === "solved";
   const save = (kind: "solved" | "note", value: boolean | string) => {
-    if (kind === "solved")
-      // Transient only: un-solving an "attempted" question briefly reads as
-      // not-started until the reload lands with the true state.
-      setOptimisticStatus(value ? "solved" : "not_started");
     start(async () => {
+      if (kind === "solved")
+        // Transient only: un-solving an "attempted" question briefly reads as
+        // not-started until the reload lands with the true state.
+        setOptimisticStatus(value ? "solved" : "not_started");
       setMessage("");
       const result = await saveQuestionProgress(question.id, kind, value);
       if (result.ok) {
