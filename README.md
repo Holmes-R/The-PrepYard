@@ -110,3 +110,7 @@ Shared components live in `src/components/ui`; control and typography tokens are
 ### Original PrepYard practice tracks
 
 Explore and Practice offer Interview Launchpad (66 unique questions), DSA Deep Dive (282 unique questions across three platforms), and Interview Hotlist (up to 20 questions per topic ranked dynamically by reported company frequency). Old collection memberships are retired while saved progress, notes, and revisions remain. Run the generated `scripts/patterns/publish-prepyard.sql` in Supabase SQL Editor, or apply pending migrations and run `pnpm patterns:publish` with an administrative connection. See [publication](docs/pattern-sheet.md) and [reference attribution](docs/collection-attribution.md). Display names do not change reuse rights.
+
+## Pattern roadmap
+
+Practice exposes 22 numbered pattern groups in the learning order of the pinned DSA Patterns Roadmap. Dedicated pages prioritize its reference exercises already present in the catalogue, followed by matching verified topic tags and reviewed mappings. Existing topic browsing, explicit sorting, notes and revisions remain available. No database migration is needed for this catalogue/order change. See [roadmap matching and verification](docs/pattern-roadmap.md).

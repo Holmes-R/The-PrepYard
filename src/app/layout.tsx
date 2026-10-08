@@ -6,6 +6,8 @@ import "./globals.css";
 import "./launch-theme.css";
 import "./stitch-theme.css";
 import "./control-theme.css";
+import "./question-polish.css";
+import "./question-uniform.css";
 
 const inter = localFont({
   src: "./fonts/Inter-variable.ttf",

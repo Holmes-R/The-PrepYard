@@ -6,6 +6,7 @@ export type Filters = {
   difficulty: string;
   window: string;
   sort: string;
+  order?: string;
   topics: string[];
   progress: string;
   minFrequency: number | null;
@@ -46,6 +47,7 @@ export type Sheet = DifficultyCounts & {
     status: string;
     bookmarked: boolean;
     revision: boolean;
+    revision_confidence: number | null;
     has_note: boolean;
   }[];
   solved: number;

@@ -165,6 +165,9 @@ test("every statement binds exactly as many parameters as it references", async 
     new Set([...sql.matchAll(/\$(\d+)/g)].map((m) => Number(m[1]))).size;
   for (const params of [
     { sort: "random", collection: "dsa-deep-dive" },
+    { sort: "revision", collection: "dsa-deep-dive", pattern: "prefix-sum" },
+    { sort: "difficulty-asc", collection: "dsa-deep-dive" },
+    { sort: "difficulty-desc", pattern: "two-pointers" },
     { collection: "interview-hotlist", topic: "arrays", difficulty: "easy" },
     { sort: "random", collection: "interview-hotlist" },
     { sort: "random" },

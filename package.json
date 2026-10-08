@@ -31,7 +31,9 @@
     "collections:sql": "node scripts/patterns/sql-editor.mjs",
     "test:publication:database": "node tests/patterns/publication-sql-database.mjs",
     "test:hotlist:database": "node tests/patterns/hotlist-database.mjs",
-    "test:difficulty:database": "node tests/catalogue/difficulty-counts-database.mjs"
+    "test:difficulty:database": "node tests/catalogue/difficulty-counts-database.mjs",
+    "test:columns:database": "node tests/patterns/pattern-sort-database.mjs",
+    "test:roadmap:database": "node tests/patterns/roadmap-database.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

@@ -8,6 +8,7 @@ export type PatternFilters = {
   difficulty: string;
   progress: string;
   sort: string;
+  order?: string;
   hideTopics: string;
   page: number;
 };
@@ -22,6 +23,7 @@ export type PatternQuestion = {
   status: string;
   bookmarked: boolean;
   revision: boolean;
+  revision_confidence: number | null;
   has_note: boolean;
   patterns: Choice[];
   topics: Choice[];
@@ -34,6 +36,7 @@ export type PatternRows = {
   pages: number;
 };
 export type PatternOverview = {
+  topics: (Choice & { position: number; total: number })[];
   groups: (Choice & { position: number; total: number; solved: number })[];
   patterns: Choice[];
   collections: Choice[];

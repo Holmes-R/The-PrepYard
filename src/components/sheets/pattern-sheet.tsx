@@ -1,4 +1,13 @@
 "use client";
+import {
+  DifficultyBadge,
+  TopicTags,
+  RevisionButton,
+  NoteButton,
+} from "@/components/questions/question-controls";
+import { QuestionFilters } from "@/components/questions/question-filters";
+import { QuestionHeader } from "@/components/questions/question-header";
+import { patternHref } from "@/features/patterns/navigation.mjs";
 import { CompletionToggle } from "@/components/ui/selection-control";
 import {
   useCallback,
@@ -16,10 +25,8 @@ import {
   Layers3,
   BookOpen,
   Code2,
-  History,
   Search,
   Shuffle,
-  StickyNote,
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { SaveMessage } from "@/components/feedback/save-message";
@@ -65,22 +72,7 @@ function Meter({
   );
 }
 // Display platform topic tags separately from curated pattern tags.
-function QuestionTopics({ topics }: { topics: Choice[] }) {
-  return (
-    <div className="dsa-question-topics" aria-label="Topics">
-      {topics.length ? (
-        topics.map((topic) => (
-          <span key={topic.slug} className="dsa-platform-topic">
-            {topic.name}
-          </span>
-        ))
-      ) : (
-        <span className="dsa-topics-unavailable">Not available</span>
-      )}
-    </div>
-  );
-}
-function Question({
+export function Question({
   question: q,
   filters,
   onSaved,
@@ -196,7 +188,7 @@ function Question({
               {q.patterns.map((p) => (
                 <Link
                   key={p.slug}
-                  href={"/patterns?" + paramsFor(filters, { pattern: p.slug })}
+                  href={patternHref(p.slug)}
                   title={"Filter by " + p.name}
                   aria-current={filters.pattern === p.slug ? "true" : undefined}
                   style={{ color: patternColour(p.slug) }}
@@ -207,34 +199,30 @@ function Question({
             </div>
           )}
         </div>
-        <span className={"dsa-difficulty " + (q.difficulty ?? "")}>
-          {q.difficulty ?? "Unrated"}
-        </span>
-        {!hideTopics && <QuestionTopics topics={q.topics} />}
+        <DifficultyBadge className="dsa-difficulty" difficulty={q.difficulty} />
+        {!hideTopics && (
+          <div className="dsa-question-topics" aria-label="Topics">
+            <TopicTags topics={q.topics} />
+          </div>
+        )}
         <div className="dsa-actions dsa-revision-cell">
-          <button
-            aria-label={`Revision: ${q.title}`}
-            title="Add revision"
-            aria-haspopup="dialog"
-            className={q.revision ? "dsa-has-revision" : ""}
+          <RevisionButton
+            questionTitle={q.title}
+            confidence={q.revision_confidence}
+            scheduled={q.revision}
             onClick={() => setRevisionOpen(true)}
-          >
-            <History size={16} aria-hidden="true" />
-            <span>Revision</span>
-          </button>
+          />
         </div>
         <div className="dsa-actions dsa-notes-cell">
-          <button
-            aria-label={`Notes: ${q.title}`}
-            title="Private notes"
-            aria-expanded={notesOpen}
-            aria-controls={noteId}
-            className={q.has_note ? "dsa-has-note" : ""}
+          <NoteButton
+            questionTitle={q.title}
+            filled={q.has_note}
+            open={notesOpen}
+            busy={noteState === "loading"}
+            disabled={pending}
+            controls={noteId}
             onClick={toggleNotes}
-          >
-            <StickyNote size={17} aria-hidden="true" />
-            <span>{q.has_note ? "Note" : "Add note"}</span>
-          </button>
+          />
         </div>
       </div>
       {noteState === "loading" && !notesOpen && (
@@ -389,20 +377,15 @@ function Topic({
           className="dsa-topic-body dsa-enter"
           aria-busy={loading}
         >
-          <div
-            className={
-              "dsa-column-headings" +
-              (filters.hideTopics === "1" ? " dsa-hide-topics" : "")
+          <QuestionHeader
+            hideTopics={filters.hideTopics === "1"}
+            sort={filters.sort}
+            order={filters.order}
+            disabled={loading}
+            onChange={(order) =>
+              router.push("/patterns?" + paramsFor(filters, { order }))
             }
-            aria-hidden="true"
-          >
-            <span />
-            <span>Question</span>
-            <span>Difficulty</span>
-            {filters.hideTopics !== "1" && <span>Topics</span>}
-            <span>Revision</span>
-            <span>Notes</span>
-          </div>
+          />
           {loading && !data && (
             <div
               role="status"
@@ -493,8 +476,6 @@ function Topic({
     </section>
   );
 }
-const DIFFICULTIES = ["", "easy", "medium", "hard"];
-const CHIP_LIMIT = 12;
 function Select({
   name,
   label,
@@ -509,7 +490,7 @@ function Select({
   placeholder: string;
 }) {
   return (
-    <label className="dsa-filter">
+    <label className="prep-filter-field">
       <span>{label}</span>
       <select name={name} defaultValue={value}>
         <option value="">{placeholder}</option>
@@ -531,7 +512,6 @@ export function PatternSheet({
 }) {
   const groups = overview.groups;
   const router = useRouter();
-  const [showAllTopics, setShowAllTopics] = useState(false);
   const [mode, setMode] = useState<"topics" | "patterns" | "collections">(
     filters.collection
       ? "collections"
@@ -540,14 +520,6 @@ export function PatternSheet({
         : "topics",
   );
   const shuffled = filters.sort === "random";
-  // The selection is the reason the reader is here, so it is never hidden behind
-  // the "+N more" control.
-  const selectedIndex = groups.findIndex((g) => g.slug === filters.topic);
-  const visibleGroups =
-    showAllTopics || selectedIndex >= CHIP_LIMIT
-      ? groups
-      : groups.slice(0, CHIP_LIMIT);
-  const hiddenTopics = groups.length - visibleGroups.length;
   return (
     <section
       id="dsa-practice"
@@ -635,7 +607,7 @@ export function PatternSheet({
             </h2>
             <p>
               {mode === "patterns"
-                ? "Choose a pattern to focus your practice."
+                ? "Follow the numbered learning order, or choose a pattern to focus your practice."
                 : "Focused practice collections. Your progress follows you across every track."}
             </p>
           </header>
@@ -643,17 +615,14 @@ export function PatternSheet({
             {(mode === "patterns"
               ? overview.patterns
               : overview.collections
-            ).map((item) => (
+            ).map((item, index) => (
               <Link
                 key={item.slug}
                 href={
-                  "/patterns?" +
-                  paramsFor(
-                    filters,
-                    mode === "patterns"
-                      ? { pattern: item.slug, collection: "" }
-                      : { collection: item.slug, pattern: "" },
-                  )
+                  mode === "patterns"
+                    ? patternHref(item.slug)
+                    : "/patterns?" +
+                      paramsFor(filters, { collection: item.slug, pattern: "" })
                 }
                 aria-current={
                   (mode === "patterns"
@@ -665,7 +634,9 @@ export function PatternSheet({
               >
                 <span>
                   {mode === "patterns" ? (
-                    <Layers3 size={18} />
+                    <span className="prep-roadmap-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                   ) : (
                     <BookOpen size={18} />
                   )}
@@ -677,144 +648,66 @@ export function PatternSheet({
           </div>
         </section>
       )}
-      <form action="/patterns" method="get" className="dsa-filters">
-        <label className="dsa-filter dsa-search">
-          <span className="sr-only">Filter problems or topics</span>
-          <div>
-            <Search size={17} aria-hidden="true" />
-            <input
-              type="search"
-              name="q"
-              defaultValue={filters.q}
-              placeholder="Filter problems or topics…"
-              maxLength={100}
-            />
-          </div>
-        </label>
-        <div className="dsa-primary-row">
-          <fieldset className="dsa-segmented">
-            <legend className="sr-only">Difficulty</legend>
-            {DIFFICULTIES.map((slug) => (
-              <label
-                key={slug || "all"}
-                className={filters.difficulty === slug ? "is-active" : ""}
-              >
-                <input
-                  type="radio"
-                  name="difficulty"
-                  value={slug}
-                  defaultChecked={filters.difficulty === slug}
-                />
-                <span>
-                  {slug ? slug[0].toUpperCase() + slug.slice(1) : "All"}
-                </span>
-              </label>
-            ))}
-          </fieldset>
-          <button type="submit" className="dsa-apply">
-            Apply
-          </button>
-          {/* A button, not a link: it toggles a state (pressed or not) rather than
-              navigating to a destination, and aria-pressed is invalid on links.
-              Navigation happens through the router so the search box keeps
-              whatever is typed in it. */}
+      <QuestionFilters
+        q={filters.q}
+        difficulty={filters.difficulty}
+        progress={filters.progress}
+        topics={overview.topics.map((g) => ({ ...g, count: g.total }))}
+        selectedTopics={filters.topic ? [filters.topic] : []}
+        progressOptions={[
+          { slug: "", name: "Any progress" },
+          { slug: "unsolved", name: "Unsolved" },
+          { slug: "solved", name: "Solved" },
+          { slug: "bookmarked", name: "Bookmarked" },
+        ]}
+        action="/patterns"
+        resetHref="/patterns"
+        order={filters.order}
+        sort={filters.sort}
+        extraActions={
           <button
             type="button"
-            className={"dsa-random" + (shuffled ? " is-active" : "")}
+            className="prep-filter-reset"
             aria-pressed={shuffled}
             onClick={() =>
               router.push(
                 "/patterns?" +
-                  paramsFor(filters, { sort: shuffled ? "" : "random" }),
+                  paramsFor(filters, {
+                    sort: shuffled ? "recommended" : "random",
+                    order: "",
+                  }),
               )
             }
           >
-            <Shuffle size={15} aria-hidden="true" />{" "}
-            {shuffled ? "Shuffled" : "Random"}
+            <Shuffle size={15} aria-hidden="true" />
+            {shuffled ? "Shuffled" : "Shuffle"}
           </button>
-          <label className="dsa-check">
-            <input
-              type="checkbox"
-              name="hideTopics"
-              value="1"
-              defaultChecked={filters.hideTopics === "1"}
-            />
-            <span>Hide topics</span>
-          </label>
-        </div>
-        {groups.length > 0 && (
-          <fieldset className="dsa-chips" id="dsa-topic-chips">
-            <legend>Topics</legend>
-            <button
-              type="submit"
-              name="topic"
-              value=""
-              className={filters.topic ? "" : "is-active"}
-              aria-current={filters.topic ? undefined : "true"}
-            >
-              All topics
-            </button>
-            {visibleGroups.map((g) => (
-              <button
-                key={g.slug}
-                type="submit"
-                name="topic"
-                value={g.slug}
-                className={filters.topic === g.slug ? "is-active" : ""}
-                aria-current={filters.topic === g.slug ? "true" : undefined}
-              >
-                {g.name} <em>{g.total}</em>
-              </button>
-            ))}
-            {/*
-              One toggle, not two buttons: the expanded state always lives in one
-              place, so the control can honestly report it. The selection forces
-              the full list open (see above), which also counts as expanded.
-            */}
-            {(hiddenTopics > 0 || showAllTopics) && (
-              <button
-                type="button"
-                className="dsa-chips-more"
-                aria-expanded={showAllTopics || selectedIndex >= CHIP_LIMIT}
-                aria-controls="dsa-topic-chips"
-                onClick={() => setShowAllTopics(!showAllTopics)}
-              >
-                {showAllTopics ? "Show fewer" : `+${hiddenTopics} more`}
-              </button>
-            )}
-          </fieldset>
-        )}
-        <div className="dsa-secondary-row">
-          <Select
-            name="pattern"
-            label="Pattern"
-            value={filters.pattern}
-            options={overview.patterns}
-            placeholder="All patterns"
+        }
+      >
+        <Select
+          name="pattern"
+          label="Pattern"
+          value={filters.pattern}
+          options={overview.patterns}
+          placeholder="All patterns"
+        />
+        <Select
+          name="collection"
+          label="Practice collection"
+          value={filters.collection}
+          options={overview.collections}
+          placeholder="All collections"
+        />
+        <label className="prep-filter-field prep-filter-check">
+          <input
+            type="checkbox"
+            name="hideTopics"
+            value="1"
+            defaultChecked={filters.hideTopics === "1"}
           />
-          <Select
-            name="collection"
-            label="Practice collection"
-            value={filters.collection}
-            options={overview.collections}
-            placeholder="All collections"
-          />
-          <Select
-            name="progress"
-            label="Progress"
-            value={filters.progress}
-            options={[
-              { slug: "unsolved", name: "Unsolved" },
-              { slug: "solved", name: "Solved" },
-              { slug: "bookmarked", name: "Bookmarked" },
-            ]}
-            placeholder="Any progress"
-          />
-          <Link href="/patterns" className="dsa-reset">
-            Reset
-          </Link>
-        </div>
-      </form>
+          <span>Hide topics in rows</span>
+        </label>
+      </QuestionFilters>
       {filters.collection === "interview-hotlist" && (
         <p className="dsa-description">
           Up to 20 questions per topic, ranked by peak reported company

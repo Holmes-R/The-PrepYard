@@ -1,3 +1,10 @@
+import { decorateRoadmapQuestions } from "../patterns/roadmap.mjs";
+import {
+  cleanOrder,
+  orderSql,
+  revisionExpressions,
+  difficultyExpression,
+} from "../questions/sorting.mjs";
 export const windowLabels = {
   all: "All time",
   "30d": "Last 30 days",
@@ -48,6 +55,7 @@ export function filtersFrom(params = {}) {
     )
       ? one("sort")
       : "frequency-desc",
+    order: cleanOrder(one("order")),
     topics: many("topics"),
     progress: Object.hasOwn(progressLabels, one("progress"))
       ? one("progress")
@@ -79,6 +87,7 @@ export function filtersToParams(filters, openSlug = "") {
     params.set("window", filters.window);
   if (filters.sort && filters.sort !== "frequency-desc")
     params.set("sort", filters.sort);
+  if (filters.order) params.set("order", filters.order);
   for (const topic of filters.topics ?? []) params.append("topics", topic);
   if (filters.progress && filters.progress !== "any")
     params.set("progress", filters.progress);
@@ -94,13 +103,13 @@ export function filtersToParams(filters, openSlug = "") {
 export async function companyTopics(client, companyId) {
   return (
     await client.query(
-      `select t.slug,t.name,count(*)::int as uses
+      `select t.slug,t.name,count(distinct qt.question_id)::int as uses
        from public.question_topics qt
        join public.topics t on t.id=qt.topic_id
        join public.company_question_observations o on o.question_id=qt.question_id
        where o.company_id=$1
        group by t.slug,t.name
-       order by count(*) desc,t.name`,
+       order by count(distinct qt.question_id) desc,t.name`,
       [companyId],
     )
   ).rows;
@@ -212,7 +221,14 @@ export async function companySheet(client, slug, filters) {
   const pages = Math.max(1, Math.ceil(total / 50));
   const page = Math.min(filters.page, pages);
   const order =
-    filters.sort === "title"
+    orderSql(filters.order, {
+      title: ["lower(q.title)"],
+      difficulty: [difficultyExpression],
+      frequency: ["o.frequency"],
+      acceptance: ["o.acceptance"],
+      revision: revisionExpressions("own"),
+    }) ||
+    (filters.sort === "title"
       ? "lower(q.title),q.id"
       : filters.sort === "title-desc"
         ? "lower(q.title) desc,q.id"
@@ -220,7 +236,7 @@ export async function companySheet(client, slug, filters) {
           ? "o.acceptance desc nulls last,lower(q.title),q.id"
           : filters.sort === "frequency-asc"
             ? "o.frequency asc nulls last,lower(q.title),q.id"
-            : "o.frequency desc nulls last,lower(q.title),q.id";
+            : "o.frequency desc nulls last,lower(q.title),q.id");
   // Counted before the rows query so the shared parameter list is not extended
   // afterwards: PostgreSQL rejects a bind list longer than the statement needs.
   const solved = Number(
@@ -243,11 +259,13 @@ export async function companySheet(client, slug, filters) {
  coalesce((select status from public.user_question_state u where u.question_id=q.id),'not_started') as status,
  coalesce((select bookmarked from public.user_question_state u where u.question_id=q.id),false) as bookmarked,
  (select next_revision_at from public.user_question_state u where u.question_id=q.id) is not null as revision,
+ (select confidence from public.user_question_state u where u.question_id=q.id) as revision_confidence,
   exists(select 1 from public.notes n where n.question_id=q.id) as has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) as patterns,
  coalesce((select jsonb_agg(t order by t.name) from (select tp.slug,tp.name from public.question_topics qt join public.topics tp on tp.id=qt.topic_id where qt.question_id=q.id) t),'[]'::jsonb) as topics,
  coalesce((select jsonb_agg(t order by t.frequency desc nulls last,t.name) from (select c.slug,c.name,max(x.frequency)::float8 as frequency from public.company_question_observations x join public.companies c on c.id=x.company_id where x.question_id=q.id and x.time_window=$2 and x.frequency_kind in ('percent','unknown') group by c.slug,c.name) t),'[]'::jsonb) as companies ` +
         base +
+        " left join public.user_question_state own on own.question_id=q.id and own.user_id=private.student_id()" +
         clause() +
         " order by " +
         order +
@@ -260,7 +278,7 @@ export async function companySheet(client, slug, filters) {
     company,
     available,
     topics,
-    rows,
+    rows: decorateRoadmapQuestions(rows),
     total,
     page,
     pages,

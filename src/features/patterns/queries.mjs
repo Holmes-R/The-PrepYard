@@ -1,3 +1,16 @@
+import {
+  roadmapChoices,
+  canonicalPatternSlug,
+  roadmapPredicate,
+  roadmapRecommendedOrder,
+  decorateRoadmapQuestions,
+} from "./roadmap.mjs";
+import {
+  cleanOrder,
+  orderSql,
+  revisionExpressions,
+  difficultyExpression,
+} from "../questions/sorting.mjs";
 import { prepYardCollectionSlugs, hotlistSlug } from "./collections.mjs";
 export function patternFilters(params = {}) {
   const one = (key) => (typeof params[key] === "string" ? params[key] : "");
@@ -7,7 +20,7 @@ export function patternFilters(params = {}) {
   return {
     q: term,
     topic: slug("topic"),
-    pattern: slug("pattern"),
+    pattern: canonicalPatternSlug(slug("pattern")),
     collection: prepYardCollectionSlugs.includes(slug("collection"))
       ? slug("collection")
       : "",
@@ -17,9 +30,12 @@ export function patternFilters(params = {}) {
     progress: ["solved", "unsolved", "bookmarked"].includes(one("progress"))
       ? one("progress")
       : "",
-    // Only two orders exist: the recommended one, and a shuffle the reader turns on
-    // and off from the toolbar.
-    sort: one("sort") === "random" ? "random" : "recommended",
+    sort: ["random", "difficulty-asc", "difficulty-desc", "revision"].includes(
+      one("sort"),
+    )
+      ? one("sort")
+      : "recommended",
+    order: cleanOrder(one("order"), ["title", "difficulty", "revision"]),
     // A view preference, but kept in the URL so it survives a filter change and can
     // be bookmarked, like everything else on this page.
     hideTopics: one("hideTopics") === "1" ? "1" : "",
@@ -50,9 +66,10 @@ function queryParts(f) {
   if (f.difficulty) where.push("q.difficulty=" + add(f.difficulty));
   if (f.pattern)
     where.push(
-      "exists(select 1 from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed and p.slug=" +
-        add(f.pattern) +
-        ")",
+      roadmapPredicate(f.pattern, add) ||
+        "exists(select 1 from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed and p.slug=" +
+          add(f.pattern) +
+          ")",
     );
   if (f.collection && f.collection !== hotlistSlug)
     where.push(
@@ -80,18 +97,28 @@ export async function patternOverview(client, f) {
       args,
     )
   ).rows;
-  const patterns = (
-    await client.query(
-      `select p.slug,p.name from public.patterns p where exists(select 1 from public.question_patterns qp join public.question_dsa_topics qt on qt.question_id=qp.question_id where qp.pattern_id=p.id and qp.reviewed) order by p.name`,
-    )
-  ).rows;
+  const patterns = roadmapChoices;
   const collections = (
     await client.query(
       "select slug,name from public.pattern_collections where slug=any($1::text[]) order by name",
       [prepYardCollectionSlugs],
     )
   ).rows;
+  const picker = queryParts({
+    ...f,
+    topic: "",
+    q: "",
+    difficulty: "",
+    progress: "",
+  });
+  const topics = (
+    await client.query(
+      `select t.slug,t.name,t.position,count(*)::int total ${picker.base} group by t.id order by t.position,t.name`,
+      picker.args,
+    )
+  ).rows;
   return {
+    topics,
     groups,
     patterns,
     collections,
@@ -113,20 +140,32 @@ export async function patternQuestions(client, f) {
   // unconditionally would bind a parameter the shuffle query never references, and
   // PostgreSQL rejects a bind list longer than the statement needs.
   const order =
-    f.sort === "random"
+    orderSql(f.order, {
+      title: ["lower(q.title)"],
+      difficulty: [difficultyExpression],
+      revision: revisionExpressions(),
+    }) ||
+    (f.sort === "random"
       ? // Re-evaluated per query, so reloading an identical URL really reshuffles.
         "random()"
-      : f.collection === hotlistSlug
-        ? "t.position,hot.position,q.id"
-        : f.collection
-          ? "coalesce((select cq.position from public.pattern_collection_questions cq join public.pattern_collections pc on pc.id=cq.collection_id where cq.question_id=q.id and pc.slug=" +
-            add(f.collection) +
-            "),2147483647),lower(q.title),q.id"
-          : "case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id";
+      : f.sort === "difficulty-asc"
+        ? "case q.difficulty when 'easy' then 1 when 'medium' then 2 when 'hard' then 3 else 4 end,lower(q.title),q.id"
+        : f.sort === "difficulty-desc"
+          ? "case q.difficulty when 'hard' then 1 when 'medium' then 2 when 'easy' then 3 else 4 end,lower(q.title),q.id"
+          : f.sort === "revision"
+            ? "case when u.next_revision_at<=now() then 0 when u.confidence in (1,2) then 1 when u.next_revision_at is not null then 2 else 3 end,u.confidence asc nulls last,u.next_revision_at asc nulls last,lower(q.title),q.id"
+            : f.collection === hotlistSlug
+              ? "t.position,hot.position,q.id"
+              : f.collection
+                ? "coalesce((select cq.position from public.pattern_collection_questions cq join public.pattern_collections pc on pc.id=cq.collection_id where cq.question_id=q.id and pc.slug=" +
+                  add(f.collection) +
+                  "),2147483647),lower(q.title),q.id"
+                : roadmapRecommendedOrder(f.pattern, add) ||
+                  "case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id");
   const rows = (
     await client.query(
       `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
- coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
+ u.confidence revision_confidence,coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  exists(select 1 from public.notes n where n.question_id=q.id and n.user_id=private.student_id()) has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns,
  coalesce((select jsonb_agg(jsonb_build_object('slug',lt.slug,'name',lt.name) order by lt.name) from public.question_topics lqt join public.topics lt on lt.id=lqt.topic_id where lqt.question_id=q.id),'[]'::jsonb) topics
@@ -134,5 +173,5 @@ export async function patternQuestions(client, f) {
       args,
     )
   ).rows;
-  return { ...summary, rows, page, pages };
+  return { ...summary, rows: decorateRoadmapQuestions(rows), page, pages };
 }

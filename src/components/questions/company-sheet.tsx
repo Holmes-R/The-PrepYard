@@ -1,4 +1,14 @@
 "use client";
+import { QuestionFilters } from "./question-filters";
+import { QuestionHeader } from "./question-header";
+
+import {
+  DifficultyBadge,
+  TopicTags,
+  RevisionButton,
+  NoteButton,
+} from "./question-controls";
+import { patternHref } from "@/features/patterns/navigation.mjs";
 import { CompletionToggle } from "@/components/ui/selection-control";
 import {
   useEffect,
@@ -10,14 +20,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  ArrowUpRight,
-  RotateCcw,
-  History,
-  ArrowRight,
-  StickyNote,
-  Search,
-} from "lucide-react";
+import { ArrowUpRight, ArrowRight, Search } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { RevisionDialog } from "@/components/sheets/revision-dialog";
 import { SaveMessage } from "@/components/feedback/save-message";
@@ -235,7 +238,7 @@ function QuestionRow({
               question.patterns.map((pattern) => (
                 <Link
                   key={pattern.slug}
-                  href={"/patterns?pattern=" + encodeURIComponent(pattern.slug)}
+                  href={patternHref(pattern.slug)}
                   style={{ color: patternColour(pattern.slug) }}
                 >
                   {pattern.name}
@@ -285,26 +288,11 @@ function QuestionRow({
             )}
           </div>
         </div>
-        <span
-          className="difficulty company-difficulty-indicator"
-          title={
-            question.difficulty
-              ? question.difficulty[0].toUpperCase() +
-                question.difficulty.slice(1)
-              : "Unrated"
-          }
-        >
-          <DifficultyDot difficulty={question.difficulty} />
-          <span className="sr-only">{question.difficulty ?? "Unrated"}</span>
+        <span className="difficulty">
+          <DifficultyBadge difficulty={question.difficulty} />
         </span>
         <div className="company-question-topics" aria-label="Topics">
-          {question.topics.length ? (
-            question.topics.map((topic) => (
-              <span key={topic.slug}>{topic.name}</span>
-            ))
-          ) : (
-            <span className="prep-muted">Not available</span>
-          )}
+          <TopicTags topics={question.topics} />
         </div>
         <span
           className="question-frequency"
@@ -322,30 +310,23 @@ function QuestionRow({
           )}
         </span>
         <div className="company-revision-cell">
-          <button
-            className={
-              "prep-row-action" + (question.revision ? " is-saved" : "")
-            }
-            aria-label={"Revision: " + question.title}
-            aria-haspopup="dialog"
+          <RevisionButton
+            questionTitle={question.title}
+            confidence={question.revision_confidence}
+            scheduled={question.revision}
             onClick={() => setRevisionOpen(true)}
-          >
-            <History size={16} />
-            <span>Revision</span>
-          </button>
+          />
         </div>
         <div className="question-utilities">
-          <button
-            className={"note-button " + (question.has_note ? "has-note" : "")}
-            title="Question notes"
-            aria-label={"Notes for " + question.title}
-            aria-expanded={notesOpen}
-            aria-controls={noteId}
+          <NoteButton
+            questionTitle={question.title}
+            filled={question.has_note}
+            open={notesOpen}
+            busy={noteState === "loading"}
+            disabled={pending}
+            controls={noteId}
             onClick={toggleNotes}
-          >
-            <StickyNote size={17} aria-hidden="true" />
-            <span>{question.has_note ? "Note" : "Add note"}</span>
-          </button>
+          />
         </div>
       </div>
       <RevisionDialog
@@ -523,7 +504,8 @@ function CompanyQuestions({
       difficulty: String(data.get("difficulty") || ""),
       window: String(data.get("window") || "all"),
       sort: String(data.get("sort") || "frequency-desc"),
-      topics: data.getAll("topics").map(String),
+      order: String(data.get("order") || ""),
+      topics: data.getAll("topics").map(String).filter(Boolean),
       progress: String(data.get("progress") || "any"),
       minFrequency,
       minAcceptance,
@@ -550,51 +532,35 @@ function CompanyQuestions({
   const applied = JSON.stringify(filters);
   return (
     <div className="company-panel-body">
-      <form className="sheet-filters" onSubmit={submit} key={applied}>
-        <label className="sheet-field sheet-field-title">
-          Question title
-          <input
-            name="q"
-            type="search"
-            maxLength={100}
-            defaultValue={filters.q}
-            placeholder="Search questions…"
-          />
-        </label>
-        <label className="sheet-field">
-          Difficulty
-          <select name="difficulty" defaultValue={filters.difficulty}>
-            <option value="">All difficulties</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </label>
-        <label className="sheet-field">
-          Window
-          <select name="window" defaultValue={window_}>
-            {windows.map((key) => (
-              <option key={key} value={key}>
-                {windowLabels[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="sheet-field">
-          My progress
-          <select name="progress" defaultValue={filters.progress}>
-            {Object.entries(progressLabels)
-              .filter(([key]) => !["bookmarked", "revision"].includes(key))
-              .map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-          </select>
-        </label>
-        <label className="sheet-field">
-          Sort
-          <select name="sort" defaultValue={filters.sort}>
+      <QuestionFilters
+        key={applied}
+        q={filters.q}
+        difficulty={filters.difficulty}
+        progress={filters.progress}
+        topics={topics.map((t) => ({ ...t, count: t.uses }))}
+        selectedTopics={filters.topics}
+        multipleTopics
+        progressOptions={Object.entries(progressLabels)
+          .filter(([key]) => key !== "bookmarked")
+          .map(([slug, name]) => ({ slug, name }))}
+        onSubmit={submit}
+        loading={loading}
+        sort={filters.sort}
+        order={filters.order}
+        sortSelect
+        onReset={() => {
+          setFormError("");
+          void load({ ...defaultFilters });
+          onApplied({ ...defaultFilters });
+        }}
+      >
+        <label className="prep-filter-field">
+          <span>Default order</span>
+          <select
+            name="sort"
+            aria-label="Default order"
+            defaultValue={filters.sort}
+          >
             <option value="frequency-desc">Highest frequency</option>
             <option value="frequency-asc">Lowest frequency</option>
             <option value="acceptance-desc">Highest acceptance</option>
@@ -602,84 +568,41 @@ function CompanyQuestions({
             <option value="title-desc">Title Z–A</option>
           </select>
         </label>
-        <label className="sheet-field sheet-field-narrow">
-          Min frequency %
+        <label className="prep-filter-field">
+          <span>Window</span>
+          <select name="window" aria-label="Window" defaultValue={window_}>
+            {windows.map((key) => (
+              <option key={key} value={key}>
+                {windowLabels[key]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="prep-filter-field">
+          <span>Min frequency %</span>
           <input
             name="minFrequency"
             type="number"
             min={0}
             max={100}
             step={0.5}
-            inputMode="decimal"
-            placeholder="any"
+            placeholder="Any"
             defaultValue={filters.minFrequency ?? ""}
-            aria-invalid={formError ? true : undefined}
-            aria-describedby={formError ? "sheet-filter-error" : undefined}
           />
         </label>
-        <label className="sheet-field sheet-field-narrow">
-          Min acceptance %
+        <label className="prep-filter-field">
+          <span>Min acceptance %</span>
           <input
             name="minAcceptance"
             type="number"
             min={0}
             max={100}
             step={0.5}
-            inputMode="decimal"
-            placeholder="any"
+            placeholder="Any"
             defaultValue={filters.minAcceptance ?? ""}
-            aria-invalid={formError ? true : undefined}
-            aria-describedby={formError ? "sheet-filter-error" : undefined}
           />
         </label>
-        <div className="sheet-filter-actions">
-          <button className="sheet-apply" disabled={loading}>
-            Apply
-          </button>
-          <button
-            type="button"
-            className="sheet-reset"
-            disabled={loading}
-            onClick={() => {
-              setFormError("");
-              void load({ ...defaultFilters });
-              onApplied({ ...defaultFilters });
-            }}
-          >
-            <RotateCcw size={14} aria-hidden="true" /> Reset
-          </button>
-        </div>
-        <fieldset className="sheet-topics">
-          <legend>
-            Topics
-            {filters.topics.length > 0 && (
-              <span className="sheet-topic-count">
-                {filters.topics.length} selected
-              </span>
-            )}
-          </legend>
-          {topics.length > 0 ? (
-            <div className="sheet-topic-chips">
-              {topics.map((topic) => (
-                <label key={topic.slug} className="sheet-topic-chip">
-                  <input
-                    type="checkbox"
-                    name="topics"
-                    value={topic.slug}
-                    defaultChecked={filters.topics.includes(topic.slug)}
-                  />
-                  <span>{topic.name}</span>
-                  <em>{topic.uses}</em>
-                </label>
-              ))}
-            </div>
-          ) : (
-            <p className="sheet-message">
-              No topic tags yet. They arrive with the catalogue import.
-            </p>
-          )}
-        </fieldset>
-      </form>
+      </QuestionFilters>
       {formError && (
         <p id="sheet-filter-error" className="sheet-error" role="alert">
           {formError}
@@ -714,15 +637,17 @@ function CompanyQuestions({
       )}
       {sheet && (
         <>
-          <div className="question-column-labels" aria-hidden="true">
-            <span>Status</span>
-            <span>Question & pattern</span>
-            <span>Difficulty</span>
-            <span>Topics</span>
-            <span>Frequency</span>
-            <span>Revision</span>
-            <span>Notes</span>
-          </div>
+          <QuestionHeader
+            company
+            order={filters.order}
+            sort={filters.sort}
+            disabled={loading}
+            onChange={(order) => {
+              const next = { ...filters, order, page: 1 };
+              void load(next);
+              onApplied(next);
+            }}
+          />
           <div
             className="company-question-list"
             role="list"
@@ -987,6 +912,7 @@ export function CompanyDirectory({
       const next = filtersFrom({
         ...Object.fromEntries(url.entries()),
         topics: url.getAll("topics"),
+        order: url.get("order") ?? "",
       });
       setPrevFind(find);
       setSearch(find);
