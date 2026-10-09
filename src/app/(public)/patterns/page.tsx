@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { patternHref } from "@/features/patterns/navigation.mjs";
 import type { Metadata } from "next";
-import { getPatternOverview } from "@/features/patterns/server";
 import { patternFilters } from "@/features/patterns/queries.mjs";
-import { PatternSheet } from "@/components/sheets/pattern-sheet";
+import { ClientPatterns } from "@/components/client/workspace-pages";
 export const metadata: Metadata = { title: "DSA topics & patterns" };
 export default async function Page({
   searchParams,
@@ -17,11 +16,5 @@ export default async function Page({
       if (value && key !== "pattern") params.set(key, String(value));
     redirect(patternHref(filters.pattern, params));
   }
-  return (
-    <PatternSheet
-      key={JSON.stringify(filters)}
-      overview={await getPatternOverview(filters)}
-      filters={filters}
-    />
-  );
+  return <ClientPatterns filters={filters} />;
 }

@@ -1,8 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import { getPatternPractice } from "@/features/patterns/server";
 import { patternFilters } from "@/features/patterns/queries.mjs";
 import { patternHref } from "@/features/patterns/navigation.mjs";
-import { PatternDetail } from "@/components/sheets/pattern-detail";
+import { ClientPattern } from "@/components/client/workspace-pages";
 export const metadata = { title: "Pattern practice" };
 export default async function Page({
   params,
@@ -20,15 +19,5 @@ export default async function Page({
       if (value && key !== "pattern") query.set(key, String(value));
     redirect(patternHref(filters.pattern, query));
   }
-  const data = await getPatternPractice(slug, filters);
-  if (!data) notFound();
-  return (
-    <PatternDetail
-      key={JSON.stringify(filters)}
-      pattern={data.pattern}
-      rows={data.rows}
-      topics={data.topics}
-      filters={filters}
-    />
-  );
+  return <ClientPattern slug={slug} filters={filters} />;
 }

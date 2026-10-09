@@ -1,12 +1,11 @@
 "use client";
+import { refreshClientData } from "@/lib/client/use-client-resource";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { deleteNote } from "@/features/progress/actions";
 
 // Two-step inline confirm: one tap stages, the second commits, so a stray tap
-// never destroys a note. The card disappears once router.refresh() re-renders
-// the server page without it.
+// never destroys a note. Successful deletion refreshes the client notes list.
 export function DeleteNoteButton({
   questionId,
   title,
@@ -14,7 +13,6 @@ export function DeleteNoteButton({
   questionId: string;
   title: string;
 }) {
-  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -34,7 +32,7 @@ export function DeleteNoteButton({
         setError(result.message);
         return;
       }
-      router.refresh();
+      refreshClientData();
     });
   };
 

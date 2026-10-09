@@ -1,0 +1,33 @@
+.prep-resource-state {
+  padding: 28px 0;
+  min-height: 400px;
+}
+.prep-resource-state > p {
+  margin-top: 16px;
+  color: #b7b7c0;
+}
+.prep-resource-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.prep-resource-skeleton {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+.prep-resource-skeleton > span {
+  height: 70px;
+  background: #1c1c1f;
+  border: 1px solid #38383d;
+  border-radius: 8px;
+}
+.yard-header-account-loading {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 150px;
+  color: #b7b7c0;
+  font-size: 13px;
+}

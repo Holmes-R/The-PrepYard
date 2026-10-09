@@ -1,10 +1,10 @@
 export const dynamic = "force-dynamic";
-import { requireUser } from "@/lib/auth/server";
-export default async function ProtectedLayout({
+// The proxy validates the session before serving protected page shells.
+// Private APIs and server actions independently authorize their data operations.
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireUser();
   return children;
 }

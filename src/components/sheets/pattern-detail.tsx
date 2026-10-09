@@ -1,4 +1,5 @@
 "use client";
+import { refreshClientData } from "@/lib/client/use-client-resource";
 import { QuestionFilters } from "@/components/questions/question-filters";
 import { QuestionHeader } from "@/components/questions/question-header";
 import Link from "next/link";
@@ -137,7 +138,7 @@ export function PatternDetail({
             question={q}
             filters={filters}
             onSaved={async () => {
-              router.refresh();
+              refreshClientData();
             }}
           />
         ))}

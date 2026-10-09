@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCompanySheet } from "@/features/catalogue/server";
 import { filtersFrom } from "@/features/catalogue/queries.mjs";
-import { CompanySection } from "@/components/questions/company-sheet";
+import { ClientCompany } from "@/components/client/workspace-pages";
 export const metadata = { title: "Company questions" };
 export default async function Page({
   params,
@@ -13,42 +11,7 @@ export default async function Page({
 }) {
   const { slug } = await params;
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) notFound();
-  const filters = filtersFrom(await searchParams);
-  const sheet = await getCompanySheet(slug, filters);
-  if (!sheet) notFound();
   return (
-    <div className="company-sheet-theme">
-      <nav aria-label="Breadcrumb">
-        <ol className="sheet-crumbs">
-          <li>
-            <Link href="/companies">All companies</Link>
-          </li>
-          <li aria-current="page">{sheet.company.name}</li>
-        </ol>
-      </nav>
-      <header className="company-page-heading">
-        <p className="sheet-eyebrow">Company-wise practice</p>
-        <h1>{sheet.company.name} Interview Questions</h1>
-        <p>Practice the questions. Track every step.</p>
-      </header>
-      <CompanySection
-        key={JSON.stringify(filters)}
-        company={{
-          ...sheet.company,
-          question_count: sheet.total,
-          solved_count: sheet.solved,
-          easy_count: sheet.easy_count,
-          medium_count: sheet.medium_count,
-          hard_count: sheet.hard_count,
-        }}
-        initial={sheet}
-        initialFilters={filters}
-        syncUrl
-      />
-      <p className="sheet-footnote">
-        Company tags are sorted by frequency within the selected window.
-        Completion, revision history, and notes are private to your account.
-      </p>
-    </div>
+    <ClientCompany slug={slug} filters={filtersFrom(await searchParams)} />
   );
 }

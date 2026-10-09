@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { listCompanies } from "@/features/catalogue/server";
 import { filtersFrom } from "@/features/catalogue/queries.mjs";
-import { CompanyDirectory } from "@/components/questions/company-sheet";
+import { ClientCompanies } from "@/components/client/workspace-pages";
 export const metadata: Metadata = { title: "Company questions" };
 export default async function Page({
   searchParams,
@@ -12,11 +11,6 @@ export default async function Page({
   const open = typeof params.open === "string" ? params.open : null;
   const find = typeof params.find === "string" ? params.find : "";
   return (
-    <CompanyDirectory
-      companies={await listCompanies()}
-      initialOpen={open}
-      initialFilters={filtersFrom(params)}
-      initialFind={find}
-    />
+    <ClientCompanies open={open} find={find} filters={filtersFrom(params)} />
   );
 }

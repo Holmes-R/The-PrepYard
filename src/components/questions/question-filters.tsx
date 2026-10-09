@@ -1,6 +1,7 @@
 "use client";
 import { useId, useState, type ReactNode, type FormEventHandler } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 type Topic = { slug: string; name: string; count?: number };
 function TopicPicker({
@@ -130,6 +131,7 @@ export function QuestionFilters({
   sort?: string;
   sortSelect?: boolean;
 }) {
+  const router = useRouter();
   return (
     <form
       className="prep-question-filters"
@@ -146,7 +148,17 @@ export function QuestionFilters({
           );
           if (input) input.value = "";
         }
-        onSubmit?.(event);
+        if (onSubmit) {
+          onSubmit(event);
+          return;
+        }
+        if (!action) return;
+        event.preventDefault();
+        const params = new URLSearchParams();
+        for (const [key, value] of new FormData(form)) {
+          if (typeof value === "string" && value) params.append(key, value);
+        }
+        router.push(action + (params.size ? "?" + params.toString() : ""));
       }}
     >
       <input type="hidden" name="order" value={order} />

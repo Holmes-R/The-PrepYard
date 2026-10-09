@@ -36,7 +36,11 @@ export async function proxy(request: NextRequest) {
       // Clear only unreadable tokens or unsupported legacy claims. A temporary
       // database outage must not be mistaken for a corrupt browser cookie.
       invalidSession = sessionCookies.length > 0 && !signedIn;
-      if (signedIn && typeof token?.passwordVersion === "number")
+      if (
+        !publicRoute &&
+        signedIn &&
+        typeof token?.passwordVersion === "number"
+      )
         signedIn = await passwordSessionValid(
           token.studentId!,
           token.passwordVersion,

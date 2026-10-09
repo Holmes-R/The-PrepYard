@@ -25,8 +25,10 @@ const links = [
 
 export function SiteHeader({
   user,
+  pending = false,
 }: {
   user?: { name?: string | null; email?: string | null } | null;
+  pending?: boolean;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -105,7 +107,11 @@ export function SiteHeader({
     );
     const accountLinks = (
       <div className="yard-header-auth">
-        {user ? (
+        {pending ? (
+          <span className="yard-header-account-loading" role="status">
+            Loading account…
+          </span>
+        ) : user ? (
           <Link
             className="yard-header-signup"
             href="/dashboard"

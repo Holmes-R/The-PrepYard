@@ -82,8 +82,17 @@ try {
   assert.match(landingHtml, /next interview/);
   assert.match(landingHtml, /Create free account/);
   assert.doesNotMatch(landingHtml, /Welcome back|Your practice updates/);
-  const api = await fetch(base + "/api/health", { redirect: "manual" });
-  assert.equal(api.status, 401);
+  for (const endpoint of [
+    "/api/health",
+    "/api/dashboard",
+    "/api/companies",
+    "/api/notes",
+    "/api/patterns/overview",
+    "/api/patterns/two-pointers",
+  ]) {
+    const api = await fetch(base + endpoint, { redirect: "manual" });
+    assert.equal(api.status, 401, endpoint + " rejects anonymous data reads");
+  }
   for (const route of ["/login"]) {
     const response = await fetch(base + route);
     assert.equal(response.status, 200);

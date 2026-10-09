@@ -1,4 +1,5 @@
 "use client";
+import { refreshClientData } from "@/lib/client/use-client-resource";
 import {
   DifficultyBadge,
   TopicTags,
@@ -337,7 +338,7 @@ function Topic({
     setLoading(true);
     setError("");
     await fetchRows();
-    router.refresh();
+    refreshClientData();
   };
   const total = data?.total ?? group.total;
   const solved = data?.solved ?? group.solved;

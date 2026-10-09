@@ -1,4 +1,5 @@
 "use client";
+import { refreshClientData } from "@/lib/client/use-client-resource";
 import { QuestionFilters } from "./question-filters";
 import { QuestionHeader } from "./question-header";
 
@@ -466,7 +467,6 @@ function CompanyQuestions({
   // refresh data without changing what is being viewed.
   onApplied: (next: Filters) => void;
 }) {
-  const router = useRouter();
   const [formError, setFormError] = useState("");
   // Offering a window the company has no observations for returns an empty sheet
   // that looks like a bug, so the options follow the data.
@@ -523,7 +523,7 @@ function CompanyQuestions({
   // solved tally update without navigating away.
   const refreshAfterSave = async () => {
     await load();
-    router.refresh();
+    refreshClientData();
   };
   const topics = sheet?.topics ?? [];
   // The form is uncontrolled, so it is remounted whenever the applied filters change.

@@ -122,3 +122,9 @@ The dashboard presents four progress stats, three explained practice collections
 ## Public landing page
 
 The root route `/` introduces PrepYard with an interactive practice preview, company/pattern/notes/revision features, three collection guides, getting-started steps and keyboard-accessible FAQs. The preview switches between curated popular topics, patterns and companies; it does not query student data or claim live popularity rankings. Arrow keys, Home and End navigate its tabs. Each choice opens its practice destination for signed-in users, or sends guests to login with that destination preserved. Visitors can create an account or log in; signed-in students also get dashboard links. `/dashboard`, question pages and application APIs still require a valid account. Account navigation uses compact icon buttons with visible keyboard focus and mobile touch targets of at least 44px.
+
+## Client-side loading
+
+The landing page is prerendered; account-specific links update from the Auth.js session endpoint in the browser. Dashboard, company directory and sheets, pattern overview and detail pages, and notes render a loading shell first, then fetch private JSON from authenticated APIs. Filters navigate on the client; rapid navigation aborts obsolete fetches. Failed requests offer a retry, and a 401 returns the student to login with the requested destination preserved. Saves and deletions refresh active client data without refreshing the entire page. Private responses use `private, no-store`; student identity and database credentials stay on the server, with the existing row-level access policies. The proxy still checks session validity before serving protected page shells.
+
+Client rendering improves perceived loading by avoiding a wait for catalogue queries in the HTML response. It still needs JavaScript and a working database connection, and does not make a slow database query faster.
