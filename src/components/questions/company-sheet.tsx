@@ -23,7 +23,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowUpRight, ArrowRight, Search } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
-import { RevisionDialog } from "@/components/sheets/revision-dialog";
+import dynamic from "next/dynamic";
+const RevisionDialog = dynamic(
+  () =>
+    import("@/components/sheets/revision-dialog").then(
+      (module) => module.RevisionDialog,
+    ),
+  { loading: () => <p role="status">Loading revision…</p> },
+);
 import { SaveMessage } from "@/components/feedback/save-message";
 import { patternColour } from "@/lib/pattern-colour";
 import {
@@ -330,13 +337,15 @@ function QuestionRow({
           />
         </div>
       </div>
-      <RevisionDialog
-        questionId={question.id}
-        questionTitle={question.title}
-        open={revisionOpen}
-        onClose={() => setRevisionOpen(false)}
-        onDone={onSaved}
-      />
+      {revisionOpen && (
+        <RevisionDialog
+          questionId={question.id}
+          questionTitle={question.title}
+          open={revisionOpen}
+          onClose={() => setRevisionOpen(false)}
+          onDone={onSaved}
+        />
+      )}
       {noteState === "loading" && !notesOpen && (
         <p role="status" className="sheet-message">
           Loading notes…

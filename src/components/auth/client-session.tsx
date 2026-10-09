@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { SWRConfig } from "swr";
 import { usePathname } from "next/navigation";
 import { useClientResource } from "@/lib/client/use-client-resource";
 import { SiteHeader } from "@/components/navigation/site-header";
@@ -28,6 +29,20 @@ export function ClientSession({ children }: { children: React.ReactNode }) {
           ].includes(pathname)
         ? pathname
         : "workspace";
+  return (
+    <SWRConfig key={scope} value={{ provider: () => new Map() }}>
+      <SessionState scope={scope}>{children}</SessionState>
+    </SWRConfig>
+  );
+}
+
+function SessionState({
+  children,
+  scope,
+}: {
+  children: React.ReactNode;
+  scope: string;
+}) {
   const { data, loading } = useClientResource<{ user?: User } | null>(
     "/api/auth/session",
     { scope, changes: false },

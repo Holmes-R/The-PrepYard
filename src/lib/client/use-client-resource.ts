@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect } from "react";
+import useSWR, { useSWRConfig } from "swr";
 
 const changedEvent = "prepyard:data-changed";
 export function refreshClientData() {
@@ -13,75 +14,69 @@ export type JsonData<T> = T extends Date
     ? { [K in keyof T]: JsonData<T[K]> }
     : T;
 
+class ResourceError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
+async function fetchResource<T>([, url]: readonly [
+  string,
+  string,
+]): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+  } catch {
+    throw new ResourceError(
+      "Could not load this content. Check your connection and try again.",
+      0,
+    );
+  }
+  if (!response.ok)
+    throw new ResourceError(
+      response.status === 404
+        ? "We could not find this page."
+        : "Could not load this content. Please try again.",
+      response.status,
+    );
+  return response.json() as Promise<T>;
+}
+
 export function useClientResource<T>(
   url: string,
   { scope = "", changes = true }: { scope?: string; changes?: boolean } = {},
 ) {
-  const [revision, reload] = useReducer((value: number) => value + 1, 0);
-  const key = scope + "|" + url;
-  const [snapshot, setSnapshot] = useState<{
-    key: string;
-    revision: number;
-    data: T | null;
-    error: string;
-    status: number;
-  }>({ key: "", revision: -1, data: null, error: "", status: 0 });
-  const retry = useCallback(() => reload(), []);
+  const { mutate: mutateCache } = useSWRConfig();
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    T,
+    ResourceError
+  >([scope, url], fetchResource<T>, {
+    dedupingInterval: 2000,
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    keepPreviousData: false,
+  });
+  const unauthorized = error?.status === 401;
+  const retry = useCallback(() => {
+    void mutate();
+  }, [mutate]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-    async function load() {
-      try {
-        const response = await fetch(url, {
-          signal: controller.signal,
-          credentials: "same-origin",
-          cache: "no-store",
-        });
-        if (!active) return;
-        if (response.status === 401) {
-          window.location.replace(
-            "/login?next=" +
-              encodeURIComponent(
-                window.location.pathname + window.location.search,
-              ),
-          );
-          return;
-        }
-        if (!response.ok) {
-          setSnapshot({
-            key,
-            revision,
-            data: null,
-            error:
-              response.status === 404
-                ? "We could not find this page."
-                : "Could not load this content. Please try again.",
-            status: response.status,
-          });
-          return;
-        }
-        const data = (await response.json()) as T;
-        if (active)
-          setSnapshot({ key, revision, data, error: "", status: 200 });
-      } catch {
-        if (active)
-          setSnapshot({
-            key,
-            revision,
-            data: null,
-            error:
-              "Could not load this content. Check your connection and try again.",
-            status: 0,
-          });
-      }
-    }
-    void load();
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [url, key, revision]);
+    if (!unauthorized) return;
+    // Clear this authentication boundary's private cache before leaving it.
+    void mutateCache(() => true, undefined, { revalidate: false });
+    window.location.replace(
+      "/login?next=" +
+        encodeURIComponent(window.location.pathname + window.location.search),
+    );
+  }, [unauthorized, mutateCache]);
 
   useEffect(() => {
     if (!changes) return;
@@ -89,13 +84,11 @@ export function useClientResource<T>(
     return () => window.removeEventListener(changedEvent, retry);
   }, [changes, retry]);
 
-  const matching = snapshot.key === key;
-  const loading = !matching || snapshot.revision !== revision;
   return {
-    data: matching ? snapshot.data : null,
-    error: loading ? "" : snapshot.error,
-    status: matching ? snapshot.status : 0,
-    loading,
+    data: unauthorized ? null : (data ?? null),
+    error: error?.message ?? "",
+    status: error?.status ?? (data === undefined ? 0 : 200),
+    loading: isLoading || isValidating,
     retry,
   };
 }

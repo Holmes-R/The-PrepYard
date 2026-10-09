@@ -125,6 +125,14 @@ The root route `/` introduces PrepYard with an interactive practice preview, com
 
 ## Client-side loading
 
-The landing page is prerendered; account-specific links update from the Auth.js session endpoint in the browser. Dashboard, company directory and sheets, pattern overview and detail pages, and notes render a loading shell first, then fetch private JSON from authenticated APIs. Filters navigate on the client; rapid navigation aborts obsolete fetches. Failed requests offer a retry, and a 401 returns the student to login with the requested destination preserved. Saves and deletions refresh active client data without refreshing the entire page. Private responses use `private, no-store`; student identity and database credentials stay on the server, with the existing row-level access policies. The proxy still checks session validity before serving protected page shells.
+The landing page is prerendered; account-specific links update from the Auth.js session endpoint in the browser. Dashboard, company directory and sheets, pattern overview and detail pages, and notes render a loading shell first, then fetch private JSON from authenticated APIs. Filters navigate on the client; obsolete filter responses cannot replace the current page. Failed requests offer a retry, and a 401 returns the student to login with the requested destination preserved. Saves and deletions refresh active client data without refreshing the entire page. Private responses use `private, no-store`; student identity and database credentials stay on the server, with the existing row-level access policies. The proxy still checks session validity before serving protected page shells.
 
 Client rendering improves perceived loading by avoiding a wait for catalogue queries in the HTML response. It still needs JavaScript and a working database connection, and does not make a slow database query faster.
+
+### Faster repeat visits
+
+SWR deduplicates matching browser requests and keeps responses in memory while navigating the workspace. Revisiting a page can show its cached data while refreshing it in the background. Each authentication boundary has a separate cache; moving to login, signup, or out of the workspace discards it. A 401 clears the cache before redirecting to login. There is no persistent browser cache of notes or shared server cache of student data. Mutation events refresh active resources.
+
+API handlers reuse the verified session only within that request, so database helpers do not repeat its lookup. Each new request still checks session validity; row-level access policies and restricted database roles remain enforced. Transaction setup sends its static BEGIN and role switch together. Revision dialog code loads when opened rather than in the initial question-page bundle.
+
+Measure loading in production mode with `pnpm build` followed by `pnpm start`; development mode includes compilation overhead. Client caching reduces repeat fetches, but first visits still depend on database latency and network access to PostgreSQL.

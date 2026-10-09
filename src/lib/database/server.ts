@@ -43,8 +43,7 @@ export async function withStudentDatabase<T>(
   const client = await connection();
   let broken = false;
   try {
-    await client.query("begin");
-    await client.query("set local role authenticated");
+    await client.query("begin; set local role authenticated");
     await client.query("select set_config('prepyard.student_id',$1,true)", [
       studentId,
     ]);

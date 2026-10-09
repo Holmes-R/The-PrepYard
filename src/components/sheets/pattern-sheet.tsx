@@ -31,7 +31,11 @@ import {
 } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { SaveMessage } from "@/components/feedback/save-message";
-import { RevisionDialog } from "./revision-dialog";
+import dynamic from "next/dynamic";
+const RevisionDialog = dynamic(
+  () => import("./revision-dialog").then((module) => module.RevisionDialog),
+  { loading: () => <p role="status">Loading revision…</p> },
+);
 import { patternColour } from "@/lib/pattern-colour";
 import type {
   Choice,
