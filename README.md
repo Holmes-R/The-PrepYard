@@ -1,138 +1,250 @@
 # The PrepYard
 
-Free, account-based coding interview preparation for students.
+Free, account-based coding interview preparation for students — company-wise question sheets, pattern-based practice, private notes, and a spaced-revision system in one app.
 
-Repository: [Holmes-R/The-PrepYard](https://github.com/Holmes-R/The-PrepYard).
+Repository: [Holmes-R/The-PrepYard](https://github.com/Holmes-R/The-PrepYard)
 
-## Current status
+## Overview
 
-Implemented: Next.js scaffold, protected routes, email/password authentication through Auth.js, seven database migrations, constraints/indexes/row-level policies, internal snapshot publication, and a pinned 1Kosmos importer. Supabase Auth is removed. Email/password registration, verification, login and password reset are implemented. The company directory and company question sheets are connected to PostgreSQL. The dashboard, explore, patterns, and notes pages remain placeholders. student progress screens, automatic fetching/scheduling, and production deployment are not yet verified or completed.
+The PrepYard helps you prepare for coding interviews in three ways:
 
-All student application pages and APIs require sign-in. Only /login, /signup, /forgot-password, /verify-email, /reset-password, Auth.js endpoints, and framework assets are available before login. Sources, dataset dates, and import history are hidden from student screens and database access. Login uses a separate PrepYard password.
+1. **Practice by company** — pick a company (for example Amazon or 1Kosmos) and work through the questions it is known to ask, ordered by how frequently they are reported.
+2. **Practice by pattern** — browse DSA questions grouped into patterns and topics (two-pointers, dynamic programming, graphs, …) so you learn transferable approaches instead of isolated tricks.
+3. **Track your progress** — mark questions solved, bookmark them, keep private notes, and schedule revisions with a confidence rating. Everything is saved to your account and shows up on your dashboard.
 
-## Stack
+Everything requires a free email/password account. Notes and progress are private to you; nothing is shared or published to other students.
 
-Next.js 16 / React 19 / TypeScript, Tailwind CSS 4, Radix-based UI primitives, Lucide icons, Auth.js Credentials with encrypted JWT cookie sessions, PostgreSQL through node-postgres, pnpm, and GitHub Actions. Supabase may host PostgreSQL and provide migration tooling; it no longer authenticates users. Auth.js is pinned to the installed v5 beta version.
+## Tech stack
 
-## Setup
+| Layer     | Choices                                                                         |
+| --------- | ------------------------------------------------------------------------------- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript                                   |
+| Styling   | Tailwind CSS 4, Radix primitives, Lucide icons, locally bundled Inter font      |
+| Data      | PostgreSQL via `pg` (node-postgres), 12 SQL migrations, row-level security      |
+| Auth      | Auth.js (v5 beta) credentials — email + PrepYard password, encrypted JWT cookie |
+| Tooling   | pnpm 11.19, ESLint, Prettier, GitHub Actions                                    |
 
-Use Node.js 22.12+ within Node 22 or Node 24, and pnpm 11.19.0. From the existing repository:
+Supabase may host the PostgreSQL database and run migrations, but it does **not** authenticate users — the app talks to the database directly through a restricted server-side login.
 
-```powershell
-Set-Location -LiteralPath 'D:\Github Repositories\The PrepYard'
+## Getting started
+
+### Prerequisites
+
+- Node.js 22.12+ (Node 22 or 24)
+- pnpm 11.19.0 (`corepack enable` installs it from `package.json`)
+- A PostgreSQL 17 database (local or Supabase)
+
+### 1. Install
+
+```bash
+git clone https://github.com/Holmes-R/The-PrepYard.git
+cd The-PrepYard
 pnpm install --frozen-lockfile
 ```
 
-Create an ignored .env.local from .env.example only if it does not exist. Configure AUTH_URL, AUTH_SECRET, DATABASE_URL, RESEND_API_KEY and AUTH_EMAIL_FROM following [password setup](docs/password-auth.md). Apply all seven migrations in order and provision the restricted prepyard_web database login. Do not use a Google password or a privileged database login. Do not commit secrets. Restart with pnpm dev after configuration changes. Missing configuration disables sign-in and denies protected pages.
+### 2. Configure environment
 
-Email/password setup is described in [password authentication](docs/password-auth.md). Verify your email before logging in.
+Create `.env.local` in the repository root (it is git-ignored — never commit it):
 
-## Commands
+```bash
+AUTH_URL=http://localhost:3000
+AUTH_SECRET=generate-with-openssl-rand-base64-32
+DATABASE_URL=postgresql://user:password@host:5432/postgres
+RESEND_API_KEY=...        # transactional email for signup/reset links
+AUTH_EMAIL_FROM=...       # the From address for those emails
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-| Command                 | Purpose                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| pnpm dev                | Run the development application                                                         |
-| pnpm build / pnpm start | Build / serve production                                                                |
-| pnpm check              | Format, lint, importer/auth tests, types, build, route/session checks                   |
-| pnpm test:auth          | Verified identity and safe destination tests                                            |
-| pnpm test:access        | Logged-out and encrypted-session integration checks after build                         |
-| pnpm import:company     | Generate pinned 1Kosmos JSON and staging SQL, without modifying a database              |
-| pnpm test:import        | Verify exact fixture values and malformed inputs                                        |
-| pnpm db:test            | Run migrations and policy/identity tests on a fresh disposable local PostgreSQL cluster |
+Sign-in fails closed: without this configuration, protected pages deny access. A wrong or missing `AUTH_SECRET` invalidates every session. See [password authentication](docs/password-auth.md) for the full walkthrough.
 
-## Architecture
+### 3. Database
 
-Student → verified email/password → Auth.js session → protected Next.js application → restricted PostgreSQL server queries.
+Apply all 12 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
 
-Approved upstream data → importer → normalize/validate → stage → atomic publication → catalogue. Sources/snapshots/import logs remain internal. Progress belongs to stable question IDs and is never rewritten by imports.
+### 4. Run
 
-private.students owns application UUIDs. Verified password identities resolve the account; email is never used to automatically merge historical users. Migration 5 preserves existing Supabase-user UUIDs and student records without automatically linking them to Google accounts. Existing saved work needs an explicitly verified account migration. Student query transactions use the authenticated permission role and a locally scoped application identity; browser clients never receive direct database credentials or use Supabase Auth/PostgREST for student data.
+```bash
+pnpm dev        # http://localhost:3000
+```
 
-## Routes and folders
+Create an account at `/signup`, confirm the emailed link, then log in at `/login`. Your password is a **PrepYard password** — never reuse your email or Google password.
 
-| Route             | Behaviour                                           |
-| ----------------- | --------------------------------------------------- |
-| /login            | Email and PrepYard password                         |
-| /signup           | Create an email/password account                    |
-| /api/auth/*       | Auth.js password/session endpoints                  |
-| /                 | Public landing page                                 |
-| /companies        | Published company directory and question sheets     |
-| /dashboard /notes | Protected dashboard and private notebook            |
-| /sources          | Removed; not found after sign-in                    |
-| /api/health       | Protected application liveness, not database health |
+## Scripts
 
-src/auth.ts configures password authentication, src/proxy.ts guards requests, src/lib/auth provides verified session helpers, and src/lib/database provides server-only PostgreSQL transactions. Supabase/migrations contains historical and current schema migrations. Scripts/import contains the pinned adapter and staging generator. Tests cover imports, auth policies, page/session access, and real PostgreSQL permissions. GitHub Actions runs application and disposable database checks.
+| Command          | What it does                                                           |
+| ---------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`       | Start the development server                                           |
+| `pnpm build`     | Production build                                                       |
+| `pnpm start`     | Serve the production build                                             |
+| `pnpm check`     | Full gate: format, lint, unit tests, types, build, route/session tests |
+| `pnpm lint`      | ESLint                                                                 |
+| `pnpm typecheck` | `tsc --noEmit` (after Next type generation)                            |
+| `pnpm format`    | Prettier write                                                         |
+| `pnpm db:test`   | Migrations + RLS/identity tests on a disposable local PostgreSQL       |
 
-## Deployment and next milestones
+Test-only entry points (also part of `pnpm check`): `test:patterns`, `test:catalogue`, `test:import`, `test:auth`, `test:access`. Database-backed suites run with their own `test:*:database` scripts and need a reachable PostgreSQL.
 
-Configure production AUTH_URL, server secrets, and a certificate-verified PostgreSQL connection. Apply reviewed migrations, provision the restricted login, build, and verify email delivery, login and sign-out. The application may be hosted on a server-capable Next.js provider. Automated deployment and scheduled imports are future work.
+Admin/import entry points: `import:company`, `import:repository`, `patterns:publish`, `collections:publish`, `logos:publish-reviewed`, `topics:fetch`, `logos:fetch`. These are documented in [the importer guide](docs/importer.md) and [company workflow](docs/company-pages.md).
 
-Next: configure production email delivery; save completion/bookmarks/notes; add reviewed patterns; automate imports; then expand platforms. Preserve necessary source licensing/attribution internally. The project does not bypass paid problem access or reproduce third-party statements.
+## Project structure
 
-Documentation: [Password authentication](docs/password-auth.md), [database](docs/database.md), [importer](docs/importer.md), [architecture](docs/architecture.md), [roadmap](docs/roadmap.md).
+```
+src/
+  app/                  # Routes (App Router)
+    page.tsx            #   Public landing page
+    login, signup, ...  #   Pre-sign-in pages (also: forgot/reset/verify email)
+    (public)/           #   App pages: companies, explore, patterns, about
+    (workspace)/        #   Workspace pages: dashboard, notes, components
+    api/                #   Route handlers (auth, companies, notes, health, …)
+  components/           # Feature UI (sheets, questions, notes) + ui/ primitives
+  features/             # Domain logic: catalogue, patterns, notes, progress, auth
+  lib/                  # Server helpers: database transactions, auth policy, site nav
+  proxy.ts              # Request guard — redirects signed-out users away from app pages
+  auth.ts               # Auth.js configuration (credentials provider)
+supabase/migrations/    # 12 ordered SQL migrations (schema, RLS, grants, identity)
+scripts/                # Importers, publishers, data fetchers
+tests/                  # Unit, auth, import, access and database suites
+docs/                   # In-depth guides (see below)
+```
 
-## Email and password accounts
+## Pages
 
-Use `/signup` to create an account, confirm the emailed link, then use `/login`. `/forgot-password` sends a reset link; `/reset-password` replaces the password and invalidates existing password sessions. These are PrepYard passwords, never Gmail passwords. Legacy Google records are retained, but Google sign-in is disabled. They are not automatically merged into new password accounts.
+Only the landing page and the five account pages are public. Every other page requires a session and redirects signed-out visitors to `/login?next=…`, returning them to the page they wanted afterwards. On any signed-in page, `Ctrl/Cmd+K` opens the quick search.
 
-Apply migration `20261002000600_password_identity.sql` with your database administrator, configure `RESEND_API_KEY` and `AUTH_EMAIL_FROM` in `.env.local`, and restart the app. See [step-by-step setup and testing](docs/password-auth.md). Without email delivery configuration, registration/reset fail closed; existing verified password login does not require email delivery.
+### Home — `/`
 
-## Completed fixed-snapshot importer
+The public front door.
 
-`pnpm import:company` imports the complete 1Kosmos fixture pinned to `a09d3bae6ecf5420ae59e8886e0f9bf660717388`: one LeetCode question and two frequency windows. It generates deterministic JSON and staging SQL without modifying your database. `pnpm test:import` checks the independently recorded expected fixture, malformed inputs, exact revision and CLI replay. `pnpm db:test` verifies exact stored values, sequential/concurrent idempotence and rollback on conflicts in an isolated database. See [importer instructions](docs/importer.md).
+- The main button adapts to your session: "Create free account" when signed out, "Go to dashboard" when signed in.
+- An interactive preview with Topics / Patterns / Companies tabs (Arrow keys, Home and End navigate them), each listing four curated destinations; guests are sent to sign-in with the destination preserved.
+- A feature grid, three collection guides, a three-step "How it works", and keyboard-accessible FAQ accordions.
 
-## Working company sheets
+### Log in — `/login`
 
-`/companies` now lists companies with published questions. `/companies/1kosmos` provides title search, difficulty and question-window filters, frequency sorting, ranked company tags and platform links. All access requires login; source metadata remains private. Publish the reviewed fixture with `pnpm import:publish --approve-source` using a trusted `IMPORT_DATABASE_URL`. See [company page and publication workflow](docs/company-pages.md).
+- Sign in with your email and PrepYard password.
+- Honors a `?next=` redirect so you land back on the page you came from.
+- Links to sign-up and password recovery; failed attempts show an error without revealing whether the account exists.
 
-## Full company directory
+### Sign up — `/signup`
 
-The Companies section now includes all 656 repository companies, expandable dark question sections, search, filters, completion tracking, bookmarks, private notes and revision scheduling. Questions are loaded on demand and company tags are frequency-sorted. `pnpm import:repository --directory PATH [--approve-source]` validates the pinned full archive and optionally publishes it using the trusted importer connection. See [company workflow](docs/company-pages.md).
+- Create an account with your name, email, and a 12–128 character password (entered twice).
+- Sends a verification email; you confirm the link before you can log in.
 
-## DSA topics and patterns
+### Forgot password — `/forgot-password`
 
-The authenticated `/patterns` page groups questions by standard DSA topics, with separate generic pattern filters and two attributed reference collections and a dynamic frequency shortlist. Progress, private notes, and revision history are shared across all views. For an existing database, run `scripts/patterns/publish-prepyard.sql` in Supabase SQL Editor, or follow the admin publication workflow in [the pattern guide](docs/pattern-sheet.md).
+- Enter your account email to have a password-reset link sent to you.
 
-### Application appearance
+### Reset password — `/reset-password`
 
-The interface follows the supplied Google Stitch designs: horizontal navigation, white primary buttons, charcoal panels, mint/blue progress accents, compact company cards, dense question tables, and a mobile navigation menu. The home route opens the authenticated dashboard.
+- The emailed link carries a token; choose and confirm a new password.
+- Without a valid token the page offers to request a new link.
 
-The dashboard shows real student progress, completion rate, due revisions, saved notes, collection progress, recent practice updates, and seven days of recorded revision activity. Company search supports alphabetical, question-count, and solved-count sorting. Practice offers Topics, Patterns, and Collections browsing modes. Questions keep separate Difficulty, Topics, Revision, and Notes cells; company rows also show frequency. Revision history retains the confidence selected for each event.
+### Verify email — `/verify-email`
 
-Notes remain private, show their content only when expanded, support deletion, and are paginated newest first. Ctrl/Cmd+K focuses the contextual quick search. See [the Stitch interface guide](docs/stitch-ui.md).
+- The emailed verification link lands here and confirms your account.
+- Without a token, the page links back to sign-up to request a new email.
 
-### Interface components
+### Companies — `/companies`
 
-After signing in, open `/components` to review the reusable button variants and states, native checkboxes (including mixed state), radios, filter chips, typography, an example company question, and a compact note. Preview interactions use local state and do not write account data.
+The company directory.
 
-Shared components live in `src/components/ui`; control and typography tokens are defined in `src/app/control-theme.css`. Buttons use 40px regular and 32px compact sizes, with 44px mobile targets, visible keyboard focus, and a loading indicator. Inter is bundled locally with its OFL license in `src/app/fonts`, so rendering does not depend on a font service.
+- Search companies (debounced, saved in the URL), sort by question count, name, or most solved, and switch between "All companies" and "Your practice" (companies you have solved at least one question in).
+- Each card shows the question pool, solved percentage, a progress meter, and difficulty totals; company logos fall back to colored initials when missing.
+- Expanding a card inlines the full question sheet with a live solved/total counter; one card opens at a time.
+- Twelve companies per page, with Previous/Next pagination; the open card and filters stay in the address bar, so views are shareable and survive back/forward.
 
-### Original PrepYard practice tracks
+### Company sheet — `/companies/1kosmos`
 
-Explore and Practice offer Interview Launchpad (66 unique questions), DSA Deep Dive (282 unique questions across three platforms), and Interview Hotlist (up to 20 questions per topic ranked dynamically by reported company frequency). Old collection memberships are retired while saved progress, notes, and revisions remain. Run the generated `scripts/patterns/publish-prepyard.sql` in Supabase SQL Editor, or apply pending migrations and run `pnpm patterns:publish` with an administrative connection. See [publication](docs/pattern-sheet.md) and [reference attribution](docs/collection-attribution.md). Display names do not change reuse rights.
+The question list for one company (for example `1kosmos`).
 
-## Pattern roadmap
+- Filters: question search, difficulty, progress (any / not started / attempted / solved / needs revision), multi-select topic chips, plus "More filters" for sort order, time window (only windows the company actually has), and minimum frequency/acceptance percentages.
+- Click column headers to sort by up to three priorities at once (question, difficulty, frequency, revision).
+- Every row: a solved toggle, a direct link to the problem on its platform, pattern tags, up to four company tags with reported frequency (clicking one deep-links to that company), an expandable topic list, a revision button, and a note button.
+- The revision dialog rates each session (Struggled / Tough / Got it / Nailed it), schedules a next-day reminder, and lists your dated revision history.
+- The note editor holds up to 50,000 characters per question, fetched on first open, with save feedback and error recovery.
+- Paginated with skeletons while loading, a Retry on failure, and a redirect to login if your session expires.
 
-Practice exposes 22 numbered pattern groups in the learning order of the pinned DSA Patterns Roadmap. Dedicated pages prioritize its reference exercises already present in the catalogue, followed by matching verified topic tags and reviewed mappings. Existing topic browsing, explicit sorting, notes and revisions remain available. No database migration is needed for this catalogue/order change. See [roadmap matching and verification](docs/pattern-roadmap.md).
+### Explore — `/explore`
 
-## Readable student dashboard
+A hub page for choosing where to practice.
 
-The dashboard presents four progress stats, three explained practice collections, recent practice and a seven-day revision chart. Collection cards show their purpose, who they suit and live solved/available totals. A keyboard-accessible “How collections work” disclosure explains shared progress, private notes and the Hotlist ranking. The interface uses scoped styles, labelled progress indicators, text alongside difficulty colors, visible keyboard focus and at least 44px action targets.
+- Large cards link to the company directory, the full topic list, and each practice collection (Interview Launchpad, DSA Deep Dive, Interview Hotlist).
+- Progress and notes are shared everywhere: a question solved in one collection stays solved in every view.
 
-## Public landing page
+### Patterns hub — `/patterns`
 
-The root route `/` introduces PrepYard with an interactive practice preview, company/pattern/notes/revision features, three collection guides, getting-started steps and keyboard-accessible FAQs. The preview switches between curated popular topics, patterns and companies; it does not query student data or claim live popularity rankings. Arrow keys, Home and End navigate its tabs. Each choice opens its practice destination for signed-in users, or sends guests to login with that destination preserved. Visitors can create an account or log in; signed-in students also get dashboard links. `/dashboard`, question pages and application APIs still require a valid account. Account navigation uses compact icon buttons with visible keyboard focus and mobile touch targets of at least 44px.
+The DSA practice hub.
 
-## Client-side loading
+- A progress card shows solved/total and completion percentage for whatever you are currently viewing.
+- Three browsing modes: **Topics** (numbered pattern roadmap), **Patterns**, and **Collections**, each with counts.
+- Filters: question search, difficulty, progress (any / unsolved / solved / bookmarked), single-select topic chips, a **Shuffle** button for random order, and "More filters" for a specific pattern, a collection, or hiding topic tags in rows.
+- Results appear as topic accordions — each with its own completion meter, solved count, sortable column header, and Previous/Next pagination.
+- Active filters show as removable chips; the Interview Hotlist gets a note explaining its dynamic top-20-per-topic ranking.
 
-The landing page is prerendered; account-specific links update from the Auth.js session endpoint in the browser. Dashboard, company directory and sheets, pattern overview and detail pages, and notes render a loading shell first, then fetch private JSON from authenticated APIs. Filters navigate on the client; obsolete filter responses cannot replace the current page. Failed requests offer a retry, and a 401 returns the student to login with the requested destination preserved. Saves and deletions refresh active client data without refreshing the entire page. Private responses use `private, no-store`; student identity and database credentials stay on the server, with the existing row-level access policies. The proxy still checks session validity before serving protected page shells.
+### Pattern sheet — `/patterns/two-pointers`
 
-Client rendering improves perceived loading by avoiding a wait for catalogue queries in the HTML response. It still needs JavaScript and a working database connection, and does not make a slow database query faster.
+The question list for one pattern group.
 
-### Faster repeat visits
+- Hero with the pattern name and a progress card; a back link to all topics.
+- Filters: search, difficulty, progress, topic chips, plus sort orders — Recommended, Easy→Hard, Hard→Easy, Revision priority (soonest-due first), and Shuffle.
+- Every row carries a solved toggle, the platform link, a "peak frequency · N companies" badge, pattern tags, a difficulty badge, an expandable topic column, and the same revision dialog and note editor as company sheets.
+- Sorting and pagination live in the URL; unknown slugs 404, and a renamed slug redirects.
 
-SWR deduplicates matching browser requests and keeps responses in memory while navigating the workspace. Revisiting a page can show its cached data while refreshing it in the background. Each authentication boundary has a separate cache; moving to login, signup, or out of the workspace discards it. A 401 clears the cache before redirecting to login. There is no persistent browser cache of notes or shared server cache of student data. Mutation events refresh active resources.
+### Dashboard — `/dashboard`
 
-API handlers reuse the verified session only within that request, so database helpers do not repeat its lookup. Each new request still checks session validity; row-level access policies and restricted database roles remain enforced. Transaction setup sends its static BEGIN and role switch together. Revision dialog code loads when opened rather than in the initial question-page bundle.
+Your progress at a glance.
 
-Measure loading in production mode with `pnpm build` followed by `pnpm start`; development mode includes compilation overhead. Client caching reduces repeat fetches, but first visits still depend on database latency and network access to PostgreSQL.
+- Four stat cards: questions solved (with easy/medium/hard breakdown), completion rate, revisions due (with a link to the review queue), and saved notes (with a link to the notebook).
+- Collection cards with solved/total, a progress bar, and a "How collections work" explainer.
+- A recent-practice list (each entry links back to the question) and a seven-day revision activity chart.
+
+### Notes — `/notes`
+
+Your private notebook.
+
+- All saved notes as cards, newest edit first, paginated.
+- Each card expands to show the note, links to the original question, and offers "Find in practice" to locate it in the pattern sheet.
+- Deleting is a deliberate two-step inline confirmation (Escape cancels), so a stray tap never removes a note.
+
+### About — `/about`
+
+A short mission statement about the project. Requires sign-in like every app page.
+
+### Components — `/components`
+
+A gallery of the design system: button variants and states, checkboxes (including indeterminate), radios, filter chips, typography scale, and example question and note components. Previews are local-only — nothing here reads or writes your account data.
+
+## How it works
+
+**Sign-in and data access.** The browser never receives database credentials. Auth.js verifies your password and stores an encrypted JWT cookie; `src/proxy.ts` checks it before any protected page or API is served. Server code opens a PostgreSQL transaction, switches to the restricted `authenticated` permission role, and scopes the request to your student id — row-level security policies double-check ownership on every query, so even a buggy query can only ever touch your own notes and progress.
+
+**Catalogue data.** Approved upstream datasets are imported separately from website traffic: the importer normalizes and validates a staged snapshot, then publishes it atomically — a failed import leaves the last good dataset in place. Student progress is keyed to stable question ids, so imports never overwrite your solved/bookmarked/notes state. Source URLs, dataset dates, and import logs stay internal.
+
+**Client rendering.** Pages load a shell immediately, then fetch private JSON from authenticated APIs (SWR deduplicates and caches them per session). Saves and deletions refresh only the affected data; a 401 returns you to login with your destination preserved. Private responses are always `private, no-store`. Filters and pagination are serialized into the URL, so any filtered view is shareable and survives reloads.
+
+## Testing and CI
+
+- **Unit tests** — query builders and fixtures: `pnpm test:patterns`, `pnpm test:catalogue`, `pnpm test:import`, `pnpm test:auth`
+- **Post-build integration** — `pnpm test:access` boots the built app and verifies protected-route redirects and forged-cookie denial
+- **Database tests** — `pnpm db:test` and the `test:*:database` scripts run migrations, row-level-security and publication checks against a disposable PostgreSQL
+- **CI** — `.github/workflows/ci.yml` runs format, lint, tests, typecheck, build and access checks on every push/PR, plus migration/policy tests on a fresh PostgreSQL service
+
+## Documentation
+
+| Guide                                            | Contents                                               |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| [Password authentication](docs/password-auth.md) | Account setup, email delivery, reset flows             |
+| [Database](docs/database.md)                     | Schema, access matrix, restricted login, deployment    |
+| [Company pages](docs/company-pages.md)           | Company sheets and the publication workflow            |
+| [Pattern sheet](docs/pattern-sheet.md)           | Practice sheets, filters, revision dialog, collections |
+| [Notes](docs/notes.md)                           | Private notes model and the notebook page              |
+| [Importer](docs/importer.md)                     | Pinned fixtures, staging SQL, publication              |
+| [Architecture](docs/architecture.md)             | Design boundaries and data-ownership rules             |
+| [Roadmap](docs/roadmap.md)                       | Planned work                                           |
+| [UI guide](docs/stitch-ui.md)                    | Design language, components, accessibility conventions |
+
+## Notes
+
+- The project does not bypass paid problem access or reproduce third-party problem statements; questions link to their canonical platform pages.
+- Keep source licensing and attribution records internal, as described in [collection attribution](docs/collection-attribution.md).
+- Never commit secrets. `.env.local`, privileged database URLs, and the `prepyard_web` password stay on your machine or in your host's secret store.
