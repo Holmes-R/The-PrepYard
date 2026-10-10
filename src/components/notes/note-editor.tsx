@@ -2,13 +2,20 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useClientSession } from "@/components/auth/client-session";
 import { Button } from "@/components/ui/button";
-import { saveQuestionProgress } from "@/features/progress/actions";
+import { saveNote } from "@/features/notes/actions";
+import { X } from "lucide-react";
+import {
+  normalizeNoteTags,
+  noteSignature,
+  MAX_NOTE_TAGS,
+  MAX_TAG_LENGTH,
+  type EditableNote,
+} from "@/features/notes/model.mjs";
 import { refreshClientData } from "@/lib/client/use-client-resource";
 import { NoteContent } from "./note-content";
 import {
   NOTE_LIMIT,
   NOTE_LANGUAGES,
-  noteTemplate,
   insertCode,
   draftKey,
   readDraft,
@@ -23,17 +30,21 @@ import {
 export function NoteEditor({
   questionId,
   initialContent,
+  initialTags = [],
   onSaved,
   onClose,
 }: {
   questionId: string;
   initialContent: string;
-  onSaved?: (content: string) => Promise<void> | void;
+  initialTags?: string[];
+  onSaved?: (content: string, tags: string[]) => Promise<void> | void;
   onClose: () => void;
 }) {
   const { user } = useClientSession();
   const id = useId();
   const [content, setContent] = useState(initialContent);
+  const [tags, setTags] = useState(initialTags);
+  const [tagInput, setTagInput] = useState("");
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [error, setError] = useState("");
   const [preview, setPreview] = useState(false);
@@ -41,8 +52,8 @@ export function NoteEditor({
   const [recovery, setRecovery] = useState<NoteDraft | null>(null);
   const [storageWarning, setStorageWarning] = useState(false);
   const input = useRef<HTMLTextAreaElement>(null);
-  const queue = useRef<NoteAutosave | null>(null);
-  const base = useRef(initialContent);
+  const queue = useRef<NoteAutosave<EditableNote> | null>(null);
+  const base = useRef({ content: initialContent, tags: initialTags });
   const callbacks = useRef({ onSaved, onClose });
   const key = user?.id ? draftKey(user.id, questionId) : "";
   useEffect(() => {
@@ -56,7 +67,7 @@ export function NoteEditor({
       if (!mounted) return;
       try {
         const draft = readDraft(sessionStorage, key);
-        if (draft && draft.content.trim() !== base.current.trim())
+        if (draft && noteSignature(draft) !== noteSignature(base.current))
           setRecovery(draft);
         else clearDraft(sessionStorage, key);
       } catch {
@@ -65,12 +76,13 @@ export function NoteEditor({
     });
     const autosave = createNoteAutosave({
       initial: base.current,
+      identify: noteSignature,
       save: async (value) => {
-        const result = await saveQuestionProgress(questionId, "note", value);
+        const result = await saveNote(questionId, value.content, value.tags);
         if (!result.ok) throw new Error(result.message);
-        base.current = value.trim();
+        base.current = { content: value.content.trim(), tags: value.tags };
         try {
-          clearDraft(sessionStorage, key, value);
+          clearDraft(sessionStorage, key, value.content, value.tags);
         } catch {
           /* Browser storage is optional. */
         }
@@ -78,7 +90,7 @@ export function NoteEditor({
         // The question row can remain visible after its editor is hidden.
         // Refresh it even when this editor unmounted during the request.
         try {
-          await callbacks.current.onSaved?.(value.trim());
+          await callbacks.current.onSaved?.(value.content.trim(), value.tags);
         } catch {
           /* The save succeeded even if a list refresh failed. */
         }
@@ -97,25 +109,49 @@ export function NoteEditor({
       queue.current = null;
     };
   }, [key, questionId]);
-  function change(value: string) {
+  function change(value: string, nextTags = tags) {
     if (value.length > NOTE_LIMIT) {
       setError("Notes can contain up to 50,000 characters.");
       return;
     }
     setContent(value);
+    setTags(nextTags);
     if (key) {
       try {
-        if (!writeDraft(sessionStorage, key, value, base.current))
+        if (
+          !writeDraft(
+            sessionStorage,
+            key,
+            value,
+            base.current.content,
+            nextTags,
+            base.current.tags,
+          )
+        )
           setStorageWarning(true);
       } catch {
         setStorageWarning(true);
       }
     }
-    queue.current?.schedule(value);
+    queue.current?.schedule({ content: value, tags: nextTags });
   }
   async function flush(close = false) {
     if (await queue.current?.flush()) {
       if (close) callbacks.current.onClose();
+    }
+  }
+  function addTag() {
+    if (!tagInput.trim()) return;
+    try {
+      const next = normalizeNoteTags([...tags, tagInput]);
+      if (next.length === tags.length) {
+        setError("This tag is already added.");
+        return;
+      }
+      change(content, next);
+      setTagInput("");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Invalid tag.");
     }
   }
   function addCode() {
@@ -139,7 +175,10 @@ export function NoteEditor({
         <div className="prep-note-recovery" role="status">
           <p>
             Unsaved draft found in this tab.
-            {recovery.base.trim() !== initialContent.trim()
+            {noteSignature({
+              content: recovery.base,
+              tags: recovery.baseTags,
+            }) !== noteSignature({ content: initialContent, tags: initialTags })
               ? " The saved note has changed since this draft was started."
               : ""}
           </p>
@@ -149,7 +188,7 @@ export function NoteEditor({
             onClick={() => {
               const draft = recovery;
               setRecovery(null);
-              change(draft.content);
+              change(draft.content, draft.tags);
             }}
           >
             Restore draft
@@ -191,23 +230,6 @@ export function NoteEditor({
           >
             Preview
           </Button>
-        </div>
-        <div className="prep-note-field">
-          <label htmlFor={id + "-template"}>Template</label>
-          <select
-            id={id + "-template"}
-            value=""
-            disabled={!!recovery || !key}
-            onChange={(event) => {
-              const template = noteTemplate(event.target.value);
-              if (template)
-                change(content + (content.trim() ? "\n\n" : "") + template);
-            }}
-          >
-            <option value="">Add template…</option>
-            <option value="approach">Approach & complexity</option>
-            <option value="mistakes">Mistakes & lessons</option>
-          </select>
         </div>
         <div className="prep-note-field">
           <label htmlFor={id + "-language"}>Code language</label>
@@ -252,6 +274,69 @@ export function NoteEditor({
           />
         </>
       )}
+      <div className="prep-note-tag-field">
+        <label htmlFor={id + "-tag"}>
+          Tags <span>(optional)</span>
+        </label>
+        {tags.length > 0 && (
+          <ul className="prep-note-tags" aria-label="Your note tags">
+            {tags.map((tag, index) => (
+              <li key={tag}>
+                <span>{tag}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="compact"
+                  aria-label={"Remove tag " + tag}
+                  disabled={!!recovery || !key}
+                  onClick={() =>
+                    change(
+                      content,
+                      tags.filter((_, i) => i !== index),
+                    )
+                  }
+                >
+                  <X size={13} aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="prep-note-tag-input">
+          <input
+            id={id + "-tag"}
+            value={tagInput}
+            maxLength={MAX_TAG_LENGTH}
+            placeholder="e.g. Edge cases"
+            disabled={!!recovery || !key || tags.length >= MAX_NOTE_TAGS}
+            onChange={(event) => setTagInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addTag();
+              }
+            }}
+            aria-describedby={id + "-tag-help"}
+          />
+          <Button
+            type="button"
+            size="compact"
+            variant="secondary"
+            disabled={
+              !!recovery ||
+              !key ||
+              !tagInput.trim() ||
+              tags.length >= MAX_NOTE_TAGS
+            }
+            onClick={addTag}
+          >
+            Add tag
+          </Button>
+        </div>
+        <p id={id + "-tag-help"} className="prep-note-hint">
+          Your own labels · Up to 8 tags · Press Enter or Add tag.
+        </p>
+      </div>
       <div className="prep-note-editor-footer">
         <span role="status" aria-live="polite">
           {status === "saving"

@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   noteBlocks,
-  noteTemplate,
   insertCode,
   draftKey,
   readDraft,
@@ -11,9 +10,7 @@ import {
   createNoteAutosave,
 } from "../../src/features/notes/editor.mjs";
 const tick = (ms = 15) => new Promise((r) => setTimeout(r, ms));
-test("templates and code fences preserve existing text and literal HTML", () => {
-  assert.match(noteTemplate("approach"), /## Complexity/);
-  assert.equal(noteTemplate("unknown"), "");
+test("code fences preserve existing text and literal HTML", () => {
   const inserted = insertCode('keep\nreturn "```";', 5, 18, "python");
   assert.ok(inserted.content.startsWith("keep\n````python\n"));
   const blocks = noteBlocks(

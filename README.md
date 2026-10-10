@@ -20,7 +20,7 @@ Everything requires a free email/password account. Notes and progress are privat
 | --------- | ------------------------------------------------------------------------------- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript                                   |
 | Styling   | Tailwind CSS 4, Radix primitives, Lucide icons, locally bundled Inter font      |
-| Data      | PostgreSQL via `pg` (node-postgres), 14 SQL migrations, row-level security      |
+| Data      | PostgreSQL via `pg` (node-postgres), 15 SQL migrations, row-level security      |
 | Auth      | Auth.js (v5 beta) credentials — email + PrepYard password, encrypted JWT cookie |
 | Tooling   | pnpm 11.19, ESLint, Prettier, GitHub Actions                                    |
 
@@ -59,7 +59,7 @@ Sign-in fails closed: without this configuration, protected pages deny access. A
 
 ### 3. Database
 
-Apply all 14 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
+Apply all 15 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
 
 ### 4. Run
 
@@ -101,7 +101,7 @@ src/
   lib/                  # Server helpers: database transactions, auth policy, site nav
   proxy.ts              # Request guard — redirects signed-out users away from app pages
   auth.ts               # Auth.js configuration (credentials provider)
-supabase/migrations/    # 14 ordered SQL migrations (schema, RLS, grants, identity)
+supabase/migrations/    # 15 ordered SQL migrations (schema, RLS, grants, identity)
 scripts/                # Importers, publishers, data fetchers
 tests/                  # Unit, auth, import, access and database suites
 docs/                   # In-depth guides (see below)
@@ -261,6 +261,6 @@ The optional Chrome/Edge extension imports all solved question slugs from a sign
 
 ## Notes: first release
 
-The notebook searches question titles and note content across all pages. Compact cards keep content behind View note, with Edit note opening the shared editor. Company and pattern rows use that same editor. Optional approach/complexity and mistakes templates append without replacing existing text. Insert language-labelled fenced code blocks and use Preview or View note to copy code. Only a small safe Markdown subset (headings, bullet lists and fenced code) is rendered; raw HTML remains text.
+The notebook searches question titles and note content across all pages. Compact cards keep content behind View note, with Edit note opening the shared editor. Company and pattern rows use that same editor. The editor starts with a clean note and supports optional user-written tags, shown on each notebook card and included in search. Insert language-labelled fenced code blocks and use Preview or View note to copy code. Only a small safe Markdown subset (headings, bullet lists and fenced code) is rendered; raw HTML remains text.
 
-Notes autosave after a one-second pause, with Saved, Saving and retryable error states. Writes from one editor are serialized so older requests cannot overwrite newer typing. Unsaved drafts are stored under the signed-in account and question in this browser tab's session storage; reopening after a refresh offers Restore or Discard instead of overwriting the saved note. Closing the tab ends this recovery session. Notes stay private under existing owner policies, with the existing 50,000-character limit; no database migration is needed. Run `pnpm test:notes` for editor/queue/validation checks.
+Notes autosave after a one-second pause, with Saved, Saving and retryable error states. Writes from one editor are serialized so older requests cannot overwrite newer typing. Unsaved drafts are stored under the signed-in account and question in this browser tab's session storage; reopening after a refresh offers Restore or Discard instead of overwriting the saved note. Closing the tab ends this recovery session. Notes stay private under existing owner policies, with the existing 50,000-character limit; apply `supabase/migrations/20261010001600_note_tags.sql` for optional note tags. Run `pnpm test:notes` for editor/queue/validation checks.

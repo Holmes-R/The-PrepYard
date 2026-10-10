@@ -32,6 +32,13 @@ function NoteCard({ note: n }: { note: JsonData<NotePage>["rows"][number] }) {
       <time className="prep-note-updated" dateTime={n.updated_at}>
         Updated {new Date(n.updated_at).toLocaleDateString()}
       </time>
+      {n.tags.length > 0 && (
+        <ul className="prep-note-tags" aria-label="Note tags">
+          {n.tags.map((tag) => (
+            <li key={tag}>{tag}</li>
+          ))}
+        </ul>
+      )}
       <details className="note-disclosure">
         <summary>
           <span className="note-view-label">View note</span>
@@ -63,6 +70,7 @@ function NoteCard({ note: n }: { note: JsonData<NotePage>["rows"][number] }) {
           questionId={n.id}
           title={n.title}
           content={n.content}
+          tags={n.tags}
           onClose={() => setEditing(false)}
         />
       )}
@@ -128,7 +136,7 @@ export function ClientNotes({
           type="search"
           maxLength={200}
           defaultValue={query}
-          placeholder="Search question titles or note content…"
+          placeholder="Search titles, content, or tags…"
         />
         <Button type="submit">Search</Button>
         {query && (

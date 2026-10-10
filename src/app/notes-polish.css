@@ -259,3 +259,72 @@ body .prep-note-content p {
   display: grid;
   gap: 6px;
 }
+
+.prep-note-tag-field {
+  margin-top: 16px;
+}
+.prep-note-tag-field > label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.prep-note-tag-field label span {
+  color: var(--muted-foreground);
+}
+body .prep-note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 8px 0;
+  list-style: none;
+}
+body .prep-note-tags li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #bce3d5;
+  background: #8edcc00d;
+  overflow-wrap: anywhere;
+}
+.prep-note-tags li > button {
+  padding: 0 4px;
+  min-width: 28px;
+}
+.prep-note-tag-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.prep-note-tag-input input {
+  min-width: 0;
+  flex: 1;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.prep-note-tag-input input:focus-visible {
+  outline: 2px solid #9bc5fa;
+  outline-offset: 3px;
+}
+@media (max-width: 540px) {
+  .prep-note-tag-input input {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 540px) {
+  .prep-note-tags li > button {
+    min-width: 44px;
+  }
+}

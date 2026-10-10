@@ -12,7 +12,7 @@ export async function studentNotes(
       ? requestedQuery.trim().slice(0, 200)
       : "";
   const base =
-    "from public.notes n join public.questions q on q.id=n.question_id where n.user_id=private.student_id() and length(btrim(n.content))>0 and (strpos(lower(q.title),lower($1))>0 or strpos(lower(n.content),lower($1))>0)";
+    "from public.notes n join public.questions q on q.id=n.question_id where n.user_id=private.student_id() and length(btrim(n.content))>0 and (strpos(lower(q.title),lower($1))>0 or strpos(lower(n.content),lower($1))>0 or strpos(lower(array_to_string(n.tags,' ')),lower($1))>0)";
   const total = (
     await client.query("select count(*)::int total " + base, [query])
   ).rows[0].total;
@@ -20,7 +20,7 @@ export async function studentNotes(
   const page = Math.min(requested, pages);
   const rows = (
     await client.query(
-      "select q.id,q.title,q.canonical_url,n.content,n.updated_at " +
+      "select q.id,q.title,q.canonical_url,n.content,n.tags,n.updated_at " +
         base +
         " order by n.updated_at desc,q.id limit $2 offset $3",
       [query, pageSize, (page - 1) * pageSize],

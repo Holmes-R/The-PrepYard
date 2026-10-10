@@ -177,6 +177,7 @@ function QuestionRow({
   const [notesOpen, setNotesOpen] = useState(false);
   const [revisionOpen, setRevisionOpen] = useState(false);
   const [note, setNote] = useState("");
+  const [noteTags, setNoteTags] = useState<string[]>([]);
   const [noteState, setNoteState] = useState<"idle" | "loading" | "ready">(
     "idle",
   );
@@ -217,6 +218,7 @@ function QuestionRow({
         if (!response.ok) throw new Error(String(response.status));
         const body = await response.json();
         setNote(typeof body.note === "string" ? body.note : "");
+        setNoteTags(Array.isArray(body.tags) ? body.tags : []);
         setNoteState("ready");
         setNotesOpen(true);
       })
@@ -364,8 +366,10 @@ function QuestionRow({
           <NoteEditor
             questionId={question.id}
             initialContent={note}
-            onSaved={async (content) => {
+            initialTags={noteTags}
+            onSaved={async (content, tags) => {
               setNote(content);
+              setNoteTags(tags);
               await onSaved();
             }}
             onClose={() => setNotesOpen(false)}

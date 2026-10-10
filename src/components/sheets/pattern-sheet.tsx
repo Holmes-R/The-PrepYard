@@ -97,6 +97,7 @@ export function Question({
   const [pending, start] = useTransition();
   const [notesOpen, setNotesOpen] = useState(false);
   const [note, setNote] = useState("");
+  const [noteTags, setNoteTags] = useState<string[]>([]);
   const [noteState, setNoteState] = useState<"idle" | "loading" | "ready">(
     "idle",
   );
@@ -134,6 +135,7 @@ export function Question({
         if (!response.ok) throw new Error(String(response.status));
         const body = await response.json();
         setNote(typeof body.note === "string" ? body.note : "");
+        setNoteTags(Array.isArray(body.tags) ? body.tags : []);
         setNoteState("ready");
         setNotesOpen(true);
       })
@@ -247,8 +249,10 @@ export function Question({
           <NoteEditor
             questionId={q.id}
             initialContent={note}
-            onSaved={async (content) => {
+            initialTags={noteTags}
+            onSaved={async (content, tags) => {
               setNote(content);
+              setNoteTags(tags);
               await onSaved();
             }}
             onClose={() => setNotesOpen(false)}

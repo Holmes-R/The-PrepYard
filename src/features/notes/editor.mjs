@@ -1,3 +1,4 @@
+import { normalizeNoteTags } from "./model.mjs";
 export const NOTE_LIMIT = 50000;
 export const NOTE_LANGUAGES = [
   ["text", "Plain text"],
@@ -11,13 +12,6 @@ export const NOTE_LANGUAGES = [
   ["rust", "Rust"],
   ["sql", "SQL"],
 ];
-export function noteTemplate(kind) {
-  if (kind === "approach")
-    return "## Approach\n\n## Why it works\n\n## Complexity\n\nTime: \nSpace: \n\n## Edge cases\n";
-  if (kind === "mistakes")
-    return "## What went wrong\n\n## Correction\n\n## What to remember\n";
-  return "";
-}
 // This intentionally renders a small Markdown subset, never raw HTML.
 export function noteBlocks(content) {
   const lines = content.replace(/\r\n?/g, "\n").split("\n"),
@@ -92,34 +86,50 @@ export function readDraft(storage, key) {
   try {
     const draft = JSON.parse(storage.getItem(key));
     if (
-      draft?.version === 1 &&
+      [1, 2].includes(draft?.version) &&
       typeof draft.content === "string" &&
       draft.content.length <= NOTE_LIMIT &&
       typeof draft.base === "string" &&
       draft.base.length <= NOTE_LIMIT
     )
-      return draft;
+      return {
+        ...draft,
+        tags: normalizeNoteTags(draft.tags ?? []),
+        baseTags: normalizeNoteTags(draft.baseTags ?? []),
+      };
   } catch {
     /* Storage may be disabled or contain an incomplete draft. */
   }
   return null;
 }
-export function writeDraft(storage, key, content, base) {
+export function writeDraft(
+  storage,
+  key,
+  content,
+  base,
+  tags = [],
+  baseTags = [],
+) {
   try {
-    storage.setItem(key, JSON.stringify({ version: 1, content, base }));
+    storage.setItem(
+      key,
+      JSON.stringify({ version: 2, content, base, tags, baseTags }),
+    );
     return true;
   } catch {
     return false;
   }
 }
-export function clearDraft(storage, key, savedContent) {
+export function clearDraft(storage, key, savedContent, savedTags) {
   try {
     const draft = readDraft(storage, key);
     // A late save must never erase a newer draft typed during that request.
     if (
       !draft ||
       savedContent === undefined ||
-      draft.content.trim() === savedContent.trim()
+      (draft.content.trim() === savedContent.trim() &&
+        (savedTags === undefined ||
+          JSON.stringify(draft.tags) === JSON.stringify(savedTags)))
     )
       storage.removeItem(key);
   } catch {
@@ -130,12 +140,13 @@ export function clearDraft(storage, key, savedContent) {
 // order. Unmount cancels the debounce while an already-started save may finish.
 export function createNoteAutosave({
   initial = "",
+  identify = (value) => value.trim(),
   save,
   status,
   delay = 1000,
 }) {
   let current = initial,
-    saved = initial.trim(),
+    saved = identify(initial),
     timer,
     flight,
     disposed = false,
@@ -144,13 +155,13 @@ export function createNoteAutosave({
     due = true;
     if (flight) return flight;
     flight = (async () => {
-      while (!disposed && due && current.trim() !== saved) {
+      while (!disposed && due && identify(current) !== saved) {
         due = false;
         const candidate = current;
         status("saving");
         try {
           await save(candidate);
-          saved = candidate.trim();
+          saved = identify(candidate);
         } catch (error) {
           due = false;
           status(
@@ -159,7 +170,8 @@ export function createNoteAutosave({
           );
           return false;
         }
-        if (!disposed) status(current.trim() === saved ? "saved" : "unsaved");
+        if (!disposed)
+          status(identify(current) === saved ? "saved" : "unsaved");
       }
       return true;
     })();
@@ -172,7 +184,7 @@ export function createNoteAutosave({
       if (disposed) return;
       current = value;
       clearTimeout(timer);
-      status(current.trim() === saved && !flight ? "saved" : "unsaved");
+      status(identify(current) === saved && !flight ? "saved" : "unsaved");
       timer = setTimeout(() => {
         void pump();
       }, delay);

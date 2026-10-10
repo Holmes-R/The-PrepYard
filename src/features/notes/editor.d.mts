@@ -1,6 +1,5 @@
 export const NOTE_LIMIT: number;
 export const NOTE_LANGUAGES: string[][];
-export function noteTemplate(kind: string): string;
 export type NoteBlock =
   | { kind: "code"; language: string; text: string }
   | { kind: "heading"; level: number; text: string }
@@ -13,7 +12,13 @@ export function insertCode(
   end: number,
   language: string,
 ): { content: string; cursor: number; end: number };
-export type NoteDraft = { version: 1; content: string; base: string };
+export type NoteDraft = {
+  version: 1 | 2;
+  content: string;
+  base: string;
+  tags: string[];
+  baseTags: string[];
+};
 export type DraftStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 export function draftKey(userId: string, questionId: string): string;
 export function readDraft(storage: DraftStorage, key: string): NoteDraft | null;
@@ -22,21 +27,25 @@ export function writeDraft(
   key: string,
   content: string,
   base: string,
+  tags?: string[],
+  baseTags?: string[],
 ): boolean;
 export function clearDraft(
   storage: DraftStorage,
   key: string,
   savedContent?: string,
+  savedTags?: string[],
 ): void;
 export type SaveStatus = "saved" | "unsaved" | "saving" | "error";
-export type NoteAutosave = {
-  schedule(value: string): void;
+export type NoteAutosave<T = string> = {
+  schedule(value: T): void;
   flush(): Promise<boolean>;
   dispose(): void;
 };
-export function createNoteAutosave(options: {
-  initial?: string;
-  save: (value: string) => Promise<void>;
+export function createNoteAutosave<T = string>(options: {
+  initial?: T;
+  identify?: (value: T) => string;
+  save: (value: T) => Promise<void>;
   status: (value: SaveStatus, message?: string) => void;
   delay?: number;
-}): NoteAutosave;
+}): NoteAutosave<T>;

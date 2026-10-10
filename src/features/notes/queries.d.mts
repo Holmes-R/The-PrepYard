@@ -5,6 +5,7 @@ export type NotePage = {
     title: string;
     canonical_url: string;
     content: string;
+    tags: string[];
     updated_at: Date;
   }[];
   total: number;

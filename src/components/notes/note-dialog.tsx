@@ -5,11 +5,13 @@ export function NoteDialog({
   questionId,
   title,
   content,
+  tags,
   onClose,
 }: {
   questionId: string;
   title: string;
   content: string;
+  tags: string[];
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -32,6 +34,7 @@ export function NoteDialog({
       <NoteEditor
         questionId={questionId}
         initialContent={content}
+        initialTags={tags}
         onClose={onClose}
       />
     </dialog>
