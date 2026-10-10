@@ -21,8 +21,8 @@ import {
   readDraft,
   writeDraft,
   clearDraft,
-  createNoteAutosave,
-  type NoteAutosave,
+  createNoteSaveController,
+  type NoteSaveController,
   type NoteDraft,
   type SaveStatus,
 } from "@/features/notes/editor.mjs";
@@ -52,7 +52,7 @@ export function NoteEditor({
   const [recovery, setRecovery] = useState<NoteDraft | null>(null);
   const [storageWarning, setStorageWarning] = useState(false);
   const input = useRef<HTMLTextAreaElement>(null);
-  const queue = useRef<NoteAutosave<EditableNote> | null>(null);
+  const queue = useRef<NoteSaveController<EditableNote> | null>(null);
   const base = useRef({ content: initialContent, tags: initialTags });
   const callbacks = useRef({ onSaved, onClose });
   const key = user?.id ? draftKey(user.id, questionId) : "";
@@ -74,7 +74,7 @@ export function NoteEditor({
         setStorageWarning(true);
       }
     });
-    const autosave = createNoteAutosave({
+    const controller = createNoteSaveController({
       initial: base.current,
       identify: noteSignature,
       save: async (value) => {
@@ -102,10 +102,10 @@ export function NoteEditor({
         }
       },
     });
-    queue.current = autosave;
+    queue.current = controller;
     return () => {
       mounted = false;
-      autosave.dispose();
+      controller.dispose();
       queue.current = null;
     };
   }, [key, questionId]);
@@ -133,12 +133,10 @@ export function NoteEditor({
         setStorageWarning(true);
       }
     }
-    queue.current?.schedule({ content: value, tags: nextTags });
+    queue.current?.update({ content: value, tags: nextTags });
   }
-  async function flush(close = false) {
-    if (await queue.current?.flush()) {
-      if (close) callbacks.current.onClose();
-    }
+  async function submit() {
+    await queue.current?.submit();
   }
   function addTag() {
     if (!tagInput.trim()) return;
@@ -355,16 +353,11 @@ export function NoteEditor({
           size="compact"
           loading={status === "saving"}
           disabled={!key || !!recovery}
-          onClick={() => void flush()}
+          onClick={() => void submit()}
         >
-          {status === "error" ? "Retry save" : "Save now"}
+          Save now
         </Button>
-        <Button
-          type="button"
-          size="compact"
-          variant="ghost"
-          onClick={() => (recovery ? onClose() : void flush(true))}
-        >
+        <Button type="button" size="compact" variant="ghost" onClick={onClose}>
           Close
         </Button>
       </div>
@@ -375,13 +368,13 @@ export function NoteEditor({
       )}
       {storageWarning && (
         <p className="prep-note-error" role="status">
-          Draft recovery is unavailable in this browser. Keep the editor open
-          until it shows Saved.
+          Draft recovery is unavailable in this browser. Click Save now before
+          closing the editor.
         </p>
       )}
       <p className="prep-note-hint">
-        Autosaves after you pause typing. Unsaved drafts can be recovered in
-        this browser tab.
+        Click Save now to save your note and tags. Closing keeps an unsaved
+        draft in this browser tab.
       </p>
     </section>
   );

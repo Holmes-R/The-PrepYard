@@ -82,7 +82,7 @@ Create an account at `/signup`, confirm the emailed link, then log in at `/login
 | `pnpm format`    | Prettier write                                                         |
 | `pnpm db:test`   | Migrations + RLS/identity tests on a disposable local PostgreSQL       |
 
-Test-only entry points (also part of `pnpm check`): `test:patterns`, `test:catalogue`, `test:import`, `test:auth`, `test:access`. Database-backed suites run with their own `test:*:database` scripts and need a reachable PostgreSQL.
+Test-only entry points (also part of `pnpm check`): `test:patterns`, `test:catalogue`, `test:import`, `test:auth`, `test:access`, `test:notes`. Database-backed suites run with their own `test:*:database` scripts and need a reachable PostgreSQL.
 
 Admin/import entry points: `import:company`, `import:repository`, `patterns:publish`, `collections:publish`, `logos:publish-reviewed`, `topics:fetch`, `logos:fetch`. These are documented in [the importer guide](docs/importer.md) and [company workflow](docs/company-pages.md).
 
@@ -161,7 +161,7 @@ The question list for one company (for example `1kosmos`).
 - Click column headers to sort by up to three priorities at once (question, difficulty, frequency, revision).
 - Every row: a solved toggle, a direct link to the problem on its platform, pattern tags, up to four company tags with reported frequency (clicking one deep-links to that company), an expandable topic list, a revision button, and a note button.
 - The revision dialog rates each session (Struggled / Tough / Got it / Nailed it), schedules a next-day reminder, and lists your dated revision history.
-- The note editor holds up to 50,000 characters per question, fetched on first open, with save feedback and error recovery.
+- The note editor starts blank for new notes, holds up to 50,000 characters, and supports optional custom tags. Click **Save now** to save text and tags together; **Close** keeps a draft in the current browser tab without saving it to your account.
 - Paginated with skeletons while loading, a Retry on failure, and a redirect to login if your session expires.
 
 ### Explore — `/explore`
@@ -202,9 +202,11 @@ Your progress at a glance.
 
 Your private notebook.
 
-- All saved notes as cards, newest edit first, paginated.
-- Each card expands to show the note, links to the original question, and offers "Find in practice" to locate it in the pattern sheet.
-- Deleting is a deliberate two-step inline confirmation (Escape cancels), so a stray tap never removes a note.
+- Saved notes appear as compact cards, newest edit first, with 24 notes per page. Optional custom tags are visible on each card; the note body stays collapsed until **View note** is selected.
+- Search question titles, note text, or tags across all saved notes, including other pages.
+- **Edit note** opens the same editor used on company and pattern pages. The saved note and its tags are shared across these views for the same question.
+- Cards link to the original question and offer **Find in practice**.
+- **Delete note** asks for confirmation; Escape cancels. Clearing the editor text and clicking **Save now** also deletes the saved note.
 
 ### About — `/about`
 
@@ -224,7 +226,7 @@ A gallery of the design system: button variants and states, checkboxes (includin
 
 ## Testing and CI
 
-- **Unit tests** — query builders and fixtures: `pnpm test:patterns`, `pnpm test:catalogue`, `pnpm test:import`, `pnpm test:auth`
+- **Unit tests** — query builders and fixtures: `pnpm test:patterns`, `pnpm test:catalogue`, `pnpm test:import`, `pnpm test:auth`; `pnpm test:notes` verifies manual saving, draft recovery, tags, validation, and note queries
 - **Post-build integration** — `pnpm test:access` boots the built app and verifies protected-route redirects and forged-cookie denial
 - **Database tests** — `pnpm db:test` and the `test:*:database` scripts run migrations, row-level-security and publication checks against a disposable PostgreSQL
 - **CI** — `.github/workflows/ci.yml` runs format, lint, tests, typecheck, build and access checks on every push/PR, plus migration/policy tests on a fresh PostgreSQL service
@@ -259,8 +261,20 @@ Apply migration `20261010001400_leetcode_sync.sql` before using this feature. Pu
 
 The optional Chrome/Edge extension imports all solved question slugs from a signed-in LeetCode tab and checks every two minutes while LeetCode and PrepYard tabs are open. Completion is shared across company and pattern pages. Passwords, cookies and solution code remain outside PrepYard. Apply migration `20261010001500_leetcode_history.sql` after the sync-settings migration. Run `pnpm build:extension` to package the downloadable ZIP; the production build does this automatically. Install/setup, privacy and limitations are documented in [LeetCode sync](docs/leetcode-sync.md).
 
-## Notes: first release
+## Writing and saving notes
 
-The notebook searches question titles and note content across all pages. Compact cards keep content behind View note, with Edit note opening the shared editor. Company and pattern rows use that same editor. The editor starts with a clean note and supports optional user-written tags, shown on each notebook card and included in search. Insert language-labelled fenced code blocks and use Preview or View note to copy code. Only a small safe Markdown subset (headings, bullet lists and fenced code) is rendered; raw HTML remains text.
+New notes start blank, without preset templates. Company rows, pattern rows, and the notebook use the same private note editor for each question.
 
-Notes autosave after a one-second pause, with Saved, Saving and retryable error states. Writes from one editor are serialized so older requests cannot overwrite newer typing. Unsaved drafts are stored under the signed-in account and question in this browser tab's session storage; reopening after a refresh offers Restore or Discard instead of overwriting the saved note. Closing the tab ends this recovery session. Notes stay private under existing owner policies, with the existing 50,000-character limit; apply `supabase/migrations/20261010001600_note_tags.sql` for optional note tags. Run `pnpm test:notes` for editor/queue/validation checks.
+1. Open the question's note icon, or choose **Edit note** on its notebook card.
+2. Write your note. Optionally choose a code language and **Insert code**, then use **Preview** to check the formatting.
+3. Add your own optional tags by typing a label and pressing Enter or **Add tag**. Use the remove icon to delete a tag. Each note allows up to 8 tags, with 1–32 characters per tag.
+4. Click **Save now** to save the current text and tags together. The status changes from **Unsaved changes** to **Saving…**, then **Saved**. If saving fails, the editor shows **Not saved**; click **Save now** again to retry.
+5. Open **Notes** to see the saved card and its tags. Search by question title, note text, or tag; choose **View note** to read the content.
+
+**Saving is manual.** Typing, changing tags, previewing, restoring a draft, or clicking **Close** never saves to your account. Edits made while a save is in progress remain unsaved until you click **Save now** again. Clearing all note text deletes the saved note only after **Save now** is clicked.
+
+**Draft recovery.** Unsaved text and tags are kept locally in this browser tab, scoped to your signed-in account and question. Closing the editor, navigating away, or refreshing leaves the draft recoverable in the same tab. Reopening offers **Restore draft** or **Discard draft**. Restoring only loads the draft into the editor; click **Save now** to save it to your account. Closing the browser tab ends this recovery session. If browser storage is unavailable, save before closing the editor.
+
+Notes remain private under the existing owner policies and have a 50,000-character limit. Preview supports headings, bullet lists, and language-labelled fenced code blocks with **Copy code**; raw HTML remains text.
+
+**Database setup:** apply [the optional note-tags migration](supabase/migrations/20261010001600_note_tags.sql) after earlier migrations. Existing notes receive an empty tag list and retain their text. Changing from automatic to manual saving needs no additional migration. See [the notes guide](docs/notes.md) for storage and access details. Run `pnpm test:notes` for editor, manual-save, draft, query, and validation checks.

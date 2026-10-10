@@ -136,66 +136,51 @@ export function clearDraft(storage, key, savedContent, savedTags) {
     /* Saving on the server remains usable when browser storage fails. */
   }
 }
-// One request at a time. Edits made during a save are coalesced, not sent out of
-// order. Unmount cancels the debounce while an already-started save may finish.
-export function createNoteAutosave({
+// Editing only stages a draft. Only an explicit Save now writes a snapshot.
+// Edits made during that request remain unsaved until another explicit save.
+export function createNoteSaveController({
   initial = "",
   identify = (value) => value.trim(),
   save,
   status,
-  delay = 1000,
 }) {
   let current = initial,
     saved = identify(initial),
-    timer,
     flight,
-    disposed = false,
-    due = false;
-  async function pump() {
-    due = true;
-    if (flight) return flight;
-    flight = (async () => {
-      while (!disposed && due && identify(current) !== saved) {
-        due = false;
-        const candidate = current;
-        status("saving");
+    disposed = false;
+  return {
+    update(value) {
+      if (disposed) return;
+      current = value;
+      if (!flight) status(identify(current) === saved ? "saved" : "unsaved");
+    },
+    async submit() {
+      if (disposed || flight) return false;
+      if (identify(current) === saved) return true;
+      const candidate = current;
+      status("saving");
+      flight = (async () => {
         try {
           await save(candidate);
           saved = identify(candidate);
+          if (!disposed)
+            status(identify(current) === saved ? "saved" : "unsaved");
+          return true;
         } catch (error) {
-          due = false;
-          status(
-            "error",
-            error?.message || "Could not save. Please try again.",
-          );
+          if (!disposed)
+            status(
+              "error",
+              error?.message || "Could not save. Please try again.",
+            );
           return false;
         }
-        if (!disposed)
-          status(identify(current) === saved ? "saved" : "unsaved");
-      }
-      return true;
-    })();
-    const result = await flight;
-    flight = undefined;
-    return result;
-  }
-  return {
-    schedule(value) {
-      if (disposed) return;
-      current = value;
-      clearTimeout(timer);
-      status(identify(current) === saved && !flight ? "saved" : "unsaved");
-      timer = setTimeout(() => {
-        void pump();
-      }, delay);
-    },
-    flush() {
-      clearTimeout(timer);
-      return disposed ? Promise.resolve(false) : pump();
+      })();
+      const result = await flight;
+      flight = undefined;
+      return result;
     },
     dispose() {
       disposed = true;
-      clearTimeout(timer);
     },
   };
 }

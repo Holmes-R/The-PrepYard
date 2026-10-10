@@ -37,15 +37,14 @@ export function clearDraft(
   savedTags?: string[],
 ): void;
 export type SaveStatus = "saved" | "unsaved" | "saving" | "error";
-export type NoteAutosave<T = string> = {
-  schedule(value: T): void;
-  flush(): Promise<boolean>;
+export type NoteSaveController<T = string> = {
+  update(value: T): void;
+  submit(): Promise<boolean>;
   dispose(): void;
 };
-export function createNoteAutosave<T = string>(options: {
+export function createNoteSaveController<T = string>(options: {
   initial?: T;
   identify?: (value: T) => string;
   save: (value: T) => Promise<void>;
   status: (value: SaveStatus, message?: string) => void;
-  delay?: number;
-}): NoteAutosave<T>;
+}): NoteSaveController<T>;

@@ -57,4 +57,4 @@ Run `pnpm test:leetcode` for independent fixtures, complete-list/count validatio
 
 ## Suggested notes improvements
 
-Useful next additions: optional **Approach / Why it works / Complexity / Mistakes / Edge cases** templates; searchable notes with topic/pattern filters; code blocks with language selection and copy; debounced autosave with a saved indicator and recoverable drafts; note history, revision reminders and Markdown export. Keep notebook cards compact with the note body behind **View note**.
+Useful next additions: optional **Approach / Why it works / Complexity / Mistakes / Edge cases** templates; searchable notes with topic/pattern filters; code blocks with language selection and copy; explicit Save now with a saved indicator and recoverable drafts; note history, revision reminders and Markdown export. Keep notebook cards compact with the note body behind **View note**.

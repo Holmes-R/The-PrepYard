@@ -6,7 +6,7 @@ import {
   noteSignature,
 } from "../../src/features/notes/model.mjs";
 import {
-  createNoteAutosave,
+  createNoteSaveController,
   draftKey,
   readDraft,
   writeDraft,
@@ -40,9 +40,9 @@ test("custom tags are optional, trimmed, deduplicated and bounded", () => {
   });
   assert.throws(() => parseNoteInput("x".repeat(50001), []));
 });
-test("tag-only edits participate in the same serialized autosave as note text", async () => {
+test("tag-only edits save with note text only on explicit submit", async () => {
   const writes = [];
-  const queue = createNoteAutosave({
+  const queue = createNoteSaveController({
     initial: { content: "Keep this text", tags: [] },
     identify: noteSignature,
     status: () => {},
@@ -50,10 +50,11 @@ test("tag-only edits participate in the same serialized autosave as note text", 
       writes.push(value);
     },
   });
-  queue.schedule({ content: "Keep this text", tags: ["Review"] });
-  assert.equal(await queue.flush(), true);
-  queue.schedule({ content: "Keep this text", tags: [] });
-  assert.equal(await queue.flush(), true);
+  queue.update({ content: "Keep this text", tags: ["Review"] });
+  assert.equal(writes.length, 0);
+  assert.equal(await queue.submit(), true);
+  queue.update({ content: "Keep this text", tags: [] });
+  assert.equal(await queue.submit(), true);
   assert.deepEqual(
     writes.map((n) => n.tags),
     [["Review"], []],
