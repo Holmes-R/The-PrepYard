@@ -1,0 +1,19 @@
+{
+  "data": {
+    "matchedUser": { "username": "fixture_student" },
+    "recentAcSubmissionList": [
+      { "id": "987654321", "titleSlug": "two-sum", "timestamp": "1720000000" },
+      {
+        "id": "987654322",
+        "titleSlug": "valid-parentheses",
+        "timestamp": "1720000100"
+      },
+      {
+        "id": "987654323",
+        "titleSlug": "not-in-prepyard",
+        "timestamp": "1720000200"
+      },
+      { "id": "987654321", "titleSlug": "two-sum", "timestamp": "1720000000" }
+    ]
+  }
+}

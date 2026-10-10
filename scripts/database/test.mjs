@@ -81,6 +81,7 @@ psql([
   "-c",
   "select 1 / ((to_regprocedure('private.register_google_student(text,text,text)') is null)::integer)",
 ]);
+psql(["-f", "tests/database/leetcode-sync.sql"]);
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

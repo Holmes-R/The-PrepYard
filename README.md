@@ -20,7 +20,7 @@ Everything requires a free email/password account. Notes and progress are privat
 | --------- | ------------------------------------------------------------------------------- |
 | Framework | Next.js 16 (App Router), React 19, TypeScript                                   |
 | Styling   | Tailwind CSS 4, Radix primitives, Lucide icons, locally bundled Inter font      |
-| Data      | PostgreSQL via `pg` (node-postgres), 12 SQL migrations, row-level security      |
+| Data      | PostgreSQL via `pg` (node-postgres), 13 SQL migrations, row-level security      |
 | Auth      | Auth.js (v5 beta) credentials — email + PrepYard password, encrypted JWT cookie |
 | Tooling   | pnpm 11.19, ESLint, Prettier, GitHub Actions                                    |
 
@@ -59,7 +59,7 @@ Sign-in fails closed: without this configuration, protected pages deny access. A
 
 ### 3. Database
 
-Apply all 12 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
+Apply all 13 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
 
 ### 4. Run
 
@@ -101,7 +101,7 @@ src/
   lib/                  # Server helpers: database transactions, auth policy, site nav
   proxy.ts              # Request guard — redirects signed-out users away from app pages
   auth.ts               # Auth.js configuration (credentials provider)
-supabase/migrations/    # 12 ordered SQL migrations (schema, RLS, grants, identity)
+supabase/migrations/    # 13 ordered SQL migrations (schema, RLS, grants, identity)
 scripts/                # Importers, publishers, data fetchers
 tests/                  # Unit, auth, import, access and database suites
 docs/                   # In-depth guides (see below)
@@ -248,3 +248,9 @@ A gallery of the design system: button variants and states, checkboxes (includin
 - The project does not bypass paid problem access or reproduce third-party problem statements; questions link to their canonical platform pages.
 - Keep source licensing and attribution records internal, as described in [collection attribution](docs/collection-attribution.md).
 - Never commit secrets. `.env.local`, privileged database URLs, and the `prepyard_web` password stay on your machine or in your host's secret store.
+
+## LeetCode completion sync
+
+Open **Dashboard → LeetCode sync**, enter your public LeetCode username, and connect. Recent publicly visible Accepted submissions are checked every two minutes while PrepYard is open, with manual Sync now, pause/resume, and disconnect controls. Matching questions update across company pages, patterns, and dashboard totals. Notes and revision ratings are preserved, and previously processed submissions do not undo a later manual uncheck. No LeetCode passwords, cookies, or solution code are collected.
+
+Apply migration `20261010001400_leetcode_sync.sql` before using this feature. Public syncing is limited to the latest 20 Accepted submissions and may miss older/private activity; closing all PrepYard tabs stops periodic checks. See [sync setup and limitations](docs/leetcode-sync.md). Run `pnpm test:leetcode` for adapter checks.

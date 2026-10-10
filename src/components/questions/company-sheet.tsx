@@ -1,4 +1,5 @@
 "use client";
+import { externalProgressEvent } from "@/features/leetcode/client";
 import { refreshClientData } from "@/lib/client/use-client-resource";
 import { QuestionFilters } from "./question-filters";
 import { QuestionHeader } from "./question-header";
@@ -13,6 +14,7 @@ import { patternHref } from "@/features/patterns/navigation.mjs";
 import { CompletionToggle } from "@/components/ui/selection-control";
 import {
   useEffect,
+  useCallback,
   useMemo,
   useOptimistic,
   useState,
@@ -410,6 +412,13 @@ function useCompanySheet(
 ) {
   const router = useRouter();
   const [sheet, setSheet] = useState<Sheet | undefined>(initial);
+  const [previousInitial, setPreviousInitial] = useState(initial);
+  // SWR can replace cached initial rows after a revisit. Adopt that newer
+  // snapshot without remounting questions or discarding an open note editor.
+  if (initial !== previousInitial) {
+    setPreviousInitial(initial);
+    if (initial) setSheet(initial);
+  }
   const [filters, setFilters] = useState(initialFilters);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -450,7 +459,12 @@ function useCompanySheet(
       if (request === sequence.current) setLoading(false);
     }
   };
-  return { sheet, filters, loading, error, load };
+  const invalidate = useCallback(() => {
+    sequence.current++;
+    setSheet(undefined);
+    setLoading(false);
+  }, []);
+  return { sheet, filters, loading, error, load, invalidate };
 }
 function percentValue(raw: FormDataEntryValue | null) {
   const text = String(raw ?? "").trim();
@@ -723,7 +737,7 @@ function CompanyPanel({
   sync?: { filters: Filters; tick: number } | null;
   logoSrc?: string | null;
 }) {
-  const { sheet, filters, loading, error, load } = useCompanySheet(
+  const { sheet, filters, loading, error, load, invalidate } = useCompanySheet(
     company,
     initial,
     initialFilters,
@@ -735,6 +749,17 @@ function CompanyPanel({
     loadRef.current = load;
   });
   const didInit = useRef(false);
+  useEffect(() => {
+    const refresh = () => {
+      if (open) void loadRef.current();
+      else {
+        didInit.current = false;
+        invalidate();
+      }
+    };
+    window.addEventListener(externalProgressEvent, refresh);
+    return () => window.removeEventListener(externalProgressEvent, refresh);
+  }, [open, invalidate]);
   // Opened from a shared URL there is nothing to show yet, so fetch immediately
   // with the filters the URL carried instead of waiting for a toggle.
   useEffect(() => {

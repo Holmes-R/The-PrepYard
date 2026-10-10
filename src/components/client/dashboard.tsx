@@ -53,6 +53,12 @@ function DashboardContent({ data }: { data: Data }) {
           >
             <Building2 size={17} aria-hidden="true" /> Browse companies
           </Link>
+          <Link
+            href="/settings"
+            className="dashboard-button dashboard-button-secondary"
+          >
+            LeetCode sync
+          </Link>
         </div>
       </header>
 

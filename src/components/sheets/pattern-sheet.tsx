@@ -1,4 +1,5 @@
 "use client";
+import { externalProgressEvent } from "@/features/leetcode/client";
 import { refreshClientData } from "@/lib/client/use-client-resource";
 import {
   DifficultyBadge,
@@ -338,6 +339,17 @@ function Topic({
     void fetchRows(controller.signal);
     return () => controller.abort();
   }, [open, url, retry, fetchRows]);
+  useEffect(() => {
+    const refresh = () => {
+      if (open) {
+        setLoading(true);
+        setError("");
+        setRetry((value) => value + 1);
+      } else setData(null);
+    };
+    window.addEventListener(externalProgressEvent, refresh);
+    return () => window.removeEventListener(externalProgressEvent, refresh);
+  }, [open]);
   const saved = async () => {
     setLoading(true);
     setError("");

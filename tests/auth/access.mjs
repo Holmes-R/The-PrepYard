@@ -54,6 +54,7 @@ try {
     "/about",
     "/dashboard",
     "/notes",
+    "/settings",
     "/sources",
     "/unknown-route",
   ]) {
@@ -87,6 +88,7 @@ try {
     "/api/dashboard",
     "/api/companies",
     "/api/notes",
+    "/api/integrations/leetcode",
     "/api/patterns/overview",
     "/api/patterns/two-pointers",
   ]) {

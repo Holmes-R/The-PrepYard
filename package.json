@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm test:patterns && pnpm test:catalogue && pnpm test:import && pnpm test:auth && pnpm typecheck && pnpm build && pnpm test:access",
+    "check": "pnpm format:check && pnpm lint && pnpm test:patterns && pnpm test:catalogue && pnpm test:import && pnpm test:auth && pnpm test:leetcode && pnpm typecheck && pnpm build && pnpm test:access",
     "db:test": "node scripts/database/test.mjs",
     "import:company": "node scripts/import/company.mjs",
     "test:import": "node --test tests/import/company.test.mjs",
@@ -33,7 +33,8 @@
     "test:hotlist:database": "node tests/patterns/hotlist-database.mjs",
     "test:difficulty:database": "node tests/catalogue/difficulty-counts-database.mjs",
     "test:columns:database": "node tests/patterns/pattern-sort-database.mjs",
-    "test:roadmap:database": "node tests/patterns/roadmap-database.mjs"
+    "test:roadmap:database": "node tests/patterns/roadmap-database.mjs",
+    "test:leetcode": "node --test tests/leetcode/*.test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",
