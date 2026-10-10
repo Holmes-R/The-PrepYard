@@ -1,4 +1,16 @@
 import "server-only";
+export class EmailDeliveryError extends Error {
+  readonly code: string;
+  readonly status: number;
+
+  constructor(status: number) {
+    super("Email provider rejected the delivery request.");
+    this.name = "EmailDeliveryError";
+    this.code = "RESEND_HTTP_" + status;
+    this.status = status;
+  }
+}
+
 export function emailConfigured() {
   return Boolean(
     process.env.RESEND_API_KEY &&
@@ -50,5 +62,5 @@ export async function sendAuthEmail(
         "\n\nIf you did not request this, ignore this email.",
     }),
   });
-  if (!response.ok) throw new Error("Email delivery failed.");
+  if (!response.ok) throw new EmailDeliveryError(response.status);
 }

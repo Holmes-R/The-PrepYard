@@ -17,6 +17,30 @@ const unavailable = {
   message:
     "Email and password access is temporarily unavailable. Please try again later.",
 };
+function logAuthFailure(operation: string, stage: string, error: unknown) {
+  const cause =
+    error instanceof Error && "cause" in error ? error.cause : undefined;
+  const code =
+    error instanceof Error &&
+    "code" in error &&
+    typeof error.code === "string"
+      ? error.code
+      : cause instanceof Error &&
+          "code" in cause &&
+          typeof cause.code === "string"
+        ? cause.code
+        : undefined;
+  console.error(`[auth] ${operation} failed`, {
+    stage,
+    name: error instanceof Error ? error.name : "UnknownError",
+    code,
+    ...(error instanceof Error &&
+    "status" in error &&
+    typeof error.status === "number"
+      ? { status: error.status }
+      : {}),
+  });
+}
 export async function loginWithPassword(
   _previous: AuthState,
   form: FormData,
@@ -59,24 +83,31 @@ export async function requestAccountEmail(
     };
   if (purpose === "verify" && password !== form.get("confirmPassword"))
     return { message: "The passwords do not match." };
+  let stage = "rate_limit";
   try {
     if (!(await allowedAttempt("email", email, 5, 3600)))
       return { message: "Too many requests. Please try again in an hour." };
+    stage = "password_hash";
     const hash =
       purpose === "verify" ? await hashPassword(password as string) : null;
     const { token, digest } = newEmailToken();
+    stage = "database_token";
     const rows = await authQuery<{ ok: boolean }>(
       "select private.issue_email_token($1,$2,$3,$4,$5) as ok",
       [email, purpose, hash, name, digest],
     );
-    if (rows[0].ok) await sendAuthEmail(email, token, purpose);
+    if (rows[0].ok) {
+      stage = "email_delivery";
+      await sendAuthEmail(email, token, purpose);
+    }
     return {
       message:
         purpose === "verify"
           ? "If this address can be registered, a verification email is on its way. Check your inbox and spam folder. Already registered? Log in or reset your password."
           : "If an email-and-password account exists for this address, a reset link is on its way.",
     };
-  } catch {
+  } catch (error) {
+    logAuthFailure("Account email request", stage, error);
     return unavailable;
   }
 }
@@ -97,11 +128,14 @@ export async function completeAccountEmail(
     return {
       message: "Use a matching PrepYard password of 12–128 characters.",
     };
+  let stage = "rate_limit";
   try {
     if (!(await allowedAttempt("consume", token, 5, 900)))
       return { message: "Too many attempts. Please try again later." };
+    stage = "password_hash";
     const hash =
       purpose === "reset" ? await hashPassword(password as string) : null;
+    stage = "database_token";
     const rows = await authQuery<{ ok: boolean }>(
       "select private.consume_email_token($1,$2,$3) as ok",
       [tokenDigest(token), purpose, hash],
@@ -118,7 +152,8 @@ export async function completeAccountEmail(
           message:
             "This link has expired or was already used. Request a new email.",
         };
-  } catch {
+  } catch (error) {
+    logAuthFailure("Email token completion", stage, error);
     return unavailable;
   }
 }
