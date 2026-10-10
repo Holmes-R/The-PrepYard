@@ -26,6 +26,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowUpRight, ArrowRight, Search } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import dynamic from "next/dynamic";
+const NoteEditor = dynamic(
+  () =>
+    import("@/components/notes/note-editor").then(
+      (module) => module.NoteEditor,
+    ),
+  { loading: () => <p role="status">Loading note editor…</p> },
+);
 const RevisionDialog = dynamic(
   () =>
     import("@/components/sheets/revision-dialog").then(
@@ -179,7 +186,7 @@ function QuestionRow({
     question.status,
   );
   const solved = optimisticStatus === "solved";
-  const save = (kind: "solved" | "note", value: boolean | string) => {
+  const save = (kind: "solved", value: boolean | string) => {
     start(async () => {
       if (kind === "solved")
         // Transient only: un-solving an "attempted" question briefly reads as
@@ -190,18 +197,17 @@ function QuestionRow({
       if (result.ok) {
         setSavedKey((key) => key + 1);
         await onSaved();
-        if (kind === "note") setNotesOpen(false);
       } else setMessage(result.message);
     });
   };
   const noteId = "note-" + question.id;
   const toggleNotes = () => {
-    if (notesOpen || noteState === "ready") {
-      setNotesOpen(!notesOpen);
+    if (notesOpen) {
+      setNotesOpen(false);
       return;
     }
     if (noteState === "loading") return;
-    // Content is not in the list payload, so the first open fetches it. A failed
+    // Content is not in the list payload, so each open fetches it. A failed
     // fetch leaves the editor closed: opening it empty would let Save silently
     // overwrite the real note with nothing.
     setNoteState("loading");
@@ -354,34 +360,17 @@ function QuestionRow({
         </p>
       )}
       {notesOpen && (
-        <form
-          className="question-notes"
-          id={noteId}
-          onSubmit={(event) => {
-            event.preventDefault();
-            save("note", note);
-          }}
-        >
-          <label htmlFor={noteId + "-input"}>
-            Your private notes
-            <textarea
-              id={noteId + "-input"}
-              autoFocus
-              value={note}
-              maxLength={50000}
-              onChange={(e) => setNote(e.target.value)}
-              rows={4}
-            />
-          </label>
-          <div>
-            <button className="sheet-apply" disabled={pending}>
-              Save notes
-            </button>
-            <button type="button" onClick={() => setNotesOpen(false)}>
-              Cancel
-            </button>
-          </div>
-        </form>
+        <div className="prep-note-inline" id={noteId}>
+          <NoteEditor
+            questionId={question.id}
+            initialContent={note}
+            onSaved={async (content) => {
+              setNote(content);
+              await onSaved();
+            }}
+            onClose={() => setNotesOpen(false)}
+          />
+        </div>
       )}
       {message && (
         <p className="sheet-error" role="alert">

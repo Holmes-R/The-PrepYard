@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "PrepYard · LeetCode history sync",
+  "version": "1.0.0",
+  "description": "Import your complete solved-question list into PrepYard without sharing LeetCode passwords or session cookies.",
+  "permissions": ["storage", "scripting", "alarms"],
+  "host_permissions": ["https://leetcode.com/*"],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": { "service_worker": "background.mjs", "type": "module" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PrepYard history sync"
+  }
+}

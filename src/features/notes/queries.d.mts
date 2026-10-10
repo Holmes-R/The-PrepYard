@@ -14,4 +14,5 @@ export type NotePage = {
 export function studentNotes(
   client: PoolClient,
   requestedPage?: string | number,
+  requestedQuery?: string,
 ): Promise<NotePage>;

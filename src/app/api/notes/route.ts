@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
       studentNotes(
         client,
         request.nextUrl.searchParams.get("page") ?? undefined,
+        request.nextUrl.searchParams.get("q") ?? undefined,
       ),
     ),
   );

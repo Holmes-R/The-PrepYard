@@ -20,6 +20,16 @@ export function LeetCodeSyncCoordinator({ userId }: { userId: string }) {
   const username = data?.settings?.username;
 
   useEffect(() => {
+    const imported = () => {
+      announceSyncedProgress(userId);
+      retry();
+    };
+    window.addEventListener("prepyard:history-imported", imported);
+    return () =>
+      window.removeEventListener("prepyard:history-imported", imported);
+  }, [userId, retry]);
+
+  useEffect(() => {
     if (typeof BroadcastChannel === "undefined") return;
     const channel = new BroadcastChannel(syncChannel);
     channel.onmessage = (event) => {

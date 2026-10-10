@@ -82,6 +82,36 @@ psql([
   "select 1 / ((to_regprocedure('private.register_google_student(text,text,text)') is null)::integer)",
 ]);
 psql(["-f", "tests/database/leetcode-sync.sql"]);
+psql(["-f", "tests/database/leetcode-history.sql"]);
+const historyImport = spawnSync(
+  process.execPath,
+  ["tests/leetcode/history-database.mjs"],
+  {
+    cwd: root,
+    env: { ...process.env, PREPYARD_DATABASE_TESTS: "1" },
+    stdio: "inherit",
+  },
+);
+if (historyImport.error || historyImport.status !== 0)
+  throw new Error("Full-history importer checks failed");
+const acceptedImport = spawnSync(
+  process.execPath,
+  ["tests/leetcode/accepted-database.mjs"],
+  {
+    cwd: root,
+    env: { ...process.env, PREPYARD_DATABASE_TESTS: "1" },
+    stdio: "inherit",
+  },
+);
+if (acceptedImport.error || acceptedImport.status !== 0)
+  throw new Error("New Accepted submission checks failed");
+const noteSearch = spawnSync(process.execPath, ["tests/notes/database.mjs"], {
+  cwd: root,
+  env: { ...process.env, PREPYARD_DATABASE_TESTS: "1" },
+  stdio: "inherit",
+});
+if (noteSearch.error || noteSearch.status !== 0)
+  throw new Error("Private note search checks failed");
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

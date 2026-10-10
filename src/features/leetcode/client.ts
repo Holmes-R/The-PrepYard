@@ -6,6 +6,11 @@ export const externalProgressEvent = "prepyard:external-progress";
 export const syncChannel = "prepyard:leetcode-sync";
 export type ClientSyncSettings = {
   username: string;
+  binding_version: string;
+  sync_started_at: string;
+  last_history_at: string | null;
+  history_total: number;
+  history_matched_count: number;
   enabled: boolean;
   last_attempt_at: string | null;
   last_synced_at: string | null;

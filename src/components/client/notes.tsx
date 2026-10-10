@@ -1,6 +1,9 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, StickyNote } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { ArrowUpRight, StickyNote, Search, Pencil } from "lucide-react";
 import type { NotePage } from "@/features/notes/queries.mjs";
 import {
   useClientResource,
@@ -8,95 +11,172 @@ import {
 } from "@/lib/client/use-client-resource";
 import { ResourceState } from "@/components/feedback/resource-state";
 import { DeleteNoteButton } from "@/components/notes/delete-note-button";
-export function ClientNotes({ requested }: { requested?: string }) {
-  const resource = useClientResource<JsonData<NotePage>>(
-    "/api/notes?page=" + encodeURIComponent(requested ?? "1"),
+import { Button } from "@/components/ui/button";
+import { NoteContent } from "@/components/notes/note-content";
+const NoteDialog = dynamic(
+  () =>
+    import("@/components/notes/note-dialog").then(
+      (module) => module.NoteDialog,
+    ),
+  { loading: () => <p role="status">Loading editor…</p> },
+);
+
+function NoteCard({ note: n }: { note: JsonData<NotePage>["rows"][number] }) {
+  const [editing, setEditing] = useState(false);
+  return (
+    <article className="launch-note-card">
+      <header className="note-card-heading">
+        <StickyNote size={17} aria-hidden="true" />
+        <h2>{n.title}</h2>
+      </header>
+      <time className="prep-note-updated" dateTime={n.updated_at}>
+        Updated {new Date(n.updated_at).toLocaleDateString()}
+      </time>
+      <details className="note-disclosure">
+        <summary>
+          <span className="note-view-label">View note</span>
+          <span className="note-hide-label">Hide note</span>
+          <span className="sr-only"> for {n.title}</span>
+        </summary>
+        <NoteContent content={n.content} />
+      </details>
+      <div>
+        <a href={n.canonical_url} target="_blank" rel="noopener noreferrer">
+          Open question <ArrowUpRight size={14} />
+        </a>
+        <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
+          Find in practice
+        </Link>
+        <Button
+          type="button"
+          variant="ghost"
+          size="compact"
+          onClick={() => setEditing(true)}
+        >
+          <Pencil size={14} aria-hidden="true" /> Edit note
+          <span className="sr-only"> for {n.title}</span>
+        </Button>
+        <DeleteNoteButton questionId={n.id} title={n.title} />
+      </div>
+      {editing && (
+        <NoteDialog
+          questionId={n.id}
+          title={n.title}
+          content={n.content}
+          onClose={() => setEditing(false)}
+        />
+      )}
+    </article>
   );
-  if (!resource.data)
-    return <ResourceState title="Your private notebook." {...resource} />;
-  const { rows: notes, total, page, pages } = resource.data;
+}
+export function ClientNotes({
+  requested,
+  query = "",
+}: {
+  requested?: string;
+  query?: string;
+}) {
+  const router = useRouter();
+  const params = new URLSearchParams({ page: requested ?? "1" });
+  if (query) params.set("q", query);
+  const resource = useClientResource<JsonData<NotePage>>(
+    "/api/notes?" + params,
+  );
+  const data = resource.data;
+  function pageHref(page: number) {
+    const next = new URLSearchParams({ page: String(page) });
+    if (query) next.set("q", query);
+    return "/notes?" + next;
+  }
   return (
     <>
       <header className="launch-page-heading">
-        <span className="launch-eyebrow">LESSONS WORTH KEEPING</span>
         <h1>Your private notebook.</h1>
         <p>
-          Your approaches, edge cases, and reminders. Add or edit a note beside
-          any question in a company or practice sheet.
+          Capture your approach, mistakes, and code. Your notes stay connected
+          to each question across company and pattern pages.
         </p>
-        {total > 0 && (
+        {data && (
           <p className="text-sm">
-            {total} {total === 1 ? "saved note" : "saved notes"} · Recently
-            updated first
+            {data.total} {query ? "matching" : "saved"}{" "}
+            {data.total === 1 ? "note" : "notes"} · Recently updated first
           </p>
         )}
       </header>
-      {notes.length ? (
+      <form
+        className="prep-note-search"
+        role="search"
+        action="/notes"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const value = String(new FormData(event.currentTarget).get("q") ?? "")
+            .trim()
+            .slice(0, 200);
+          router.push(
+            value ? "/notes?" + new URLSearchParams({ q: value }) : "/notes",
+          );
+        }}
+      >
+        <label className="sr-only" htmlFor="notes-search">
+          Search notes
+        </label>
+        <Search size={18} aria-hidden="true" />
+        <input
+          key={query}
+          id="notes-search"
+          name="q"
+          type="search"
+          maxLength={200}
+          defaultValue={query}
+          placeholder="Search question titles or note content…"
+        />
+        <Button type="submit">Search</Button>
+        {query && (
+          <Link className="prep-note-clear" href="/notes">
+            Clear search
+          </Link>
+        )}
+      </form>
+      {!data ? (
+        <ResourceState title="Your notes" {...resource} />
+      ) : data.rows.length ? (
         <div className="launch-notes-grid">
-          {notes.map((n) => (
-            <article className="launch-note-card" key={n.id}>
-              <header className="note-card-heading">
-                <StickyNote size={17} aria-hidden="true" />
-                <h2>{n.title}</h2>
-              </header>
-              <details className="note-disclosure">
-                <summary>
-                  <span className="note-view-label">View note</span>
-                  <span className="note-hide-label">Hide note</span>
-                  <span className="sr-only"> for {n.title}</span>
-                </summary>
-                <p>{n.content}</p>
-              </details>
-              <div>
-                <a
-                  href={n.canonical_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open question <ArrowUpRight size={14} />
-                </a>
-                <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
-                  Find in practice
-                </Link>
-                <DeleteNoteButton questionId={n.id} title={n.title} />
-              </div>
-            </article>
+          {data.rows.map((note) => (
+            <NoteCard key={note.id} note={note} />
           ))}
         </div>
       ) : (
         <section className="launch-final">
-          <StickyNote size={30} />
-          <h2>A space for your next insight.</h2>
+          <StickyNote size={30} aria-hidden="true" />
+          <h2>
+            {query ? "No matching notes." : "A space for your next insight."}
+          </h2>
           <p>
-            Open a question’s notes button to capture what you learned. Your
-            saved notes will appear here.
+            {query
+              ? "Try another question title or a phrase from your note."
+              : "Open a question’s notes button to capture what you learned. Your saved notes will appear here."}
           </p>
-          <Link className="launch-button" href="/patterns">
-            Find a question <ArrowUpRight size={16} />
+          <Link className="launch-button" href={query ? "/notes" : "/patterns"}>
+            {query ? "Show all notes" : "Find a question"}{" "}
+            <ArrowUpRight size={16} />
           </Link>
         </section>
       )}
-      {pages > 1 && (
+      {data && data.pages > 1 && (
         <nav
           aria-label="Notes pages"
           className="mt-8 flex flex-wrap items-center justify-center gap-5"
         >
-          {page > 1 && (
-            <Link
-              className="launch-secondary"
-              href={"/notes?page=" + (page - 1)}
-            >
+          {data.page > 1 && (
+            <Link className="launch-secondary" href={pageHref(data.page - 1)}>
               Previous
             </Link>
           )}
           <span className="text-sm text-muted-foreground">
-            Page {page} of {pages}
+            Page {data.page} of {data.pages}
           </span>
-          {page < pages && (
-            <Link
-              className="launch-secondary"
-              href={"/notes?page=" + (page + 1)}
-            >
+          {data.page < data.pages && (
+            <Link className="launch-secondary" href={pageHref(data.page + 1)}>
               Next
             </Link>
           )}

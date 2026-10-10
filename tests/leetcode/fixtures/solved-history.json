@@ -1,0 +1,65 @@
+{
+  "user_name": "fixture_student",
+  "num_solved": 24,
+  "stat_status_pairs": [
+    { "status": "ac", "stat": { "question__title_slug": "two-sum" } },
+    { "status": "ac", "stat": { "question__title_slug": "valid-parentheses" } },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "contains-duplicate" }
+    },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "best-time-to-buy-and-sell-stock" }
+    },
+    { "status": "ac", "stat": { "question__title_slug": "maximum-subarray" } },
+    { "status": "ac", "stat": { "question__title_slug": "merge-intervals" } },
+    { "status": "ac", "stat": { "question__title_slug": "rotate-array" } },
+    { "status": "ac", "stat": { "question__title_slug": "move-zeroes" } },
+    { "status": "ac", "stat": { "question__title_slug": "majority-element" } },
+    { "status": "ac", "stat": { "question__title_slug": "sort-colors" } },
+    { "status": "ac", "stat": { "question__title_slug": "three-sum" } },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "product-of-array-except-self" }
+    },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "container-with-most-water" }
+    },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "trapping-rain-water" }
+    },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "subarray-sum-equals-k" }
+    },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "reverse-linked-list" }
+    },
+    { "status": "ac", "stat": { "question__title_slug": "linked-list-cycle" } },
+    { "status": "ac", "stat": { "question__title_slug": "climbing-stairs" } },
+    { "status": "ac", "stat": { "question__title_slug": "binary-search" } },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "search-insert-position" }
+    },
+    { "status": "ac", "stat": { "question__title_slug": "missing-number" } },
+    { "status": "ac", "stat": { "question__title_slug": "single-number" } },
+    { "status": "ac", "stat": { "question__title_slug": "not-in-prepyard" } },
+    {
+      "status": "ac",
+      "stat": { "question__title_slug": "second-unknown-question" }
+    },
+    {
+      "status": null,
+      "stat": { "question__title_slug": "unattempted-question" }
+    },
+    {
+      "status": "notac",
+      "stat": { "question__title_slug": "attempted-question" }
+    }
+  ]
+}

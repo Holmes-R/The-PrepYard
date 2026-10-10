@@ -33,6 +33,13 @@ import {
 import { saveQuestionProgress } from "@/features/progress/actions";
 import { SaveMessage } from "@/components/feedback/save-message";
 import dynamic from "next/dynamic";
+const NoteEditor = dynamic(
+  () =>
+    import("@/components/notes/note-editor").then(
+      (module) => module.NoteEditor,
+    ),
+  { loading: () => <p role="status">Loading note editor…</p> },
+);
 const RevisionDialog = dynamic(
   () => import("./revision-dialog").then((module) => module.RevisionDialog),
   { loading: () => <p role="status">Loading revision…</p> },
@@ -100,7 +107,7 @@ export function Question({
   const solved = optimisticStatus === "solved";
   const hideTopics = filters.hideTopics === "1";
   const noteId = "note-" + q.id;
-  function save(kind: "solved" | "note", value: boolean | string) {
+  function save(kind: "solved", value: boolean | string) {
     start(async () => {
       if (kind === "solved")
         setOptimisticStatus(value ? "solved" : "not_started");
@@ -111,13 +118,12 @@ export function Question({
         return;
       }
       setSavedKey((key) => key + 1);
-      if (kind === "note") setNotesOpen(false);
       await onSaved();
     });
   }
   function toggleNotes() {
-    if (notesOpen || noteState === "ready") {
-      setNotesOpen(!notesOpen);
+    if (notesOpen) {
+      setNotesOpen(false);
       return;
     }
     if (noteState === "loading") return;
@@ -237,36 +243,17 @@ export function Question({
         </p>
       )}
       {notesOpen && (
-        <form
-          className="dsa-note"
-          id={noteId}
-          onSubmit={(e) => {
-            e.preventDefault();
-            save("note", note);
-          }}
-        >
-          <label htmlFor={noteId + "-input"}>Your private notes</label>
-          <textarea
-            id={noteId + "-input"}
-            value={note}
-            maxLength={50000}
-            rows={4}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Approach, edge cases, complexity…"
+        <div className="prep-note-inline" id={noteId}>
+          <NoteEditor
+            questionId={q.id}
+            initialContent={note}
+            onSaved={async (content) => {
+              setNote(content);
+              await onSaved();
+            }}
+            onClose={() => setNotesOpen(false)}
           />
-          <div>
-            <button disabled={pending} type="submit">
-              {pending ? "Saving…" : "Save note"}
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => setNotesOpen(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        </div>
       )}
       {message && (
         <p className="dsa-save-message" role="alert">

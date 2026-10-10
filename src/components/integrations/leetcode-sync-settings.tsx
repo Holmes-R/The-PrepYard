@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, Link2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, Link2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClientResource } from "@/lib/client/use-client-resource";
 import { ResourceState } from "@/components/feedback/resource-state";
@@ -27,8 +27,8 @@ export function LeetCodeSyncSettings() {
       <header className="launch-page-heading">
         <h1>LeetCode sync</h1>
         <p>
-          Keep your PrepYard checkboxes in step with your recent Accepted
-          submissions.
+          New Accepted submissions automatically update completion across
+          company and pattern pages. No extension is needed.
         </p>
       </header>
       {resource.data ? (
@@ -41,27 +41,29 @@ export function LeetCodeSyncSettings() {
         <ResourceState title="Your connection" {...resource} />
       )}
       <details className="prep-sync-help">
-        <summary>What does syncing include?</summary>
+        <summary>
+          <span>How sync works</span>
+          <ChevronDown size={18} aria-hidden="true" />
+        </summary>
+        <ol>
+          <li>
+            Connect your LeetCode username once to turn on automatic sync.
+          </li>
+          <li>Submit a solution on LeetCode and get an Accepted result.</li>
+          <li>
+            Return to PrepYard. Matching questions are marked solved across
+            company and pattern pages on the next check.
+          </li>
+        </ol>
         <p>
-          Checks the most recent 20 publicly visible Accepted submissions every
-          two minutes while a signed-in PrepYard tab is visible. Sync now uses
-          the same two-minute limit.
+          Checks run every two minutes while PrepYard is visible and online,
+          using your latest 20 public Accepted submissions. Only submissions
+          accepted after connecting count; older solves and failed attempts are
+          left unchanged. LeetCode delays can postpone an update.
         </p>
         <p>
-          Only questions already in PrepYard are matched. Older or private
-          submissions may be unavailable. This is not a full history import or
-          instant live detection.
-        </p>
-        <p>
-          Only new submission records mark completion. A later manual uncheck
-          stays unchecked until you submit another accepted solution for that
-          question. Your notes, bookmarks, and revision confidence remain
-          unchanged.
-        </p>
-        <p>
-          No LeetCode password, session cookie, or solution code is collected. A
-          username selects a public profile; it does not verify ownership of
-          that account.
+          Your notes and revision ratings stay as they are. No LeetCode password
+          is needed. You can pause or disconnect sync at any time.
         </p>
       </details>
     </section>
@@ -100,7 +102,7 @@ function SyncPanel({
               ? "Automatic syncing resumed."
               : action === "disconnect"
                 ? "Disconnected. Your saved progress and notes are kept."
-                : "Profile connected. Checking your recent submissions."),
+                : "Automatic sync is on. New Accepted submissions will update your progress."),
       );
     } catch (failure) {
       setError(
@@ -120,8 +122,9 @@ function SyncPanel({
         <h2>Connect your public profile</h2>
       </div>
       <p>
-        Enter your LeetCode username to automatically mark matching questions as
-        completed.
+        Connect once to enable automatic sync. Matching questions are marked
+        completed only when LeetCode accepts a submission after you connect.
+        Older solves are left unchanged.
       </p>
       <form
         onSubmit={(event) => {
@@ -152,7 +155,7 @@ function SyncPanel({
             loading={pending === "connect"}
             disabled={!!pending}
           >
-            {settings ? "Update username" : "Connect profile"}
+            {settings ? "Update username" : "Enable automatic sync"}
           </Button>
         </div>
         <p id="leetcode-username-help" className="prep-sync-meta">
@@ -186,6 +189,10 @@ function SyncPanel({
                   ? "On · every two minutes while open"
                   : "Paused"}
               </dd>
+            </div>
+            <div>
+              <dt>Tracking new Accepted submissions since</dt>
+              <dd>{new Date(settings.sync_started_at).toLocaleString()}</dd>
             </div>
             <div>
               <dt>Last successful sync</dt>

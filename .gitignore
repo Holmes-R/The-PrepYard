@@ -48,4 +48,6 @@ next-env.d.ts
 /supabase/.branches/
 
 /artifacts/imports/
-/artifacts 
+/artifacts
+# Generated from extensions/leetcode-sync by pnpm build
+/public/prepyard-leetcode-sync.zip

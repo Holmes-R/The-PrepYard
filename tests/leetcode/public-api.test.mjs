@@ -65,7 +65,13 @@ test("missing profiles, changed upstream schemas, wrong profiles and GraphQL err
     { titleSlug: "../../admin" },
     { timestamp: "tomorrow" },
     { timestamp: -1 },
-    { statusDisplay: "Wrong Answer" },
+    ...[
+      "Wrong Answer",
+      "Pending",
+      "Time Limit Exceeded",
+      "Compile Error",
+      "Runtime Error",
+    ].map((statusDisplay) => ({ statusDisplay })),
   ]) {
     const body = structuredClone(fixture);
     Object.assign(body.data.recentAcSubmissionList[0], invalid);

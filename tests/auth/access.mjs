@@ -95,6 +95,12 @@ try {
     const api = await fetch(base + endpoint, { redirect: "manual" });
     assert.equal(api.status, 401, endpoint + " rejects anonymous data reads");
   }
+  const history = await fetch(base + "/api/integrations/leetcode/history", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: base },
+    body: "{}",
+  });
+  assert.equal(history.status, 401, "Anonymous history imports are denied");
   for (const route of ["/login"]) {
     const response = await fetch(base + route);
     assert.equal(response.status, 200);

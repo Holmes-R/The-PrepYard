@@ -2,6 +2,11 @@ import type { PoolClient } from "pg";
 import type { AcceptedSubmission } from "./public-api.mjs";
 export type SyncSettings = {
   username: string;
+  binding_version: string;
+  sync_started_at: Date;
+  last_history_at: Date | null;
+  history_total: number;
+  history_matched_count: number;
   enabled: boolean;
   last_attempt_at: Date | null;
   last_synced_at: Date | null;
