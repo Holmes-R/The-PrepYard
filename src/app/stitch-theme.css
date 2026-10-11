@@ -1881,6 +1881,12 @@ body::before {
   color: #c4c7c8;
   white-space: nowrap;
 }
+.prep-account-actions {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  align-items: center;
+  column-gap: 8px;
+}
 .prep-avatar {
   width: 32px;
   height: 32px;
@@ -1890,6 +1896,7 @@ body::before {
 }
 .prep-top-signout {
   position: relative;
+  flex: 0 0 auto;
 }
 .prep-top-signout summary {
   min-height: 36px;
@@ -1912,35 +1919,51 @@ body::before {
   z-index: 50;
   top: calc(100% + 12px);
   right: 0;
-  width: max-content;
-  max-width: min(320px, calc(100vw - 32px));
-  padding: 16px;
+  box-sizing: border-box;
+  width: 232px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
   border: 1px solid #38383d;
   border-radius: 8px;
   background: #201f20;
-  box-shadow: 0 12px 32px #0008;
+  box-shadow: 0 8px 20px #0006;
 }
 .prep-signout-confirm p {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   color: #f4f4f5;
-  font-size: 13px;
+  font-size: 12px;
 }
 .prep-signout-confirm form {
   display: flex;
-  justify-content: flex-end;
 }
-.prep-signout-confirm button {
-  min-height: 38px;
-  padding: 8px 12px;
+.prep-signout-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.prep-signout-actions button {
+  min-height: 32px;
+  padding: 6px 10px;
   border-radius: 6px;
-  background: #f4f4f5;
-  color: #131314;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
 }
-.prep-signout-confirm button:hover {
+.prep-signout-actions form button {
+  background: #f4f4f5;
+  color: #131314;
+}
+.prep-signout-actions form button:hover {
   background: #d4d4d8;
+}
+.prep-signout-actions > button {
+  border: 1px solid #4a4a50;
+  background: transparent;
+  color: #f4f4f5;
+}
+.prep-signout-actions > button:hover {
+  background: #2a2a2b;
 }
 .prep-quick-search {
   margin-left: auto;
@@ -2563,6 +2586,7 @@ body .note-card-heading svg {
 }
 @media (max-width: 800px) {
   .prep-desktop-navigation,
+  .prep-account-actions,
   .prep-top-profile,
   .prep-top-signout {
     display: none;
@@ -2599,9 +2623,9 @@ body .note-card-heading svg {
     justify-content: center;
   }
   .prep-mobile-account {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
     margin-top: 16px;
     padding-top: 12px;
@@ -2616,6 +2640,7 @@ body .note-card-heading svg {
   }
   .prep-mobile-signout {
     position: relative;
+    flex: 0 0 auto;
   }
   .prep-mobile-signout summary {
     display: flex;
@@ -2631,7 +2656,12 @@ body .note-card-heading svg {
     display: none;
   }
   .prep-mobile-signout .prep-signout-confirm {
-    top: calc(100% + 8px);
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 6px);
+    right: 0;
+    width: min(232px, calc(100vw - 32px));
+    box-shadow: none;
   }
   body:has(.prep-top-navigation) > main.prep-main {
     padding: 24px 20px 40px;
