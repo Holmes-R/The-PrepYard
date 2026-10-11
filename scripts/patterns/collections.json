@@ -39,9 +39,7 @@
           "url": "https://leetcode.com/problems/maximum-subarray/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -87,9 +85,7 @@
           "url": "https://leetcode.com/problems/next-permutation/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -127,9 +123,7 @@
           "url": "https://leetcode.com/problems/product-of-array-except-self/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -148,10 +142,7 @@
           "url": "https://leetcode.com/problems/find-the-duplicate-number/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers",
-            "Binary Search"
-          ],
+          "patterns": ["Two Pointers", "Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -186,9 +177,7 @@
           "url": "https://leetcode.com/problems/subarray-sum-equals-k/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -211,10 +200,7 @@
           "url": "https://leetcode.com/problems/trapping-rain-water/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Two Pointers",
-            "Monotonic Stack"
-          ],
+          "patterns": ["Two Pointers", "Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -245,9 +231,7 @@
           "url": "https://leetcode.com/problems/3sum/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -293,9 +277,7 @@
           "url": "https://leetcode.com/problems/longest-palindromic-substring/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "dynamic-programming",
@@ -364,9 +346,7 @@
           "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
           "difficulty": "medium",
           "topic": "strings",
-          "patterns": [
-            "Sliding Window"
-          ],
+          "patterns": ["Sliding Window"],
           "topics": [
             {
               "slug": "hash-table",
@@ -412,9 +392,7 @@
           "url": "https://leetcode.com/problems/minimum-window-substring/",
           "difficulty": "hard",
           "topic": "strings",
-          "patterns": [
-            "Sliding Window"
-          ],
+          "patterns": ["Sliding Window"],
           "topics": [
             {
               "slug": "hash-table",
@@ -521,9 +499,7 @@
           "url": "https://leetcode.com/problems/linked-list-cycle/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "floyds-cycle-finding-algorithm",
@@ -573,9 +549,7 @@
           "url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -594,9 +568,7 @@
           "url": "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "depth-first-search",
@@ -646,9 +618,7 @@
           "url": "https://leetcode.com/problems/intersection-of-two-linked-lists/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "hash-table",
@@ -671,10 +641,7 @@
           "url": "https://leetcode.com/problems/sort-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers",
-            "Divide and Conquer"
-          ],
+          "patterns": ["Two Pointers", "Divide and Conquer"],
           "topics": [
             {
               "slug": "divide-and-conquer",
@@ -724,9 +691,7 @@
           "url": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -753,9 +718,7 @@
           "url": "https://leetcode.com/problems/binary-tree-preorder-traversal/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -782,9 +745,7 @@
           "url": "https://leetcode.com/problems/binary-tree-postorder-traversal/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -841,9 +802,7 @@
           "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-lifting",
@@ -878,9 +837,7 @@
           "url": "https://leetcode.com/problems/balanced-binary-tree/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -903,9 +860,7 @@
           "url": "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -928,9 +883,7 @@
           "url": "https://leetcode.com/problems/diameter-of-binary-tree/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -995,9 +948,7 @@
           "url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -1152,9 +1103,7 @@
           "url": "https://leetcode.com/problems/shortest-path-in-binary-matrix/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "array",
@@ -1208,9 +1157,7 @@
           "url": "https://leetcode.com/problems/critical-connections-in-a-network/",
           "difficulty": "hard",
           "topic": "graphs",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "biconnected-component",
@@ -1276,10 +1223,7 @@
           "url": "https://leetcode.com/problems/connecting-cities-with-minimum-cost/",
           "difficulty": "medium",
           "topic": "graphs",
-          "patterns": [
-            "Union-Find",
-            "Minimum Spanning Tree"
-          ],
+          "patterns": ["Union-Find", "Minimum Spanning Tree"],
           "topics": [
             {
               "slug": "graph",
@@ -1306,9 +1250,7 @@
           "url": "https://leetcode.com/problems/climbing-stairs/",
           "difficulty": "easy",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Memoization"
-          ],
+          "patterns": ["Memoization"],
           "topics": [
             {
               "slug": "dynamic-programming",
@@ -1369,9 +1311,7 @@
           "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -1398,9 +1338,7 @@
           "url": "https://leetcode.com/problems/coin-change/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "array",
@@ -1458,9 +1396,7 @@
           "url": "https://leetcode.com/problems/word-break/",
           "difficulty": "medium",
           "topic": "tries",
-          "patterns": [
-            "Memoization"
-          ],
+          "patterns": ["Memoization"],
           "topics": [
             {
               "slug": "array",
@@ -1602,10 +1538,7 @@
           "url": "https://leetcode.com/problems/sliding-window-maximum/",
           "difficulty": "hard",
           "topic": "heaps",
-          "patterns": [
-            "Sliding Window",
-            "Monotonic Queue"
-          ],
+          "patterns": ["Sliding Window", "Monotonic Queue"],
           "topics": [
             {
               "slug": "array",
@@ -1640,9 +1573,7 @@
           "url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
           "difficulty": "hard",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -1669,9 +1600,7 @@
           "url": "https://leetcode.com/problems/daily-temperatures/",
           "difficulty": "medium",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -1694,9 +1623,7 @@
           "url": "https://leetcode.com/problems/next-greater-element-i/",
           "difficulty": "easy",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -1746,9 +1673,7 @@
           "url": "https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
           "difficulty": "easy",
           "topic": "strings",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "boyer-moore-string-search-algorithm",
@@ -1793,10 +1718,7 @@
           "url": "https://leetcode.com/problems/find-the-duplicate-number/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers",
-            "Binary Search"
-          ],
+          "patterns": ["Two Pointers", "Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -1831,9 +1753,7 @@
           "url": "https://leetcode.com/problems/sort-colors/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -1864,9 +1784,7 @@
           "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-array/",
           "difficulty": "easy",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -1885,9 +1803,7 @@
           "url": "https://leetcode.com/problems/move-zeroes/",
           "difficulty": "easy",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -1959,9 +1875,7 @@
           "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -1984,9 +1898,7 @@
           "url": "https://leetcode.com/problems/subarray-sums-divisible-by-k/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -2032,10 +1944,7 @@
           "url": "https://leetcode.com/problems/container-with-most-water/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers",
-            "Greedy"
-          ],
+          "patterns": ["Two Pointers", "Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -2058,9 +1967,7 @@
           "url": "https://leetcode.com/problems/3sum/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -2083,9 +1990,7 @@
           "url": "https://leetcode.com/problems/4sum/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -2108,10 +2013,7 @@
           "url": "https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum",
-            "Sliding Window"
-          ],
+          "patterns": ["Prefix Sum", "Sliding Window"],
           "topics": [
             {
               "slug": "array",
@@ -2134,9 +2036,7 @@
           "url": "https://leetcode.com/problems/subarray-sum-equals-k/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -2182,10 +2082,7 @@
           "url": "https://leetcode.com/problems/word-search/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Depth First Search (DFS)",
-            "Backtracking"
-          ],
+          "patterns": ["Depth First Search (DFS)", "Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -2216,9 +2113,7 @@
           "url": "https://leetcode.com/problems/merge-sorted-array/",
           "difficulty": "easy",
           "topic": "arrays",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "array",
@@ -2241,9 +2136,7 @@
           "url": "https://leetcode.com/problems/jump-game/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -2266,9 +2159,7 @@
           "url": "https://leetcode.com/problems/majority-element/",
           "difficulty": "easy",
           "topic": "arrays",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -2303,10 +2194,7 @@
           "url": "https://leetcode.com/problems/reverse-pairs/",
           "difficulty": "hard",
           "topic": "arrays",
-          "patterns": [
-            "Binary Search",
-            "Divide and Conquer"
-          ],
+          "patterns": ["Binary Search", "Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -2349,9 +2237,7 @@
           "url": "https://www.geeksforgeeks.org/problems/all-unique-permutations-of-an-array/1",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Backtracking",
@@ -2389,10 +2275,7 @@
           "url": "https://leetcode.com/problems/max-value-of-equation/",
           "difficulty": "hard",
           "topic": "heaps",
-          "patterns": [
-            "Sliding Window",
-            "Monotonic Queue"
-          ],
+          "patterns": ["Sliding Window", "Monotonic Queue"],
           "topics": [
             {
               "slug": "array",
@@ -2454,9 +2337,7 @@
           "url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
           "difficulty": "hard",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -2516,9 +2397,7 @@
           "url": "https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
           "difficulty": "easy",
           "topic": "strings",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "boyer-moore-string-search-algorithm",
@@ -2576,10 +2455,7 @@
           "url": "https://leetcode.com/problems/valid-palindrome-ii/",
           "difficulty": "easy",
           "topic": "strings",
-          "patterns": [
-            "Two Pointers",
-            "Greedy"
-          ],
+          "patterns": ["Two Pointers", "Greedy"],
           "topics": [
             {
               "slug": "greedy",
@@ -2625,9 +2501,7 @@
           "url": "https://leetcode.com/problems/generate-parentheses/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "backtracking",
@@ -2673,9 +2547,7 @@
           "url": "https://www.geeksforgeeks.org/problems/smallest-window-in-a-string-containing-all-the-characters-of-another-string-1587115621/1",
           "difficulty": "hard",
           "topic": "strings",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "name": "HashMap and Set",
@@ -2698,9 +2570,7 @@
           "url": "https://leetcode.com/problems/reverse-words-in-a-string/",
           "difficulty": "medium",
           "topic": "strings",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "string",
@@ -2832,9 +2702,7 @@
           "url": "https://leetcode.com/problems/minimum-window-substring/",
           "difficulty": "hard",
           "topic": "strings",
-          "patterns": [
-            "Sliding Window"
-          ],
+          "patterns": ["Sliding Window"],
           "topics": [
             {
               "slug": "hash-table",
@@ -3108,9 +2976,7 @@
           "url": "https://www.geeksforgeeks.org/problems/find-pair-given-difference1559/1",
           "difficulty": "easy",
           "topic": "sorting-and-searching",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "name": "Sorting",
@@ -3226,9 +3092,7 @@
           "url": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -3247,10 +3111,7 @@
           "url": "https://leetcode.com/problems/count-of-smaller-numbers-after-self/",
           "difficulty": "hard",
           "topic": "arrays",
-          "patterns": [
-            "Binary Search",
-            "Divide and Conquer"
-          ],
+          "patterns": ["Binary Search", "Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -3293,11 +3154,7 @@
           "url": "https://leetcode.com/problems/split-array-largest-sum/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Prefix Sum",
-            "Binary Search",
-            "Greedy"
-          ],
+          "patterns": ["Prefix Sum", "Binary Search", "Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -3343,9 +3200,7 @@
           "url": "https://leetcode.com/problems/middle-of-the-linked-list/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3364,9 +3219,7 @@
           "url": "https://leetcode.com/problems/linked-list-cycle/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "floyds-cycle-finding-algorithm",
@@ -3490,9 +3343,7 @@
           "url": "https://leetcode.com/problems/intersection-of-two-linked-lists/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "hash-table",
@@ -3530,9 +3381,7 @@
           "url": "https://leetcode.com/problems/palindrome-linked-list/",
           "difficulty": "easy",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3658,9 +3507,7 @@
           "url": "https://leetcode.com/problems/reorder-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3687,9 +3534,7 @@
           "url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3708,9 +3553,7 @@
           "url": "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "depth-first-search",
@@ -3733,9 +3576,7 @@
           "url": "https://leetcode.com/problems/partition-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3754,9 +3595,7 @@
           "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "linked-list",
@@ -3790,10 +3629,7 @@
           "url": "https://leetcode.com/problems/sort-list/",
           "difficulty": "medium",
           "topic": "linked-lists",
-          "patterns": [
-            "Two Pointers",
-            "Divide and Conquer"
-          ],
+          "patterns": ["Two Pointers", "Divide and Conquer"],
           "topics": [
             {
               "slug": "divide-and-conquer",
@@ -3844,9 +3680,7 @@
           "url": "https://leetcode.com/problems/merge-k-sorted-lists/",
           "difficulty": "hard",
           "topic": "linked-lists",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "divide-and-conquer",
@@ -3949,9 +3783,7 @@
           "url": "https://leetcode.com/problems/backspace-string-compare/",
           "difficulty": "easy",
           "topic": "stacks",
-          "patterns": [
-            "Two Pointers"
-          ],
+          "patterns": ["Two Pointers"],
           "topics": [
             {
               "slug": "simulation",
@@ -4011,9 +3843,7 @@
           "url": "https://leetcode.com/problems/next-greater-element-i/",
           "difficulty": "easy",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -4074,9 +3904,7 @@
           "url": "https://leetcode.com/problems/daily-temperatures/",
           "difficulty": "medium",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -4099,10 +3927,7 @@
           "url": "https://leetcode.com/problems/minimum-cost-tree-from-leaf-values/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Monotonic Stack",
-            "Greedy"
-          ],
+          "patterns": ["Monotonic Stack", "Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -4137,9 +3962,7 @@
           "url": "https://leetcode.com/problems/online-stock-span/",
           "difficulty": "medium",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "data-stream",
@@ -4185,9 +4008,7 @@
           "url": "https://leetcode.com/problems/sum-of-subarray-minimums/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -4256,9 +4077,7 @@
           "url": "https://leetcode.com/problems/flatten-nested-list-iterator/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "depth-first-search",
@@ -4354,9 +4173,7 @@
           "url": "https://leetcode.com/problems/diameter-of-binary-tree/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -4413,9 +4230,7 @@
           "url": "https://leetcode.com/problems/subtree-of-another-tree/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -4446,9 +4261,7 @@
           "url": "https://leetcode.com/problems/range-sum-of-bst/",
           "difficulty": "easy",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-search-tree",
@@ -4505,9 +4318,7 @@
           "url": "https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/",
           "difficulty": "easy",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -4598,10 +4409,7 @@
           "url": "https://leetcode.com/problems/binary-tree-paths/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)",
-            "Backtracking"
-          ],
+          "patterns": ["Depth First Search (DFS)", "Backtracking"],
           "topics": [
             {
               "slug": "backtracking",
@@ -4662,9 +4470,7 @@
           "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-lifting",
@@ -4793,9 +4599,7 @@
           "url": "https://leetcode.com/problems/balanced-binary-tree/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -4833,9 +4637,7 @@
           "url": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
           "difficulty": "easy",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -4912,9 +4714,7 @@
           "url": "https://leetcode.com/problems/unique-binary-search-trees-ii/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "backtracking",
@@ -4979,9 +4779,7 @@
           "url": "https://leetcode.com/problems/validate-binary-search-tree/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-search-tree",
@@ -5038,9 +4836,7 @@
           "url": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5063,9 +4859,7 @@
           "url": "https://leetcode.com/problems/path-sum-iii/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5088,9 +4882,7 @@
           "url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -5152,9 +4944,7 @@
           "url": "https://leetcode.com/problems/recover-binary-search-tree/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-search-tree",
@@ -5215,9 +5005,7 @@
           "url": "https://leetcode.com/problems/flatten-binary-tree-to-linked-list/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5293,9 +5081,7 @@
           "url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
           "difficulty": "medium",
           "topic": "binary-search-trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-search-tree",
@@ -5322,9 +5108,7 @@
           "url": "https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/",
           "difficulty": "medium",
           "topic": "trees",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5400,9 +5184,7 @@
           "url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
           "difficulty": "hard",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5433,9 +5215,7 @@
           "url": "https://leetcode.com/problems/sum-of-distances-in-tree/",
           "difficulty": "hard",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "depth-first-search",
@@ -5466,9 +5246,7 @@
           "url": "https://leetcode.com/problems/binary-tree-cameras/",
           "difficulty": "hard",
           "topic": "trees",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "binary-tree",
@@ -5732,9 +5510,7 @@
           "url": "https://www.geeksforgeeks.org/problems/rat-in-a-maze-problem/1",
           "difficulty": "medium",
           "topic": "graphs",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Backtracking",
@@ -5749,9 +5525,7 @@
           "url": "https://www.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1",
           "difficulty": "medium",
           "topic": "graphs",
-          "patterns": [
-            "Union-Find"
-          ],
+          "patterns": ["Union-Find"],
           "topics": [
             {
               "name": "DFS",
@@ -5986,10 +5760,7 @@
           "url": "https://leetcode.com/problems/most-stones-removed-with-same-row-or-column/",
           "difficulty": "medium",
           "topic": "graphs",
-          "patterns": [
-            "Depth First Search (DFS)",
-            "Union-Find"
-          ],
+          "patterns": ["Depth First Search (DFS)", "Union-Find"],
           "topics": [
             {
               "slug": "bipartite-graph",
@@ -6020,9 +5791,7 @@
           "url": "https://leetcode.com/problems/as-far-from-land-as-possible/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "array",
@@ -6049,9 +5818,7 @@
           "url": "https://leetcode.com/problems/find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/",
           "difficulty": "medium",
           "topic": "graphs",
-          "patterns": [
-            "Shortest Path"
-          ],
+          "patterns": ["Shortest Path"],
           "topics": [
             {
               "slug": "bellman-ford-algorithm",
@@ -6191,9 +5958,7 @@
           "url": "https://leetcode.com/problems/snakes-and-ladders/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "array",
@@ -6390,9 +6155,7 @@
           "url": "https://leetcode.com/problems/remove-boxes/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Memoization"
-          ],
+          "patterns": ["Memoization"],
           "topics": [
             {
               "slug": "array",
@@ -6438,9 +6201,7 @@
           "url": "https://leetcode.com/problems/critical-connections-in-a-network/",
           "difficulty": "hard",
           "topic": "graphs",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "biconnected-component",
@@ -6497,9 +6258,7 @@
           "url": "https://leetcode.com/problems/word-ladder/",
           "difficulty": "hard",
           "topic": "strings",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "bidirectional-search",
@@ -6567,9 +6326,7 @@
           "url": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
           "difficulty": "medium",
           "topic": "tries",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "depth-first-search",
@@ -6679,9 +6436,7 @@
           "url": "https://leetcode.com/problems/top-k-frequent-elements/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -6724,9 +6479,7 @@
           "url": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -6784,9 +6537,7 @@
           "url": "https://leetcode.com/problems/furthest-building-you-can-reach/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -6809,9 +6560,7 @@
           "url": "https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -6842,9 +6591,7 @@
           "url": "https://leetcode.com/problems/reorganize-string/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "counting",
@@ -6879,10 +6626,7 @@
           "url": "https://leetcode.com/problems/find-the-most-competitive-subsequence/",
           "difficulty": "medium",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack",
-            "Greedy"
-          ],
+          "patterns": ["Monotonic Stack", "Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -6928,9 +6672,7 @@
           "url": "https://leetcode.com/problems/k-closest-points-to-origin/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -6973,9 +6715,7 @@
           "url": "https://leetcode.com/problems/minimum-number-of-refueling-stops/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -7002,9 +6742,7 @@
           "url": "https://leetcode.com/problems/minimum-cost-to-hire-k-workers/",
           "difficulty": "hard",
           "topic": "heaps",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -7083,10 +6821,7 @@
           "url": "https://leetcode.com/problems/sliding-window-maximum/",
           "difficulty": "hard",
           "topic": "heaps",
-          "patterns": [
-            "Sliding Window",
-            "Monotonic Queue"
-          ],
+          "patterns": ["Sliding Window", "Monotonic Queue"],
           "topics": [
             {
               "slug": "array",
@@ -7121,9 +6856,7 @@
           "url": "https://leetcode.com/problems/climbing-stairs/",
           "difficulty": "easy",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Memoization"
-          ],
+          "patterns": ["Memoization"],
           "topics": [
             {
               "slug": "dynamic-programming",
@@ -7291,9 +7024,7 @@
           "url": "https://leetcode.com/problems/coin-change/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Breadth First Search (BFS)"
-          ],
+          "patterns": ["Breadth First Search (BFS)"],
           "topics": [
             {
               "slug": "array",
@@ -7343,10 +7074,7 @@
           "url": "https://leetcode.com/problems/maximum-length-of-repeated-subarray/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Sliding Window",
-            "Binary Search"
-          ],
+          "patterns": ["Sliding Window", "Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -7381,9 +7109,7 @@
           "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "slug": "array",
@@ -7528,9 +7254,7 @@
           "url": "https://leetcode.com/problems/range-sum-query-2d-immutable/",
           "difficulty": "medium",
           "topic": "matrices",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -7634,10 +7358,7 @@
           "url": "https://leetcode.com/problems/trapping-rain-water/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Two Pointers",
-            "Monotonic Stack"
-          ],
+          "patterns": ["Two Pointers", "Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -7668,9 +7389,7 @@
           "url": "https://leetcode.com/problems/minimum-cost-to-merge-stones/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -7712,9 +7431,7 @@
           "url": "https://leetcode.com/problems/maximal-rectangle/",
           "difficulty": "hard",
           "topic": "matrices",
-          "patterns": [
-            "Monotonic Stack"
-          ],
+          "patterns": ["Monotonic Stack"],
           "topics": [
             {
               "slug": "array",
@@ -7764,9 +7481,7 @@
           "url": "https://leetcode.com/problems/super-egg-drop/",
           "difficulty": "hard",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Binary Search"
-          ],
+          "patterns": ["Binary Search"],
           "topics": [
             {
               "slug": "binary-search",
@@ -7804,9 +7519,7 @@
           "url": "https://leetcode.com/problems/longest-repeating-character-replacement/",
           "difficulty": "medium",
           "topic": "strings",
-          "patterns": [
-            "Sliding Window"
-          ],
+          "patterns": ["Sliding Window"],
           "topics": [
             {
               "slug": "hash-table",
@@ -7829,9 +7542,7 @@
           "url": "https://leetcode.com/problems/maximum-number-of-visible-points/",
           "difficulty": "hard",
           "topic": "arrays",
-          "patterns": [
-            "Sliding Window"
-          ],
+          "patterns": ["Sliding Window"],
           "topics": [
             {
               "slug": "array",
@@ -7862,9 +7573,7 @@
           "url": "https://leetcode.com/problems/gas-station/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -7893,9 +7602,7 @@
           "url": "https://leetcode.com/problems/restore-the-array-from-adjacent-pairs/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Depth First Search (DFS)"
-          ],
+          "patterns": ["Depth First Search (DFS)"],
           "topics": [
             {
               "slug": "array",
@@ -7918,9 +7625,7 @@
           "url": "https://leetcode.com/problems/task-scheduler/",
           "difficulty": "medium",
           "topic": "heaps",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -7955,9 +7660,7 @@
           "url": "https://leetcode.com/problems/minimum-deletions-to-make-character-frequencies-unique/",
           "difficulty": "medium",
           "topic": "strings",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "greedy",
@@ -7984,10 +7687,7 @@
           "url": "https://leetcode.com/problems/remove-k-digits/",
           "difficulty": "medium",
           "topic": "stacks",
-          "patterns": [
-            "Monotonic Stack",
-            "Greedy"
-          ],
+          "patterns": ["Monotonic Stack", "Greedy"],
           "topics": [
             {
               "slug": "greedy",
@@ -8024,9 +7724,7 @@
           "url": "https://leetcode.com/problems/non-overlapping-intervals/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -8053,9 +7751,7 @@
           "url": "https://leetcode.com/problems/minimum-time-to-make-rope-colorful/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Greedy"
-          ],
+          "patterns": ["Greedy"],
           "topics": [
             {
               "slug": "array",
@@ -8082,9 +7778,7 @@
           "url": "https://leetcode.com/problems/combination-sum-ii/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -8103,9 +7797,7 @@
           "url": "https://leetcode.com/problems/combinations/",
           "difficulty": "medium",
           "topic": "algorithms",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "backtracking",
@@ -8120,9 +7812,7 @@
           "url": "https://leetcode.com/problems/subsets-ii/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -8145,9 +7835,7 @@
           "url": "https://www.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1",
           "difficulty": "medium",
           "topic": "recursion",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Backtracking",
@@ -8162,10 +7850,7 @@
           "url": "https://leetcode.com/problems/beautiful-arrangement/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Backtracking",
-            "Bitmask"
-          ],
+          "patterns": ["Backtracking", "Bitmask"],
           "topics": [
             {
               "slug": "array",
@@ -8196,9 +7881,7 @@
           "url": "https://leetcode.com/problems/palindrome-partitioning/",
           "difficulty": "medium",
           "topic": "dynamic-programming",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "backtracking",
@@ -8221,9 +7904,7 @@
           "url": "https://leetcode.com/problems/permutations-ii/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -8246,9 +7927,7 @@
           "url": "https://leetcode.com/problems/subsets/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -8271,9 +7950,7 @@
           "url": "https://leetcode.com/problems/n-queens/",
           "difficulty": "hard",
           "topic": "arrays",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "algorithm-x",
@@ -8296,9 +7973,7 @@
           "url": "https://leetcode.com/problems/sudoku-solver/",
           "difficulty": "hard",
           "topic": "matrices",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "algorithm-x",
@@ -8333,9 +8008,7 @@
           "url": "https://leetcode.com/problems/unique-paths-iii/",
           "difficulty": "hard",
           "topic": "matrices",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "slug": "array",
@@ -8366,9 +8039,7 @@
           "url": "https://www.geeksforgeeks.org/problems/largest-number-in-k-swaps-1587115620/1",
           "difficulty": "medium",
           "topic": "recursion",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Strings",
@@ -8387,9 +8058,7 @@
           "url": "https://www.geeksforgeeks.org/problems/partition-array-to-k-subsets/1",
           "difficulty": "hard",
           "topic": "recursion",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Dynamic Programming",
@@ -8438,9 +8107,7 @@
           "url": "https://www.geeksforgeeks.org/problems/find-all-possible-palindromic-partitions-of-a-string/1",
           "difficulty": "medium",
           "topic": "recursion",
-          "patterns": [
-            "Backtracking"
-          ],
+          "patterns": ["Backtracking"],
           "topics": [
             {
               "name": "Strings",
@@ -8463,9 +8130,7 @@
           "url": "https://leetcode.com/problems/range-sum-query-immutable/",
           "difficulty": "easy",
           "topic": "arrays",
-          "patterns": [
-            "Prefix Sum"
-          ],
+          "patterns": ["Prefix Sum"],
           "topics": [
             {
               "slug": "array",
@@ -8488,9 +8153,7 @@
           "url": "https://leetcode.com/problems/range-sum-query-mutable/",
           "difficulty": "medium",
           "topic": "arrays",
-          "patterns": [
-            "Divide and Conquer"
-          ],
+          "patterns": ["Divide and Conquer"],
           "topics": [
             {
               "slug": "array",
@@ -8525,10 +8188,7 @@
           "url": "https://leetcode.com/problems/count-of-range-sum/",
           "difficulty": "hard",
           "topic": "arrays",
-          "patterns": [
-            "Binary Search",
-            "Divide and Conquer"
-          ],
+          "patterns": ["Binary Search", "Divide and Conquer"],
           "topics": [
             {
               "slug": "array",

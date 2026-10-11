@@ -62,9 +62,12 @@ jobs:
       PGDATABASE: prepyard_test
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Test migrations and policies
