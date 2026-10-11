@@ -50,10 +50,12 @@ Create `.env.local` in the repository root (it is git-ignored — never commit i
 AUTH_URL=http://localhost:3000
 AUTH_SECRET=generate-with-openssl-rand-base64-32
 DATABASE_URL=postgresql://user:password@host:5432/postgres
-RESEND_API_KEY=...        # transactional email for signup/reset links
-AUTH_EMAIL_FROM=...       # the From address for those emails
+GMAIL_USER=you@gmail.com
+GMAIL_APP_PASSWORD=...     # Google App Password, not your account password
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+Enable 2-Step Verification on the Google account and create an App Password for Gmail SMTP. Use the same account for `GMAIL_USER`; set both Gmail variables in local and production environments. The sender displays as PrepYard from that account.
 
 Sign-in fails closed: without this configuration, protected pages deny access. A wrong or missing `AUTH_SECRET` invalidates every session. See [password authentication](docs/password-auth.md) for the full walkthrough.
 
