@@ -4,7 +4,7 @@
 
 1. Apply all migrations in filename order. For an existing Google setup, apply only the new migration `supabase/migrations/20261002000600_password_identity.sql` using your PostgreSQL administrator (for example, Supabase SQL Editor). Keep the app's DATABASE_URL on the restricted prepyard_web login.
 2. Keep AUTH_SECRET, DATABASE_URL and AUTH_URL. AUTH_URL is http://localhost:3000 locally; use your exact HTTPS origin in production. Google OAuth is no longer supported.
-3. Create a Resend API key and verify a sending domain in Resend. Set RESEND_API_KEY and AUTH_EMAIL_FROM in the ignored .env.local (e.g. PrepYard <accounts@your-verified-domain.example>). Resend's test sender has recipient restrictions; production needs a verified sender. Never paste secrets into Git or a browser bundle. Official setup: https://resend.com/docs/dashboard/domains/introduction and https://resend.com/docs/api-reference/emails/send-email .
+3. Enable 2-Step Verification on the Gmail account, then create a Google App Password. Set GMAIL_USER to that account and GMAIL_APP_PASSWORD to the app password in the ignored .env.local and in the production environment. Use the app password, not the regular Google account password; spaces in the copied app password are ignored. Never paste secrets into Git or a browser bundle. See https://support.google.com/accounts/answer/185833 and https://support.google.com/accounts/answer/185839 .
 4. Restart with pnpm dev. Visit /signup, enter your name, email and a new PrepYard password (12–128 characters), then confirm it.
 5. Open the verification email and click Verify email on the page. Sign in at /login. Unverified registrations cannot log in. To resend verification, submit signup again with the desired password; the latest link replaces the older one. Pending registrations create no student account until confirmed.
 6. Test /forgot-password, open the reset email and set a new password. Old password sessions are rejected on their next request. Log in again with the new password. Legacy Google sessions are rejected.
@@ -24,7 +24,7 @@ Run pnpm test:auth, pnpm lint, pnpm typecheck, pnpm build, then pnpm test:access
 
 For the real HTTP credentials flow after building and migrating the disposable cluster, set `PREPYARD_AUTH_TEST_DATABASE_URL` to its administrator connection URL (loopback host, database ending in `_test`) and run `node tests/auth/password-flow.mjs`. This starts a test server on port 3114, creates and removes a test account, and verifies CSRF denial, login, reset revocation, and attempt limits without sending email. The test cluster must allow the `prepyard_web` test login to connect.
 
-Apply migration 7 (`20261002000700_remove_google_sign_in.sql`) after migration 6. It removes the Google registration function while preserving existing records. Remove unused AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET deployment variables. Resend remains required for email verification and password reset.
+Apply migration 7 (`20261002000700_remove_google_sign_in.sql`) after migration 6. It removes the Google registration function while preserving existing records. Remove unused AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET deployment variables. Gmail SMTP sends verification and password-reset email from the configured Gmail account.
 
 ## Recovering JWT session errors
 
