@@ -23,6 +23,66 @@ const links = [
   { href: "/notes", title: "Notes", icon: StickyNote },
 ];
 
+function LogoutConfirmation({ mobile = false }: { mobile?: boolean }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !detailsRef.current?.contains(event.target)
+      ) {
+        if (detailsRef.current) detailsRef.current.open = false;
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !detailsRef.current?.open) return;
+      detailsRef.current.open = false;
+      detailsRef.current.querySelector("summary")?.focus();
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  const close = () => {
+    if (!detailsRef.current) return;
+    detailsRef.current.open = false;
+    detailsRef.current.querySelector("summary")?.focus();
+  };
+
+  return (
+    <details
+      ref={detailsRef}
+      className={mobile ? "prep-mobile-signout" : "prep-top-signout"}
+    >
+      <summary aria-label={mobile ? undefined : "Log out"} title="Log out">
+        {mobile ? (
+          <>
+            Log out <LogOut size={16} />
+          </>
+        ) : (
+          <LogOut size={18} />
+        )}
+      </summary>
+      <div className="prep-signout-confirm">
+        <p>Are you sure you want to log out?</p>
+        <div className="prep-signout-actions">
+          <button type="button" onClick={close}>
+            Cancel
+          </button>
+          <form action={signOut}>
+            <button type="submit">Confirm log out</button>
+          </form>
+        </div>
+      </div>
+    </details>
+  );
+}
+
 export function SiteHeader({
   user,
   pending = false,
@@ -225,30 +285,22 @@ export function SiteHeader({
           <span />
           Free workspace
         </span>
-        <Link
-          href="/dashboard"
-          className="prep-top-profile"
-          aria-label={"Dashboard for " + name}
-        >
-          <span className="prep-avatar">
-            <UserRound size={17} />
-          </span>
-          <span>
-            <strong>{name}</strong>
-            <small>Student account</small>
-          </span>
-        </Link>
-        <details className="prep-top-signout">
-          <summary aria-label="Log out" title="Log out">
-            <LogOut size={18} />
-          </summary>
-          <div className="prep-signout-confirm">
-            <p>Are you sure you want to log out?</p>
-            <form action={signOut}>
-              <button type="submit">Confirm log out</button>
-            </form>
-          </div>
-        </details>
+        <div className="prep-account-actions">
+          <Link
+            href="/dashboard"
+            className="prep-top-profile"
+            aria-label={"Dashboard for " + name}
+          >
+            <span className="prep-avatar">
+              <UserRound size={17} />
+            </span>
+            <span>
+              <strong>{name}</strong>
+              <small>Student account</small>
+            </span>
+          </Link>
+          <LogoutConfirmation />
+        </div>
         <button
           ref={menuRef}
           className="prep-mobile-menu"
@@ -285,17 +337,7 @@ export function SiteHeader({
           {navigation}
           <div className="prep-mobile-account">
             <span>{name}</span>
-            <details className="prep-mobile-signout">
-              <summary>
-                Log out <LogOut size={16} />
-              </summary>
-              <div className="prep-signout-confirm">
-                <p>Are you sure you want to log out?</p>
-                <form action={signOut}>
-                  <button type="submit">Confirm log out</button>
-                </form>
-              </div>
-            </details>
+            <LogoutConfirmation mobile />
           </div>
         </div>
       )}
