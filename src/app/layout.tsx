@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { ClientSession } from "@/components/auth/client-session";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import "./client-loading.css";
 import "./globals.css";
 import "./launch-theme.css";
@@ -38,6 +39,7 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
+        <ScrollReveal />
         <ClientSession>
           <main id="main-content" className="prep-main">
             {children}

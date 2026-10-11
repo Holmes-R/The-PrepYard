@@ -21,6 +21,10 @@ body {
   font-variant-numeric: tabular-nums;
   background: #131314;
 }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
 button,
 input,
 select,
@@ -30,9 +34,11 @@ textarea {
 a,
 button {
   transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s;
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease,
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 :focus-visible {
   outline: 2px solid #ffffff;
@@ -1679,6 +1685,9 @@ body .launch-button {
     transition: none !important;
     animation: none !important;
   }
+  html {
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Keep legacy mobile label pseudo-elements from duplicating tool names. */
@@ -2832,4 +2841,237 @@ body:has(.prep-top-navigation) > header.prep-top-navigation {
 }
 .prep-dashboard-grid > div {
   align-items: stretch;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(
+    .dashboard-button,
+    .yard-button,
+    .prep-primary,
+    .launch-button,
+    .launch-secondary
+  ):hover {
+    transform: translateY(-2px);
+  }
+  :is(
+    .dashboard-collection-card,
+    .dashboard-stats > div,
+    .dashboard-panel,
+    .company-card,
+    .dsa-topic,
+    .yard-feature,
+    .yard-collection,
+    .yard-steps > li
+  ):hover {
+    translate: 0 -3px;
+    box-shadow: 0 12px 28px #0003;
+  }
+  .dashboard-collection-card,
+  .dashboard-stats > div,
+  .dashboard-panel,
+  .company-card,
+  .dsa-topic,
+  .yard-feature,
+  .yard-collection,
+  .yard-steps > li {
+    transition:
+      translate 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes prep-enter {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes prep-enter-side {
+    from {
+      opacity: 0;
+      transform: translateX(38px) scale(0.97);
+      filter: blur(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes prep-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-9px);
+    }
+  }
+
+  @keyframes prep-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 #4edea300;
+    }
+    50% {
+      box-shadow: 0 0 0 6px #4edea326;
+    }
+  }
+
+  @keyframes prep-panel-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes prep-faq-open {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .yard-hero-copy > * {
+    animation: prep-enter 760ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .yard-hero-copy > :nth-child(1) {
+    animation-delay: 60ms;
+  }
+  .yard-hero-copy > :nth-child(2) {
+    animation-delay: 160ms;
+  }
+  .yard-hero-copy > :nth-child(3) {
+    animation-delay: 260ms;
+  }
+  .yard-hero-copy > :nth-child(4) {
+    animation-delay: 360ms;
+  }
+  .yard-hero-copy > :nth-child(5) {
+    animation-delay: 440ms;
+  }
+  .yard-hero-copy > :nth-child(6) {
+    animation-delay: 520ms;
+  }
+  .yard-preview-wrap {
+    animation: prep-enter-side 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 180ms both;
+  }
+  .yard-preview {
+    animation: prep-float 6s ease-in-out 1s infinite;
+  }
+  .yard-eyebrow > span {
+    animation: prep-pulse 2.2s ease-out infinite;
+  }
+  .dashboard-heading {
+    animation: prep-enter 680ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .yard-preview-panel:not([hidden]) {
+    animation: prep-panel-enter 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .yard-faq-list details[open] > p {
+    animation: prep-faq-open 300ms ease-out both;
+  }
+}
+
+.has-scroll-reveal
+  :is(
+    .yard-section-heading,
+    .yard-feature,
+    .yard-collection,
+    .yard-steps > li,
+    .yard-faq-list > details,
+    .yard-closing,
+    .dashboard-stats > div,
+    .dashboard-collection-card,
+    .dashboard-panel,
+    .company-card,
+    .dsa-topic
+  ) {
+  opacity: 0;
+  transform: translateY(38px) scale(0.97);
+  filter: blur(5px);
+}
+.has-scroll-reveal
+  :is(
+    .yard-section-heading,
+    .yard-feature,
+    .yard-collection,
+    .yard-steps > li,
+    .yard-faq-list > details,
+    .yard-closing,
+    .dashboard-stats > div,
+    .dashboard-collection-card,
+    .dashboard-panel,
+    .company-card,
+    .dsa-topic
+  ).is-scroll-visible {
+  animation: prep-scroll-enter 760ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prep-main.is-route-entering {
+    animation: prep-route-swoosh 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+@keyframes prep-route-swoosh {
+  from {
+    opacity: 0.65;
+    transform: translate3d(28px, 0, 0);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+@keyframes prep-scroll-enter {
+  from {
+    opacity: 0;
+    transform: translateY(38px) scale(0.97);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-scroll-reveal
+    :is(
+      .yard-section-heading,
+      .yard-feature,
+      .yard-collection,
+      .yard-steps > li,
+      .yard-faq-list > details,
+      .yard-closing,
+      .dashboard-stats > div,
+      .dashboard-collection-card,
+      .dashboard-panel,
+      .company-card,
+      .dsa-topic
+    ) {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
