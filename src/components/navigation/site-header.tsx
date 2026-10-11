@@ -238,11 +238,17 @@ export function SiteHeader({
             <small>Student account</small>
           </span>
         </Link>
-        <form className="prep-top-signout" action={signOut}>
-          <button aria-label="Log out" title="Log out">
+        <details className="prep-top-signout">
+          <summary aria-label="Log out" title="Log out">
             <LogOut size={18} />
-          </button>
-        </form>
+          </summary>
+          <div className="prep-signout-confirm">
+            <p>Are you sure you want to log out?</p>
+            <form action={signOut}>
+              <button type="submit">Confirm log out</button>
+            </form>
+          </div>
+        </details>
         <button
           ref={menuRef}
           className="prep-mobile-menu"
@@ -279,11 +285,17 @@ export function SiteHeader({
           {navigation}
           <div className="prep-mobile-account">
             <span>{name}</span>
-            <form action={signOut}>
-              <button>
+            <details className="prep-mobile-signout">
+              <summary>
                 Log out <LogOut size={16} />
-              </button>
-            </form>
+              </summary>
+              <div className="prep-signout-confirm">
+                <p>Are you sure you want to log out?</p>
+                <form action={signOut}>
+                  <button type="submit">Confirm log out</button>
+                </form>
+              </div>
+            </details>
           </div>
         </div>
       )}

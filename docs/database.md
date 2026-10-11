@@ -53,7 +53,13 @@ supabase db push --dry-run
 supabase db push
 ```
 
-Provision prepyard_web with a strong private login password and configure DATABASE_URL as documented in google-sign-in.md. The website rejects postgres/service_role connections. Hosted connections must verify TLS certificates. New database changes belong in new migrations; do not rewrite previously applied migration files.
+Migration 5 creates `prepyard_web` as `NOLOGIN`; it must be provisioned before the application can connect. In Supabase SQL Editor, run the following as the database administrator, replacing the placeholder with a strong unique password:
+
+```sql
+alter role prepyard_web with login password 'REPLACE_WITH_A_STRONG_UNIQUE_PASSWORD';
+```
+
+Set `DATABASE_URL` to the Session pooler URI using the `prepyard_web.<project-ref>` username and that role password. Keep the pooler host, port, and project reference from Supabase Connect, and configure TLS verification as described in [password authentication](password-auth.md). The website rejects `postgres` and `service_role` connections. New database changes belong in new migrations; do not rewrite previously applied migration files.
 
 Historical migrations expect Supabase-provided roles/auth objects. A fresh plain PostgreSQL production deployment needs a separate proper initialization plan; do not use the disposable test bootstrap in production. Local Supabase remains an optional development database, while Google still handles application sign-in.
 

@@ -1888,16 +1888,59 @@ body::before {
   background: #fff;
   color: #131314;
 }
-.prep-top-signout button {
+.prep-top-signout {
+  position: relative;
+}
+.prep-top-signout summary {
   min-height: 36px;
   min-width: 30px;
   display: grid;
   place-items: center;
+  list-style: none;
   color: #c4c7c8;
   border-radius: 6px;
+  cursor: pointer;
 }
-.prep-top-signout button:hover {
+.prep-top-signout summary::-webkit-details-marker {
+  display: none;
+}
+.prep-top-signout summary:hover {
   background: #2a2a2b;
+}
+.prep-signout-confirm {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 12px);
+  right: 0;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid #38383d;
+  border-radius: 8px;
+  background: #201f20;
+  box-shadow: 0 12px 32px #0008;
+}
+.prep-signout-confirm p {
+  margin: 0 0 12px;
+  color: #f4f4f5;
+  font-size: 13px;
+}
+.prep-signout-confirm form {
+  display: flex;
+  justify-content: flex-end;
+}
+.prep-signout-confirm button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f4f4f5;
+  color: #131314;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.prep-signout-confirm button:hover {
+  background: #d4d4d8;
 }
 .prep-quick-search {
   margin-left: auto;
@@ -2571,13 +2614,24 @@ body .note-card-heading svg {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .prep-mobile-account button {
+  .prep-mobile-signout {
+    position: relative;
+  }
+  .prep-mobile-signout summary {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px;
     color: #fff;
     min-height: 40px;
+    list-style: none;
+    cursor: pointer;
+  }
+  .prep-mobile-signout summary::-webkit-details-marker {
+    display: none;
+  }
+  .prep-mobile-signout .prep-signout-confirm {
+    top: calc(100% + 8px);
   }
   body:has(.prep-top-navigation) > main.prep-main {
     padding: 24px 20px 40px;
