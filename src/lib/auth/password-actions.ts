@@ -21,9 +21,7 @@ function logAuthFailure(operation: string, stage: string, error: unknown) {
   const cause =
     error instanceof Error && "cause" in error ? error.cause : undefined;
   const code =
-    error instanceof Error &&
-    "code" in error &&
-    typeof error.code === "string"
+    error instanceof Error && "code" in error && typeof error.code === "string"
       ? error.code
       : cause instanceof Error &&
           "code" in cause &&

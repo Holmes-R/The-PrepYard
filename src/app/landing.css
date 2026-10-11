@@ -30,7 +30,7 @@ body:has(.prep-landing-navigation) .prep-footer nav a {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  max-width: 1256px;
+  max-width: 1440px;
   margin: auto;
   padding: 18px 28px;
 }
@@ -124,7 +124,7 @@ body
   list-style: none;
 }
 .yard-container {
-  max-width: 1256px;
+  max-width: 1440px;
   margin: 0 auto !important;
   padding-left: 28px;
   padding-right: 28px;

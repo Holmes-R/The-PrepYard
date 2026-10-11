@@ -223,17 +223,15 @@ body .prep-question-icon .prep-action-marker {
 @media (min-width: 701px) {
   body .company-question-row,
   body .question-column-labels {
-    grid-template-columns: 22px minmax(160px, 1fr) 84px minmax(
-        110px,
-        180px
-      ) 90px 44px 44px;
+    grid-template-columns:
+      22px minmax(160px, 1fr) 84px minmax(110px, 180px)
+      90px 44px 44px;
   }
   body .dsa-question-main,
   body .dsa-column-headings {
-    grid-template-columns: 22px minmax(160px, 1fr) 84px minmax(
-        110px,
-        180px
-      ) 44px 44px;
+    grid-template-columns:
+      22px minmax(160px, 1fr) 84px minmax(110px, 180px)
+      44px 44px;
   }
   body .dsa-question-main.dsa-hide-topics,
   body .dsa-column-headings.dsa-hide-topics {

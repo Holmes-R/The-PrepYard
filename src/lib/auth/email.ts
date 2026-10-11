@@ -4,8 +4,8 @@ import nodemailer from "nodemailer";
 export function emailConfigured() {
   return Boolean(
     process.env.GMAIL_USER?.trim() &&
-      process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, "") &&
-      process.env.AUTH_URL,
+    process.env.GMAIL_APP_PASSWORD?.replace(/\s/g, "") &&
+    process.env.AUTH_URL,
   );
 }
 
