@@ -1,3 +1,4 @@
+import { practiceQuestionsSql } from "../questions/practice.mjs";
 import {
   roadmapChoices,
   canonicalPatternSlug,
@@ -84,7 +85,7 @@ function queryParts(f) {
   return {
     args,
     add,
-    base: `from public.questions q ${f.collection === hotlistSlug ? "join public.topic_frequency_questions hot on hot.question_id=q.id" : ""} join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id() where ${where.join(" and ")}`,
+    base: `from ${practiceQuestionsSql} q ${f.collection === hotlistSlug ? "join public.topic_frequency_questions hot on hot.question_id=q.id" : ""} join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id() where ${where.join(" and ")}`,
   };
 }
 export async function patternOverview(client, f) {
@@ -164,7 +165,7 @@ export async function patternQuestions(client, f) {
                   "case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id");
   const rows = (
     await client.query(
-      `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
+      `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.original_url,q.difficulty,q.practice_platform platform,
  u.confidence revision_confidence,coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  exists(select 1 from public.notes n where n.question_id=q.id and n.user_id=private.student_id()) has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns,

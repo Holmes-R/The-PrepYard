@@ -253,15 +253,21 @@ A gallery of the design system: button variants and states, checkboxes (includin
 - Keep source licensing and attribution records internal, as described in [collection attribution](docs/collection-attribution.md).
 - Never commit secrets. `.env.local`, privileged database URLs, and the `prepyard_web` password stay on your machine or in your host's secret store.
 
-## LeetCode completion sync
+## Sync accounts
 
-Open **Dashboard → LeetCode sync**, enter your public LeetCode username, and connect. Automatic sync is enabled by default once a username is connected. Only submissions accepted after connecting are eligible; older solves and failed/pending attempts do not change completion. Recent publicly visible Accepted submissions are checked every two minutes while PrepYard is visible and online, with manual Sync now, pause/resume, and disconnect controls. Matching questions update across company pages, patterns, and dashboard totals. Notes and revision ratings are preserved, and previously processed submissions do not undo a later manual uncheck. No LeetCode passwords, cookies, or solution code are collected.
+Open **Dashboard → Sync accounts**, enter your public LeetCode username, and connect. Automatic sync is enabled by default once a username is connected. Only submissions accepted after connecting are eligible; older solves and failed/pending attempts do not change completion. Recent publicly visible Accepted submissions are checked every two minutes while PrepYard is visible and online, with manual Sync now, pause/resume, and disconnect controls. Matching questions update across company pages, patterns, and dashboard totals. Notes and revision ratings are preserved, and previously processed submissions do not undo a later manual uncheck. No LeetCode passwords, cookies, or solution code are collected.
 
 Apply migration `20261010001400_leetcode_sync.sql` before using this feature. Public syncing is limited to the latest 20 Accepted submissions and may miss older/private activity; closing all PrepYard tabs stops periodic checks. See [sync setup and limitations](docs/leetcode-sync.md). Run `pnpm test:leetcode` for adapter checks.
 
 ### Complete LeetCode history
 
 The optional Chrome/Edge extension imports all solved question slugs from a signed-in LeetCode tab and checks every two minutes while LeetCode and PrepYard tabs are open. Completion is shared across company and pattern pages. Passwords, cookies and solution code remain outside PrepYard. Apply migration `20261010001500_leetcode_history.sql` after the sync-settings migration. Run `pnpm build:extension` to package the downloadable ZIP; the production build does this automatically. Install/setup, privacy and limitations are documented in [LeetCode sync](docs/leetcode-sync.md).
+
+### GeeksforGeeks account sync
+
+Apply [the account-sync migration](supabase/migrations/20261012001700_account_sync.sql) after earlier migrations and restart the app. Open **Dashboard → Sync accounts** to connect LeetCode and GeeksforGeeks independently. GFG first records a complete public solved-question baseline, without marking old history complete. Later checks, every two minutes while PrepYard is visible and online, mark newly visible matching solves across company and pattern pages, including reviewed GFG alternatives. Each connection has Sync now, pause/resume and disconnect controls. Notes and revision ratings are preserved; no platform credentials are collected.
+
+NeetCode, HackerRank and CodeChef remain manual in this release. GFG checks public solved-list changes rather than timestamped acceptance events; repeated solves of an already observed question do not trigger updates. See [Sync accounts setup and limitations](docs/sync-accounts.md). Run `pnpm test:accounts` for adapter checks; the database CI job tests baseline isolation, idempotency and owner policies.
 
 ## Writing and saving notes
 
@@ -280,3 +286,15 @@ New notes start blank, without preset templates. Company rows, pattern rows, and
 Notes remain private under the existing owner policies and have a 50,000-character limit. Preview supports headings, bullet lists, and language-labelled fenced code blocks with **Copy code**; raw HTML remains text.
 
 **Database setup:** apply [the optional note-tags migration](supabase/migrations/20261010001600_note_tags.sql) after earlier migrations. Existing notes receive an empty tag list and retain their text. Changing from automatic to manual saving needs no additional migration. See [the notes guide](docs/notes.md) for storage and access details. Run `pnpm test:notes` for editor, manual-save, draft, query, and validation checks.
+
+## Free practice destinations
+
+Company and pattern lists use reviewed free equivalents for paid LeetCode exercises. Students see the destination title, difficulty, platform and link without a premium label. Stable question IDs, company observations, notes, revisions and LeetCode sync identities remain unchanged. Unmatched paid exercises are pending internally and excluded before counting/filtering/pagination; historical notes remain editable.
+
+The first reviewed set has 15 equivalents on GeeksforGeeks and NeetCode. This is not complete replacement coverage. See [free practice maintenance](docs/free-practice.md). No migration or privileged database connection is needed for these display mappings. Restart the app after pulling this change.
+
+```powershell
+pnpm practice:audit --directory "C:\path\to\pinned-company-snapshot"
+pnpm practice:check-links
+pnpm test:practice
+```

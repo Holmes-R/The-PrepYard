@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "alternatives": [
+    {
+      "source_slug": "meeting-rooms",
+      "title": "Meeting Rooms",
+      "url": "https://www.geeksforgeeks.org/problems/attend-all-meetings/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "easy",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Determine whether all intervals can be attended; an end equal to a start does not overlap. GFG interval array interface matches the task."
+    },
+    {
+      "source_slug": "meeting-rooms-ii",
+      "title": "Meeting Rooms II",
+      "url": "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Minimum concurrent rooms; touching endpoints reuse a room. GFG accepts parallel start/end arrays instead of pairs."
+    },
+    {
+      "source_slug": "graph-valid-tree",
+      "title": "Graph Valid Tree",
+      "url": "https://neetcode.io/problems/valid-tree/question",
+      "platform": "NeetCode",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Undirected graph must be connected and acyclic; includes isolated/single-node and disconnected cases."
+    },
+    {
+      "source_slug": "alien-dictionary",
+      "title": "Alien Dictionary",
+      "url": "https://neetcode.io/problems/foreign-dictionary/question",
+      "platform": "NeetCode",
+      "difficulty": "hard",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Infer any valid character order; invalid prefixes and cycles return an empty string."
+    },
+    {
+      "source_slug": "encode-and-decode-strings",
+      "title": "Encode and Decode Strings",
+      "url": "https://neetcode.io/problems/string-encode-and-decode/question",
+      "platform": "NeetCode",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Encode a list and decode it losslessly, including empty strings and delimiter characters."
+    },
+    {
+      "source_slug": "walls-and-gates",
+      "title": "Islands and Treasure",
+      "url": "https://neetcode.io/problems/islands-and-treasure/question",
+      "platform": "NeetCode",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Same four-direction multi-source distances, -1 obstacles, 0 targets, and 2147483647 unreachable cells; modify grid in place."
+    },
+    {
+      "source_slug": "number-of-connected-components-in-an-undirected-graph",
+      "title": "Number of Connected Components in an Undirected Graph",
+      "url": "https://neetcode.io/problems/count-connected-components/question",
+      "platform": "NeetCode",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Count connected components over all numbered vertices, including isolated vertices; undirected edges."
+    },
+    {
+      "source_slug": "maximum-size-subarray-sum-equals-k",
+      "title": "Longest Subarray with Sum K",
+      "url": "https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Return maximum contiguous subarray length for exact target sum. Both support negative numbers; no match returns zero."
+    },
+    {
+      "source_slug": "largest-bst-subtree",
+      "title": "Largest BST",
+      "url": "https://www.geeksforgeeks.org/problems/largest-bst/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Return node count of the largest BST subtree; strict left/right comparisons and no duplicate values."
+    },
+    {
+      "source_slug": "plus-one-linked-list",
+      "title": "Add 1 to a Linked List Number",
+      "url": "https://www.geeksforgeeks.org/problems/add-1-to-a-number-represented-as-linked-list/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Forward-order decimal digits in a linked list; add one, carry through nines, return the updated head."
+    },
+    {
+      "source_slug": "boundary-of-binary-tree",
+      "title": "Tree Boundary Traversal",
+      "url": "https://www.geeksforgeeks.org/problems/boundary-traversal-of-binary-tree/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Anticlockwise root, left boundary excluding leaves, all leaves, reversed right boundary; no duplicate root/leaves."
+    },
+    {
+      "source_slug": "number-of-distinct-islands",
+      "title": "Number of Distinct Islands",
+      "url": "https://www.geeksforgeeks.org/problems/number-of-distinct-islands/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Four-direction islands, shapes equivalent by translation only; rotations/reflections remain distinct. GFG uses L/W cells instead of 1/0."
+    },
+    {
+      "source_slug": "minimum-cost-to-connect-sticks",
+      "title": "Min Cost to Connect Ropes",
+      "url": "https://www.geeksforgeeks.org/problems/minimum-cost-of-ropes-1587115620/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Each merge costs the sum of two lengths; minimise total accumulated merge cost. Ropes and sticks differ only in naming."
+    },
+    {
+      "source_slug": "intersection-of-three-sorted-arrays",
+      "title": "Common in 3 Sorted Arrays",
+      "url": "https://www.geeksforgeeks.org/problems/common-elements1132/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "easy",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Return sorted common values across three sorted arrays. GFG additionally accepts duplicates and returns each common value once."
+    },
+    {
+      "source_slug": "median-of-a-row-wise-sorted-matrix",
+      "title": "Median in a Row-Wise Sorted Matrix",
+      "url": "https://www.geeksforgeeks.org/problems/median-in-a-row-wise-sorted-matrix1527/1",
+      "platform": "GeeksforGeeks",
+      "difficulty": "medium",
+      "match": "equivalent",
+      "free_submission": true,
+      "reviewed_at": "2026-10-12",
+      "review_notes": "Odd-sized row-sorted matrix; return median across every entry. Same value-space binary search/counting task."
+    }
+  ]
+}

@@ -57,7 +57,7 @@ function DashboardContent({ data }: { data: Data }) {
             href="/settings"
             className="dashboard-button dashboard-button-secondary"
           >
-            LeetCode sync
+            Sync accounts
           </Link>
         </div>
       </header>

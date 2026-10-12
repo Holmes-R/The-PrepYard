@@ -89,12 +89,23 @@ try {
     "/api/companies",
     "/api/notes",
     "/api/integrations/leetcode",
+    "/api/integrations/gfg",
     "/api/patterns/overview",
     "/api/patterns/two-pointers",
   ]) {
     const api = await fetch(base + endpoint, { redirect: "manual" });
     assert.equal(api.status, 401, endpoint + " rejects anonymous data reads");
   }
+  const gfgMutation = await fetch(base + "/api/integrations/gfg", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: base },
+    body: JSON.stringify({ action: "connect", username: "fixture_student" }),
+  });
+  assert.equal(
+    gfgMutation.status,
+    401,
+    "Anonymous account connections are denied",
+  );
   const history = await fetch(base + "/api/integrations/leetcode/history", {
     method: "POST",
     headers: { "Content-Type": "application/json", Origin: base },

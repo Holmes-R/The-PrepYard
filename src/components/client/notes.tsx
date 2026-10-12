@@ -48,12 +48,16 @@ function NoteCard({ note: n }: { note: JsonData<NotePage>["rows"][number] }) {
         <NoteContent content={n.content} />
       </details>
       <div>
-        <a href={n.canonical_url} target="_blank" rel="noopener noreferrer">
-          Open question <ArrowUpRight size={14} />
-        </a>
-        <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
-          Find in practice
-        </Link>
+        {n.canonical_url && (
+          <a href={n.canonical_url} target="_blank" rel="noopener noreferrer">
+            Open question <ArrowUpRight size={14} />
+          </a>
+        )}
+        {n.canonical_url && (
+          <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
+            Find in practice
+          </Link>
+        )}
         <Button
           type="button"
           variant="ghost"

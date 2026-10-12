@@ -20,7 +20,7 @@ export function roadmapPredicate(slug, add) {
   const p = roadmapPattern(slug);
   if (!p) return "";
   const clauses = [
-    "rtrim(q.canonical_url,'/')=any(" +
+    "rtrim(q.original_url,'/')=any(" +
       add(p.questions.map((q) => normal(q.url))) +
       "::text[])",
   ];
@@ -43,13 +43,13 @@ export function roadmapRecommendedOrder(slug, add) {
   return (
     "array_position(" +
     add(p.questions.map((q) => normal(q.url))) +
-    "::text[],rtrim(q.canonical_url,'/')) asc nulls last,case q.difficulty when 'easy' then 1 when 'medium' then 2 when 'hard' then 3 end asc nulls last,lower(q.title),q.id"
+    "::text[],rtrim(q.original_url,'/')) asc nulls last,case q.difficulty when 'easy' then 1 when 'medium' then 2 when 'hard' then 3 end asc nulls last,lower(q.title),q.id"
   );
 }
 export function decorateRoadmapQuestions(rows) {
   return rows.map((q) => {
     const tags = new Set((q.topics ?? []).map((t) => t.slug));
-    const url = normal(q.canonical_url);
+    const url = normal(q.original_url ?? q.canonical_url);
     const old = (q.patterns ?? []).map((p) => {
       const definition = roadmapPattern(p.slug);
       return definition ? { slug: definition.slug, name: definition.name } : p;
@@ -69,6 +69,8 @@ export function decorateRoadmapQuestions(rows) {
           (roadmapPattern(b.slug)?.position ?? 999) ||
         a.name.localeCompare(b.name),
     );
-    return { ...q, patterns };
+    const display = { ...q, patterns };
+    delete display.original_url;
+    return display;
   });
 }

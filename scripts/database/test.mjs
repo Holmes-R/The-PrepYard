@@ -112,6 +112,40 @@ const noteSearch = spawnSync(process.execPath, ["tests/notes/database.mjs"], {
 });
 if (noteSearch.error || noteSearch.status !== 0)
   throw new Error("Private note search checks failed");
+const practiceTarget = new URL("postgresql://localhost");
+practiceTarget.hostname = host;
+practiceTarget.port = process.env.PGPORT || "5432";
+practiceTarget.username = process.env.PGUSER || "postgres";
+practiceTarget.password = process.env.PGPASSWORD || "";
+practiceTarget.pathname = "/" + database;
+const freePractice = spawnSync(
+  process.execPath,
+  ["tests/catalogue/practice-database.mjs"],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      PREPYARD_AUTH_TEST_DATABASE_URL: practiceTarget.href,
+    },
+    stdio: "inherit",
+  },
+);
+if (freePractice.error || freePractice.status !== 0)
+  throw new Error("Free-practice catalogue checks failed");
+const accountSync = spawnSync(
+  process.execPath,
+  ["tests/accounts/database.mjs"],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      PREPYARD_AUTH_TEST_DATABASE_URL: practiceTarget.href,
+    },
+    stdio: "inherit",
+  },
+);
+if (accountSync.error || accountSync.status !== 0)
+  throw new Error("Account sync checks failed");
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

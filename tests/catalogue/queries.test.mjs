@@ -61,7 +61,7 @@ test("default filters never emit a dangling where or comments inside SQL", async
       "where with no conditions before order by: …" + sql.slice(-90),
     );
     assert.ok(
-      !sql.includes("//"),
+      !sql.replace(/'(?:''|[^'])*'/g, "''").includes("//"),
       "// written inside a SQL string is not a comment: …" +
         sql.slice(Math.max(0, sql.indexOf("//") - 60), sql.indexOf("//") + 70),
     );

@@ -6,14 +6,14 @@ Full history means the set of questions you have solved. It does not import solu
 
 ## Student setup: automatic new solves (no extension)
 
-1. Open **Dashboard → LeetCode sync** (`/settings`), enter your public LeetCode username and select **Enable automatic sync**. This enables checks by default; no extension, password or API key is needed.
+1. Open **Dashboard → Sync accounts** (`/settings`), enter your public LeetCode username and select **Enable automatic sync**. This enables checks by default; no extension, password or API key is needed.
 2. Submit a solution on LeetCode. PrepYard only marks a matching question solved after LeetCode returns **Accepted**, with a submission timestamp later than when you connected. Viewing, running examples, pending judgments and failed submissions do not mark completion. Previously accepted solves remain unchanged.
 3. Keep PrepYard open and return to it after solving. While a signed-in tab is visible and online, checks run at most every two minutes. Completion refreshes in company and pattern pages without a reload. Public feed delays or an unavailable/private profile can delay or prevent an update; this is periodic syncing, not instant push notifications.
 4. Use **Pause sync**, **Resume sync** or **Disconnect** when needed. Pausing/resuming or reconnecting the same username retains the original tracking start. Changing the username or disconnecting and reconnecting starts a new tracking window.
 
 ## Optional student setup: complete history
 
-1. Open **Dashboard → LeetCode sync** (`/settings`), enter your LeetCode username and select **Enable automatic sync**.
+1. Open **Dashboard → Sync accounts** (`/settings`), enter your LeetCode username and select **Enable automatic sync**.
 2. Select **Download browser extension** and extract the ZIP into a folder you will keep. Alternatively, use this repository's `extensions/leetcode-sync` folder directly.
 3. Open `chrome://extensions` in Chrome or `edge://extensions` in Edge. Turn on **Developer mode**, choose **Load unpacked**, and select the folder containing `manifest.json`.
 4. Open LeetCode and PrepYard in the **same browser**, and sign in to both. Keep both tabs open. LeetCode must be signed in to the username linked in PrepYard.
