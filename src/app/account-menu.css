@@ -1,0 +1,107 @@
+.prep-account-menu {
+  position: relative;
+}
+.prep-account-menu > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+  border-radius: 8px;
+  padding-right: 6px;
+}
+.prep-account-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.prep-account-menu > summary:hover {
+  background: #222225;
+}
+.prep-account-menu[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.prep-account-menu > summary:focus-visible,
+.prep-account-menu-panel a:focus-visible,
+.prep-mobile-account-links a:focus-visible {
+  outline: 2px solid #adc6ff;
+  outline-offset: 3px;
+}
+/* The last span selector in the shared header normally targets profile text. */
+.prep-account-menu .prep-top-profile > span:nth-child(2) {
+  display: grid;
+  gap: 3px;
+  max-width: 110px;
+}
+/* Override the shared horizontal navigation only inside the account popup. */
+.prep-top-navigation .prep-account-menu > .prep-account-menu-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 232px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  background: #1c1c1e;
+  border: 1px solid #38383d;
+  border-radius: 10px;
+}
+.prep-top-navigation .prep-account-menu-panel > a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  min-height: 44px;
+  border-radius: 6px;
+  color: #e4e4e9;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: normal;
+  line-height: 1.4;
+}
+.prep-top-navigation .prep-account-menu-panel > a:hover,
+.prep-top-navigation .prep-account-menu-panel > a[aria-current="page"] {
+  background: #2c2c30;
+  color: #fff;
+}
+.prep-top-navigation .prep-account-menu-panel > a > svg {
+  flex-shrink: 0;
+}
+.prep-mobile-account-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.prep-mobile-account-links > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: #e4e4e9;
+  font-size: 14px;
+}
+@media (max-width: 1100px) {
+  .prep-account-menu .prep-top-profile > span:nth-child(2) {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .prep-account-menu {
+    display: none;
+  }
+}
+
+.prep-mobile-account {
+  grid-template-columns: minmax(0, 1fr);
+}

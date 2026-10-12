@@ -1,6 +1,7 @@
 import { practiceQuestionsSql } from "@/features/questions/practice.mjs";
 import { prepYardCollectionSlugs } from "@/features/patterns/collections.mjs";
 import type { PoolClient } from "pg";
+import { dashboardPractice } from "./practice.mjs";
 export async function dashboardData(client: PoolClient) {
   const stats = (
     await client.query<{
@@ -42,19 +43,7 @@ export async function dashboardData(client: PoolClient) {
       [prepYardCollectionSlugs],
     )
   ).rows;
-  const recent = (
-    await client.query<{
-      id: string;
-      title: string;
-      difficulty: string | null;
-      status: string;
-      updated_at: Date;
-    }>(`
-    select q.id,q.title,q.difficulty,u.status,u.updated_at from public.user_question_state u
-    join ${practiceQuestionsSql} q on q.id=u.question_id where u.user_id=private.student_id()
-    order by u.updated_at desc,q.id limit 5
-  `)
-  ).rows;
+  const { recent, revisions } = await dashboardPractice(client);
   const activity = (
     await client.query<{ day: string; count: number }>(`
     select to_char(d.activity_date,'YYYY-MM-DD') as "day",count(e.id)::int count
@@ -63,5 +52,5 @@ export async function dashboardData(client: PoolClient) {
     group by d.activity_date order by d.activity_date
   `)
   ).rows;
-  return { stats, collections, recent, activity };
+  return { stats, collections, recent, revisions, activity };
 }

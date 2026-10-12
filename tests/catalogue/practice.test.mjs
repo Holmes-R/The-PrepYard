@@ -121,11 +121,36 @@ test("company and pattern APIs return the same replacement without losing owner 
     query: async (sql, args) => {
       calls.push({ sql, args: [...args] });
       if (sql.includes("select c.id,c.slug,c.name"))
-        return { rows: [{ id: "company", slug: "acme", name: "Acme" }] };
+        return {
+          rows: [
+            {
+              id: "company",
+              slug: "acme",
+              name: "Acme",
+              available: ["all"],
+              topics: [],
+            },
+          ],
+        };
       if (sql.startsWith("select distinct time_window"))
         return { rows: [{ time_window: "all" }] };
       if (sql.includes("as uses")) return { rows: [] };
       if (sql.startsWith("select count(*) as n")) return { rows: [{ n: 1 }] };
+      if (sql.startsWith("with filtered"))
+        return {
+          rows: [
+            {
+              total: 1,
+              solved: 1,
+              easy_count: 0,
+              medium_count: 1,
+              hard_count: 0,
+              page: 1,
+              pages: 1,
+              rows: [replacement],
+            },
+          ],
+        };
       if (sql.startsWith("select count(*)"))
         return {
           rows: [

@@ -5,10 +5,12 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { authConfigured, validStudentId } from "./policy.mjs";
 
+import { measure } from "@/lib/performance/timing.mjs";
+
 async function readUser() {
   if (!authConfigured()) return null;
   try {
-    const session = await auth();
+    const session = await measure("auth", () => auth());
     return validStudentId(session?.user?.id) ? session!.user : null;
   } catch {
     return null;

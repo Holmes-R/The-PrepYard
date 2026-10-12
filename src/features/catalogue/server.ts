@@ -1,31 +1,41 @@
 import "server-only";
 import { withStudentDatabase } from "@/lib/database/server";
+import { cachedMetadata } from "./metadata-cache";
 import {
-  companiesSql,
+  companyCatalogueSql,
+  companySolvedCountsSql,
+  companyMetadata,
   companyLogos,
   companySheet,
   questionNote,
   type Filters,
+  type CompanyCatalogueRow,
 } from "./queries.mjs";
 export async function listCompanies() {
-  return withStudentDatabase(
-    async (client) =>
-      (
-        await client.query<{
-          slug: string;
-          name: string;
-          has_logo: boolean;
-          question_count: number;
-          solved_count: number;
-          easy_count: number;
-          medium_count: number;
-          hard_count: number;
-        }>(companiesSql)
-      ).rows,
-  );
+  return withStudentDatabase(async (client) => {
+    const catalogue = await cachedMetadata(
+      "company-directory",
+      async () =>
+        (await client.query<CompanyCatalogueRow>(companyCatalogueSql)).rows,
+    );
+    const own = (
+      await client.query<{ id: string; solved_count: number }>(
+        companySolvedCountsSql,
+      )
+    ).rows;
+    const solved = new Map(own.map((row) => [row.id, row.solved_count]));
+    return catalogue.map(({ id, ...company }) => ({
+      ...company,
+      solved_count: solved.get(id) ?? 0,
+    }));
+  });
 }
 export async function getCompanySheet(slug: string, filters: Filters) {
-  return withStudentDatabase((client) => companySheet(client, slug, filters));
+  return withStudentDatabase((client) =>
+    companySheet(client, slug, filters, (c, name) =>
+      cachedMetadata("company:" + name, () => companyMetadata(c, name)),
+    ),
+  );
 }
 export async function getQuestionNote(questionId: string) {
   return withStudentDatabase((client) => questionNote(client, questionId));
@@ -40,10 +50,8 @@ export async function getCompanyLogo(slug: string) {
       image: Buffer;
       sha256: string;
     }>(
-      `select l.content_type,l.image,l.sha256
-       from public.company_logos l
-       join public.companies c on c.id=l.company_id
-       where c.slug=$1`,
+      `select l.content_type,l.image,l.sha256 from public.company_logos l
+       join public.companies c on c.id=l.company_id where c.slug=$1`,
       [slug],
     );
     const row = rows[0];

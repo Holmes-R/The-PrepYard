@@ -77,6 +77,10 @@ export function companySheet(
   client: PoolClient,
   slug: string,
   filters: Filters,
+  loadMetadata?: (
+    client: PoolClient,
+    slug: string,
+  ) => Promise<CompanyMetadata | null>,
 ): Promise<Sheet | null>;
 export function filtersToParams(
   filters: Filters,
@@ -86,3 +90,18 @@ export function questionNote(
   client: PoolClient,
   questionId: string,
 ): Promise<string>;
+
+export type CompanyMetadata = Pick<Sheet, "company" | "available" | "topics">;
+export type CompanyCatalogueRow = DifficultyCounts & {
+  id: string;
+  slug: string;
+  name: string;
+  has_logo: boolean;
+  question_count: number;
+};
+export const companyCatalogueSql: string;
+export const companySolvedCountsSql: string;
+export function companyMetadata(
+  client: PoolClient,
+  slug: string,
+): Promise<CompanyMetadata | null>;

@@ -13,6 +13,8 @@ import {
   LogOut,
   Search,
   UserRound,
+  ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 
@@ -79,6 +81,61 @@ function LogoutConfirmation({ mobile = false }: { mobile?: boolean }) {
           </form>
         </div>
       </div>
+    </details>
+  );
+}
+
+function AccountMenu({ name, pathname }: { name: string; pathname: string }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const outside = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !detailsRef.current?.contains(event.target) &&
+        detailsRef.current
+      )
+        detailsRef.current.open = false;
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && detailsRef.current?.open) {
+        detailsRef.current.open = false;
+        detailsRef.current.querySelector("summary")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, []);
+  const close = () => {
+    if (detailsRef.current) detailsRef.current.open = false;
+  };
+  return (
+    <details ref={detailsRef} className="prep-account-menu">
+      <summary
+        className="prep-top-profile"
+        aria-label={"Account options for " + name}
+      >
+        <span className="prep-avatar">
+          <UserRound size={17} aria-hidden="true" />
+        </span>
+        <span>
+          <strong>{name}</strong>
+          <small>Student account</small>
+        </span>
+        <ChevronDown size={14} aria-hidden="true" />
+      </summary>
+      <nav className="prep-account-menu-panel" aria-label="Account options">
+        <Link
+          href="/settings"
+          onClick={close}
+          aria-current={pathname === "/settings" ? "page" : undefined}
+        >
+          <RefreshCw size={16} aria-hidden="true" /> Sync accounts
+        </Link>
+      </nav>
     </details>
   );
 }
@@ -286,19 +343,7 @@ export function SiteHeader({
           Free workspace
         </span>
         <div className="prep-account-actions">
-          <Link
-            href="/dashboard"
-            className="prep-top-profile"
-            aria-label={"Dashboard for " + name}
-          >
-            <span className="prep-avatar">
-              <UserRound size={17} />
-            </span>
-            <span>
-              <strong>{name}</strong>
-              <small>Student account</small>
-            </span>
-          </Link>
+          <AccountMenu key={pathname} name={name} pathname={pathname} />
           <LogoutConfirmation />
         </div>
         <button
@@ -337,6 +382,11 @@ export function SiteHeader({
           {navigation}
           <div className="prep-mobile-account">
             <span>{name}</span>
+          </div>
+          <div className="prep-mobile-account-links">
+            <Link href="/settings" onClick={() => setOpen(false)}>
+              <RefreshCw size={16} aria-hidden="true" /> Sync accounts
+            </Link>
             <LogoutConfirmation mobile />
           </div>
         </div>

@@ -298,3 +298,13 @@ pnpm practice:audit --directory "C:\path\to\pinned-company-snapshot"
 pnpm practice:check-links
 pnpm test:practice
 ```
+
+## Catalogue performance
+
+Company sheets now combine filtered counts and paginated rows into one database query. Shared company/topic/collection metadata is cached for 60 seconds; personal progress, revisions, notes and sessions remain fresh and private. Authenticated data responses include Server-Timing measurements, with optional logging via PREPYARD_PERFORMANCE_LOG=1. No migration or new service is required. Restart the app after pulling. See [performance setup and validation](docs/performance.md). Run pnpm test:performance for cache/timing checks.
+
+## Daily practice dashboard
+
+The dashboard keeps one primary Practice now action, three compact progress cards, your three most recent questions, and the three earliest due revisions with their saved confidence ratings. Collection cards show a short purpose and progress; expand About this collection for the full explanation. Weekly revision activity and expandable recent history sit below. On mobile, recent practice and revision come before statistics. Sync accounts is available from the account dropdown on desktop and the navigation menu on mobile.
+
+Recent questions and revisions share one private database query, keeping the dashboard at four catalogue reads. Unlisted and unresolved paid questions are excluded. Questions open in their matching practice or company view when available, with a direct platform link as a fallback. No migration is required. See [the dashboard guide](docs/dashboard.md).

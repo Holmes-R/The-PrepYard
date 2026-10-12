@@ -1,6 +1,10 @@
 import "server-only";
 import { Pool, type PoolClient } from "pg";
 import { validStudentId } from "@/lib/auth/policy.mjs";
+import {
+  measure,
+  instrumentDatabaseClient,
+} from "@/lib/performance/timing.mjs";
 const shared = globalThis as typeof globalThis & { prepyardPool?: Pool };
 function pool() {
   if (!process.env.DATABASE_URL)
@@ -13,7 +17,9 @@ function pool() {
   }));
 }
 export async function connection() {
-  const client = await pool().connect();
+  const client = instrumentDatabaseClient(
+    await measure("pool", () => pool().connect()),
+  );
   try {
     const { rows } = await client.query(
       "select session_user as role, rolsuper, rolbypassrls, rolinherit from pg_roles where rolname=session_user",

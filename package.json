@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm test:patterns && pnpm test:catalogue && pnpm test:import && pnpm test:auth && pnpm test:leetcode && pnpm test:notes && pnpm test:accounts && pnpm typecheck && pnpm build && pnpm test:access",
+    "check": "pnpm format:check && pnpm lint && pnpm test:patterns && pnpm test:catalogue && pnpm test:import && pnpm test:auth && pnpm test:leetcode && pnpm test:notes && pnpm test:accounts && pnpm test:performance && pnpm typecheck && pnpm build && pnpm test:access",
     "db:test": "node scripts/database/test.mjs",
     "import:company": "node scripts/import/company.mjs",
     "test:import": "node --test tests/import/company.test.mjs",
@@ -42,7 +42,10 @@
     "test:practice": "node --test tests/catalogue/practice.test.mjs",
     "test:practice:database": "node tests/catalogue/practice-database.mjs",
     "test:accounts": "node --test tests/accounts/*.test.mjs",
-    "test:accounts:database": "node tests/accounts/database.mjs"
+    "test:accounts:database": "node tests/accounts/database.mjs",
+    "test:performance": "node --test tests/performance/*.test.mjs",
+    "test:performance:database": "node tests/performance/database.mjs",
+    "test:dashboard:database": "node tests/dashboard/database.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

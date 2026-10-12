@@ -146,6 +146,34 @@ const accountSync = spawnSync(
 );
 if (accountSync.error || accountSync.status !== 0)
   throw new Error("Account sync checks failed");
+const performanceChecks = spawnSync(
+  process.execPath,
+  ["tests/performance/database.mjs"],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      PREPYARD_AUTH_TEST_DATABASE_URL: practiceTarget.href,
+    },
+    stdio: "inherit",
+  },
+);
+if (performanceChecks.error || performanceChecks.status !== 0)
+  throw new Error("Catalogue performance checks failed");
+const dashboardChecks = spawnSync(
+  process.execPath,
+  ["tests/dashboard/database.mjs"],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      PREPYARD_AUTH_TEST_DATABASE_URL: practiceTarget.href,
+    },
+    stdio: "inherit",
+  },
+);
+if (dashboardChecks.error || dashboardChecks.status !== 0)
+  throw new Error("Dashboard revision checks failed");
 console.log(
   "Database checks passed. Disposable database retained; this runner never drops databases.",
 );

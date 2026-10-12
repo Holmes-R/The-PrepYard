@@ -2,12 +2,22 @@ import { roadmapPattern } from "./roadmap.mjs";
 import "server-only";
 import { withStudentDatabase } from "@/lib/database/server";
 import {
+  patternMetadata,
   patternOverview,
   patternQuestions,
   type PatternFilters,
 } from "./queries.mjs";
+import type { PoolClient } from "pg";
+import { cachedMetadata } from "@/features/catalogue/metadata-cache";
+const loadMetadata = (client: PoolClient, filters: PatternFilters) =>
+  cachedMetadata(
+    "patterns:" + JSON.stringify([filters.pattern, filters.collection]),
+    () => patternMetadata(client, filters),
+  );
 export const getPatternOverview = (filters: PatternFilters) =>
-  withStudentDatabase((client) => patternOverview(client, filters));
+  withStudentDatabase((client) =>
+    patternOverview(client, filters, loadMetadata),
+  );
 export const getPatternQuestions = (filters: PatternFilters) =>
   withStudentDatabase((client) => patternQuestions(client, filters));
 
@@ -26,14 +36,18 @@ export const getPatternPractice = (slug: string, filters: PatternFilters) =>
       pattern: { slug: pattern.slug, name: pattern.name },
       rows: await patternQuestions(client, { ...filters, pattern: slug }),
       topics: (
-        await patternOverview(client, {
-          ...filters,
-          pattern: slug,
-          topic: "",
-          q: "",
-          difficulty: "",
-          progress: "",
-        })
+        await patternOverview(
+          client,
+          {
+            ...filters,
+            pattern: slug,
+            topic: "",
+            q: "",
+            difficulty: "",
+            progress: "",
+          },
+          loadMetadata,
+        )
       ).groups,
     };
   });
