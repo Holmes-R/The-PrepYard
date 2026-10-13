@@ -24,61 +24,6 @@
       "review_notes": "Minimum concurrent rooms; touching endpoints reuse a room. GFG accepts parallel start/end arrays instead of pairs."
     },
     {
-      "source_slug": "graph-valid-tree",
-      "title": "Graph Valid Tree",
-      "url": "https://neetcode.io/problems/valid-tree/question",
-      "platform": "NeetCode",
-      "difficulty": "medium",
-      "match": "equivalent",
-      "free_submission": true,
-      "reviewed_at": "2026-10-12",
-      "review_notes": "Undirected graph must be connected and acyclic; includes isolated/single-node and disconnected cases."
-    },
-    {
-      "source_slug": "alien-dictionary",
-      "title": "Alien Dictionary",
-      "url": "https://neetcode.io/problems/foreign-dictionary/question",
-      "platform": "NeetCode",
-      "difficulty": "hard",
-      "match": "equivalent",
-      "free_submission": true,
-      "reviewed_at": "2026-10-12",
-      "review_notes": "Infer any valid character order; invalid prefixes and cycles return an empty string."
-    },
-    {
-      "source_slug": "encode-and-decode-strings",
-      "title": "Encode and Decode Strings",
-      "url": "https://neetcode.io/problems/string-encode-and-decode/question",
-      "platform": "NeetCode",
-      "difficulty": "medium",
-      "match": "equivalent",
-      "free_submission": true,
-      "reviewed_at": "2026-10-12",
-      "review_notes": "Encode a list and decode it losslessly, including empty strings and delimiter characters."
-    },
-    {
-      "source_slug": "walls-and-gates",
-      "title": "Islands and Treasure",
-      "url": "https://neetcode.io/problems/islands-and-treasure/question",
-      "platform": "NeetCode",
-      "difficulty": "medium",
-      "match": "equivalent",
-      "free_submission": true,
-      "reviewed_at": "2026-10-12",
-      "review_notes": "Same four-direction multi-source distances, -1 obstacles, 0 targets, and 2147483647 unreachable cells; modify grid in place."
-    },
-    {
-      "source_slug": "number-of-connected-components-in-an-undirected-graph",
-      "title": "Number of Connected Components in an Undirected Graph",
-      "url": "https://neetcode.io/problems/count-connected-components/question",
-      "platform": "NeetCode",
-      "difficulty": "medium",
-      "match": "equivalent",
-      "free_submission": true,
-      "reviewed_at": "2026-10-12",
-      "review_notes": "Count connected components over all numbered vertices, including isolated vertices; undirected edges."
-    },
-    {
       "source_slug": "maximum-size-subarray-sum-equals-k",
       "title": "Longest Subarray with Sum K",
       "url": "https://www.geeksforgeeks.org/problems/longest-sub-array-with-sum-k0809/1",

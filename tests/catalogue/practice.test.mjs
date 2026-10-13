@@ -19,8 +19,8 @@ import {
 test("replacement preserves stable progress/note identity and never mutates input", () => {
   const input = {
     id: "stable",
-    title: "Walls and Gates",
-    canonical_url: "https://leetcode.com/problems/walls-and-gates/",
+    title: "Meeting Rooms II",
+    canonical_url: "https://leetcode.com/problems/meeting-rooms-ii/",
     status: "solved",
     revision_confidence: 2,
     has_note: true,
@@ -28,11 +28,11 @@ test("replacement preserves stable progress/note identity and never mutates inpu
     topics: [{ slug: "breadth-first-search", name: "BFS" }],
   };
   const result = practiceQuestion(input);
-  assert.equal(result.title, "Islands and Treasure");
-  assert.equal(result.platform, "NeetCode");
+  assert.equal(result.title, "Meeting Rooms II");
+  assert.equal(result.platform, "GeeksforGeeks");
   assert.equal(
     result.canonical_url,
-    "https://neetcode.io/problems/islands-and-treasure/question",
+    "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1",
   );
   for (const key of [
     "id",
@@ -43,7 +43,7 @@ test("replacement preserves stable progress/note identity and never mutates inpu
     "topics",
   ])
     assert.deepEqual(result[key], input[key]);
-  assert.equal(input.title, "Walls and Gates");
+  assert.equal(input.title, "Meeting Rooms II");
 });
 test("free questions are unchanged, unresolved paid questions are withheld", () => {
   const free = {
@@ -81,7 +81,7 @@ test("historical notes survive withholding, without a paid practice link", () =>
 test("curated memberships survive URL replacement and original URL is not returned", () => {
   const rows = decorateRoadmapQuestions([
     {
-      canonical_url: "https://neetcode.io/problems/foreign-dictionary/question",
+      canonical_url: "https://example.com/free-alien-dictionary",
       original_url: "https://leetcode.com/problems/alien-dictionary/",
       patterns: [],
       topics: [],
@@ -106,10 +106,11 @@ test("publication rejects unreviewed, insecure, duplicate and non-judge destinat
 test("company and pattern APIs return the same replacement without losing owner state", async () => {
   const replacement = {
     id: "stable",
-    title: "Islands and Treasure",
-    canonical_url: "https://neetcode.io/problems/islands-and-treasure/question",
-    original_url: "https://leetcode.com/problems/walls-and-gates",
-    platform: "NeetCode",
+    title: "Meeting Rooms II",
+    canonical_url:
+      "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1",
+    original_url: "https://leetcode.com/problems/meeting-rooms-ii",
+    platform: "GeeksforGeeks",
     difficulty: "medium",
     status: "solved",
     has_note: true,
@@ -169,11 +170,11 @@ test("company and pattern APIs return the same replacement without losing owner 
   const company = await companySheet(
     client,
     "acme",
-    filtersFrom({ q: "Treasure", difficulty: "medium", order: "title-asc" }),
+    filtersFrom({ q: "Meeting", difficulty: "medium", order: "title-asc" }),
   );
   const pattern = await patternQuestions(
     client,
-    patternFilters({ q: "Treasure", difficulty: "medium", order: "title-asc" }),
+    patternFilters({ q: "Meeting", difficulty: "medium", order: "title-asc" }),
   );
   assert.deepEqual(company.rows[0], pattern.rows[0]);
   assert.equal(company.rows[0].id, "stable");
@@ -183,4 +184,46 @@ test("company and pattern APIs return the same replacement without losing owner 
     const parameters = new Set([...sql.matchAll(/\$(\d+)/g)].map((m) => m[1]));
     assert.equal(parameters.size, args.length);
   }
+});
+
+test("NeetCode destinations and former alternatives are withheld", () => {
+  assert.ok(reviewedAlternatives.every((q) => q.platform !== "NeetCode"));
+  for (const slug of [
+    "graph-valid-tree",
+    "alien-dictionary",
+    "encode-and-decode-strings",
+    "walls-and-gates",
+    "number-of-connected-components-in-an-undirected-graph",
+  ]) {
+    assert.equal(
+      practiceQuestion({
+        canonical_url: "https://leetcode.com/problems/" + slug + "/",
+      }),
+      null,
+    );
+  }
+  for (const canonical_url of [
+    "https://neetcode.io/problems/two-integer-sum/question",
+    "https://www.neetcode.io/problems/two-integer-sum/question",
+    "https://NEETCODE.IO/problems/two-integer-sum/question",
+  ]) {
+    assert.equal(practiceQuestion({ canonical_url }), null);
+    const note = {
+      id: "kept",
+      canonical_url,
+      content: "My own note",
+      tags: ["Review"],
+    };
+    assert.deepEqual(practiceNote(note), { ...note, canonical_url: "" });
+  }
+  const valid = reviewedAlternatives[0];
+  assert.throws(() =>
+    validateAlternatives([
+      {
+        ...valid,
+        platform: "NeetCode",
+        url: "https://neetcode.io/problems/valid-tree/question",
+      },
+    ]),
+  );
 });

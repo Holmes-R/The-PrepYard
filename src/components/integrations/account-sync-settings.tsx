@@ -69,9 +69,9 @@ export function AccountSyncSettings() {
           <ChevronDown size={18} aria-hidden="true" />
         </summary>
         <p>
-          NeetCode, HackerRank and CodeChef questions can still be practised and
-          marked complete in PrepYard. Automatic username syncing is unavailable
-          for these platforms in this release. Use the question checkbox after
+          HackerRank and CodeChef questions can still be practised and marked
+          complete in PrepYard. Automatic username syncing is unavailable for
+          these platforms in this release. Use the question checkbox after
           solving them.
         </p>
       </details>

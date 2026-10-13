@@ -7,7 +7,6 @@ const platforms = {
     host: "www.geeksforgeeks.org",
     path: /^\/problems\/[a-z0-9-]+\/1$/,
   },
-  NeetCode: { host: "neetcode.io", path: /^\/problems\/[a-z0-9-]+\/question$/ },
   HackerRank: {
     host: "www.hackerrank.com",
     path: /^\/challenges\/[a-z0-9-]+\/problem$/,
@@ -68,8 +67,19 @@ function leetcodeSlug(value) {
   }
 }
 
+function neetcodeQuestion(question) {
+  if (question.platform?.toLowerCase() === "neetcode") return true;
+  try {
+    const host = new URL(question.canonical_url).hostname;
+    return host === "neetcode.io" || host.endsWith(".neetcode.io");
+  } catch {
+    return false;
+  }
+}
+
 // Stable IDs continue to own notes/progress. Never overwrite the imported identity.
 export function practiceQuestion(question) {
+  if (neetcodeQuestion(question)) return null;
   const slug = leetcodeSlug(question.canonical_url);
   const replacement = bySlug.get(slug);
   if (replacement)
@@ -109,8 +119,10 @@ export const practiceQuestionsSql = `(select original.id,original.platform_id,or
   left join jsonb_to_recordset(${literal(JSON.stringify(records))}::jsonb)
     as alternative(source_slug text,title text,url text,difficulty text,platform text)
     on platform.slug='leetcode' and alternative.source_slug=split_part(original.canonical_url,'/',5)
-  where platform.slug<>'leetcode' or split_part(original.canonical_url,'/',5) not in (${paidList})
-    or alternative.url is not null)`;
+  where lower(platform.slug)<>'neetcode' and lower(platform.name)<>'neetcode'
+    and original.canonical_url !~* ${literal("^https?://([^/]+\\.)?neetcode\\.io([/:?#]|$)")}
+    and (platform.slug<>'leetcode' or split_part(original.canonical_url,'/',5) not in (${paidList})
+    or alternative.url is not null))`;
 
 // Existing notes on pending questions remain readable/editable, with no paid link.
 export function practiceNote(note) {

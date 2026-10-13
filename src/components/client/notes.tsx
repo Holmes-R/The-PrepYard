@@ -132,16 +132,18 @@ export function ClientNotes({
         <label className="sr-only" htmlFor="notes-search">
           Search notes
         </label>
-        <Search size={18} aria-hidden="true" />
-        <input
-          key={query}
-          id="notes-search"
-          name="q"
-          type="search"
-          maxLength={200}
-          defaultValue={query}
-          placeholder="Search titles, content, or tags…"
-        />
+        <div className="prep-note-search-field prep-search-field">
+          <Search size={18} aria-hidden="true" />
+          <input
+            key={query}
+            id="notes-search"
+            name="q"
+            type="search"
+            maxLength={200}
+            defaultValue={query}
+            placeholder="Search titles, content, or tags…"
+          />
+        </div>
         <Button type="submit">Search</Button>
         {query && (
           <Link className="prep-note-clear" href="/notes">

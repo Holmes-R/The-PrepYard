@@ -267,7 +267,7 @@ The optional Chrome/Edge extension imports all solved question slugs from a sign
 
 Apply [the account-sync migration](supabase/migrations/20261012001700_account_sync.sql) after earlier migrations and restart the app. Open **Dashboard → Sync accounts** to connect LeetCode and GeeksforGeeks independently. GFG first records a complete public solved-question baseline, without marking old history complete. Later checks, every two minutes while PrepYard is visible and online, mark newly visible matching solves across company and pattern pages, including reviewed GFG alternatives. Each connection has Sync now, pause/resume and disconnect controls. Notes and revision ratings are preserved; no platform credentials are collected.
 
-NeetCode, HackerRank and CodeChef remain manual in this release. GFG checks public solved-list changes rather than timestamped acceptance events; repeated solves of an already observed question do not trigger updates. See [Sync accounts setup and limitations](docs/sync-accounts.md). Run `pnpm test:accounts` for adapter checks; the database CI job tests baseline isolation, idempotency and owner policies.
+HackerRank and CodeChef remain manual in this release. GFG checks public solved-list changes rather than timestamped acceptance events; repeated solves of an already observed question do not trigger updates. See [Sync accounts setup and limitations](docs/sync-accounts.md). Run `pnpm test:accounts` for adapter checks; the database CI job tests baseline isolation, idempotency and owner policies.
 
 ## Writing and saving notes
 
@@ -291,7 +291,7 @@ Notes remain private under the existing owner policies and have a 50,000-charact
 
 Company and pattern lists use reviewed free equivalents for paid LeetCode exercises. Students see the destination title, difficulty, platform and link without a premium label. Stable question IDs, company observations, notes, revisions and LeetCode sync identities remain unchanged. Unmatched paid exercises are pending internally and excluded before counting/filtering/pagination; historical notes remain editable.
 
-The first reviewed set has 15 equivalents on GeeksforGeeks and NeetCode. This is not complete replacement coverage. See [free practice maintenance](docs/free-practice.md). No migration or privileged database connection is needed for these display mappings. Restart the app after pulling this change.
+The first reviewed set has 10 equivalents on GeeksforGeeks. This is not complete replacement coverage. See [free practice maintenance](docs/free-practice.md). No migration or privileged database connection is needed for these display mappings. Restart the app after pulling this change.
 
 ```powershell
 pnpm practice:audit --directory "C:\path\to\pinned-company-snapshot"

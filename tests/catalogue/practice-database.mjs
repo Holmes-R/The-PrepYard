@@ -57,7 +57,7 @@ try {
   ).rows[0].id;
   const ids = [];
   for (const [external, title, url, difficulty] of [
-    ["286", "Walls and Gates", "walls-and-gates", "medium"],
+    ["253", "Meeting Rooms II", "meeting-rooms-ii", "medium"],
     ["489", "Robot Room Cleaner", "robot-room-cleaner", "hard"],
     ["1", "Two Sum", "two-sum", "easy"],
   ]) {
@@ -83,7 +83,48 @@ try {
       [id, topic],
     );
   }
-  for (const id of ids.slice(0, 2)) {
+  const neetcode = (
+    await c.query(
+      "insert into public.platforms(slug,name,base_url) values('neetcode','NeetCode','https://neetcode.io') on conflict(slug) do update set name=excluded.name returning id",
+    )
+  ).rows[0].id;
+  for (const [p, external, title, url] of [
+    [
+      platform,
+      "286",
+      "Walls and Gates",
+      "https://leetcode.com/problems/walls-and-gates/",
+    ],
+    [
+      neetcode,
+      slug,
+      "NeetCode removed native",
+      "https://www.neetcode.io/problems/" + slug + "/question",
+    ],
+    [
+      platform,
+      slug + "-mislabelled",
+      "NeetCode removed mislabelled",
+      "https://neetcode.io/problems/" + slug + "/question",
+    ],
+  ]) {
+    const id = (
+      await c.query(
+        "insert into public.questions(platform_id,external_id,canonical_url,title,difficulty,is_listed) values($1,$2,$3,$4,'medium',true) on conflict(platform_id,external_id) do update set canonical_url=excluded.canonical_url,title=excluded.title,is_listed=true returning id",
+        [p, external, url, title],
+      )
+    ).rows[0].id;
+    ids.push(id);
+    await c.query(
+      "insert into public.company_question_observations(snapshot_id,company_id,question_id,time_window,frequency,frequency_kind) values($1,$2,$3,'all',75,'percent')",
+      [snapshot, company, id],
+    );
+    await c.query(
+      "insert into public.question_dsa_topics(question_id,topic_id) values($1,$2) on conflict(question_id) do update set topic_id=excluded.topic_id",
+      [id, topic],
+    );
+  }
+  for (const id of ids.filter((_, i) => i !== 2)) {
     await c.query(
       "insert into public.user_question_state(user_id,question_id,status,confidence,next_revision_at) values($1,$2,'solved',2,now())",
       [user, id],
@@ -106,13 +147,13 @@ try {
     [companyRows.easy_count, companyRows.medium_count, companyRows.hard_count],
     [1, 1, 0],
   );
-  assert.equal(companyRows.rows[0].title, "Islands and Treasure");
+  assert.equal(companyRows.rows[0].title, "Meeting Rooms II");
   assert.equal(companyRows.rows[0].id, ids[0]);
   assert.equal(companyRows.rows[0].has_note, true);
   assert.ok(!Object.hasOwn(companyRows.rows[0], "original_url"));
-  const search = await companySheet(c, slug, filtersFrom({ q: "Treasure" }));
+  const search = await companySheet(c, slug, filtersFrom({ q: "Meeting" }));
   assert.equal(search.total, 1);
-  assert.equal(search.rows[0].platform, "NeetCode");
+  assert.equal(search.rows[0].platform, "GeeksforGeeks");
   const directory = (await c.query(companiesSql)).rows.find(
     (r) => r.slug === slug,
   );
@@ -120,7 +161,7 @@ try {
   assert.equal(directory.hard_count, 0);
   const patterns = await patternQuestions(
     c,
-    patternFilters({ q: "Treasure", topic: "arrays" }),
+    patternFilters({ q: "Meeting", topic: "arrays" }),
   );
   assert.equal(patterns.total, 1);
   assert.equal(patterns.rows[0].id, ids[0]);
@@ -129,12 +170,32 @@ try {
     patternFilters({ q: "Robot Room Cleaner" }),
   );
   assert.equal(overview.total, 0);
-  const notebook = await studentNotes(c, 1, "Treasure");
+  const notebook = await studentNotes(c, 1, "Meeting");
   assert.equal(notebook.total, 1);
   assert.equal(notebook.rows[0].id, ids[0]);
   const allNotes = await studentNotes(c);
-  assert.equal(allNotes.total, 2);
+  assert.equal(allNotes.total, 5);
   assert.equal(allNotes.rows.find((n) => n.id === ids[1]).canonical_url, "");
+  for (const q of ["Walls and Gates", "NeetCode removed"]) {
+    assert.equal((await companySheet(c, slug, filtersFrom({ q }))).total, 0);
+    assert.equal(
+      (await patternQuestions(c, patternFilters({ q, topic: "arrays" }))).total,
+      0,
+    );
+    assert.equal((await patternOverview(c, patternFilters({ q }))).total, 0);
+  }
+  for (const id of ids.slice(3)) {
+    assert.equal(allNotes.rows.find((n) => n.id === id).canonical_url, "");
+    assert.equal(
+      (
+        await c.query(
+          "select status from public.user_question_state where question_id=$1",
+          [id],
+        )
+      ).rows[0].status,
+      "solved",
+    );
+  }
   const retained = (
     await c.query(
       "select status,confidence from public.user_question_state where question_id=$1",

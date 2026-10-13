@@ -19,41 +19,6 @@
       "alternative": "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1"
     },
     {
-      "id": 261,
-      "slug": "graph-valid-tree",
-      "title": "Graph Valid Tree",
-      "paid_only": true,
-      "alternative": "https://neetcode.io/problems/valid-tree/question"
-    },
-    {
-      "id": 269,
-      "slug": "alien-dictionary",
-      "title": "Alien Dictionary",
-      "paid_only": true,
-      "alternative": "https://neetcode.io/problems/foreign-dictionary/question"
-    },
-    {
-      "id": 271,
-      "slug": "encode-and-decode-strings",
-      "title": "Encode and Decode Strings",
-      "paid_only": true,
-      "alternative": "https://neetcode.io/problems/string-encode-and-decode/question"
-    },
-    {
-      "id": 286,
-      "slug": "walls-and-gates",
-      "title": "Walls and Gates",
-      "paid_only": true,
-      "alternative": "https://neetcode.io/problems/islands-and-treasure/question"
-    },
-    {
-      "id": 323,
-      "slug": "number-of-connected-components-in-an-undirected-graph",
-      "title": "Number of Connected Components in an Undirected Graph",
-      "paid_only": true,
-      "alternative": "https://neetcode.io/problems/count-connected-components/question"
-    },
-    {
       "id": 325,
       "slug": "maximum-size-subarray-sum-equals-k",
       "title": "Maximum Size Subarray Sum Equals k",
@@ -232,6 +197,12 @@
       "paid_only": true
     },
     {
+      "id": 261,
+      "slug": "graph-valid-tree",
+      "title": "Graph Valid Tree",
+      "paid_only": true
+    },
+    {
       "id": 265,
       "slug": "paint-house-ii",
       "title": "Paint House II",
@@ -244,9 +215,21 @@
       "paid_only": true
     },
     {
+      "id": 269,
+      "slug": "alien-dictionary",
+      "title": "Alien Dictionary",
+      "paid_only": true
+    },
+    {
       "id": 270,
       "slug": "closest-binary-search-tree-value",
       "title": "Closest Binary Search Tree Value",
+      "paid_only": true
+    },
+    {
+      "id": 271,
+      "slug": "encode-and-decode-strings",
+      "title": "Encode and Decode Strings",
       "paid_only": true
     },
     {
@@ -283,6 +266,12 @@
       "id": 285,
       "slug": "inorder-successor-in-bst",
       "title": "Inorder Successor in BST",
+      "paid_only": true
+    },
+    {
+      "id": 286,
+      "slug": "walls-and-gates",
+      "title": "Walls and Gates",
       "paid_only": true
     },
     {
@@ -361,6 +350,12 @@
       "id": 320,
       "slug": "generalized-abbreviation",
       "title": "Generalized Abbreviation",
+      "paid_only": true
+    },
+    {
+      "id": 323,
+      "slug": "number-of-connected-components-in-an-undirected-graph",
+      "title": "Number of Connected Components in an Undirected Graph",
       "paid_only": true
     },
     {

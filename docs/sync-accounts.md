@@ -19,7 +19,7 @@ The public profile's total must equal the number of unique solved slugs before a
 
 Every observed slug is retained, including unmatched questions. A catalogue addition or repeated check does not import old activity or undo a later manual uncheck. A failed transaction rolls back the observed keys and progress together. An account change, pause or disconnect cancels in-flight writes through the binding version and row lock. GFG can match native GFG URLs and reviewed free replacements, never merely similar titles.
 
-NeetCode, HackerRank and CodeChef remain manual in this release, as selected. Their questions and free destinations remain available; use the question checkbox after solving them. No dummy username connections or unsupported automatic-sync promises are offered.
+HackerRank and CodeChef remain manual in this release, as selected. Their questions and free destinations remain available; use the question checkbox after solving them. No dummy username connections or unsupported automatic-sync promises are offered.
 
 ## Checks
 

@@ -54,7 +54,7 @@ try {
   for (let i = 0; i < 8; i++) {
     const problem =
       i === 6
-        ? "walls-and-gates"
+        ? "meeting-rooms-ii"
         : i === 7
           ? "robot-room-cleaner"
           : slug + "-" + i;
@@ -86,6 +86,28 @@ try {
         [snapshot, company, id],
       );
   }
+  const neetcode = (
+    await c.query(
+      "insert into public.platforms(slug,name,base_url) values('neetcode','NeetCode','https://neetcode.io') on conflict(slug) do update set name=excluded.name returning id",
+    )
+  ).rows[0].id;
+  const withdrawnIds = [];
+  for (const [p, url] of [
+    [platform, "https://leetcode.com/problems/walls-and-gates/"],
+    [neetcode, "https://neetcode.io/problems/" + slug + "/question"],
+  ]) {
+    const id = (
+      await c.query(
+        "insert into public.questions(platform_id,external_id,canonical_url,title,difficulty,is_listed) values($1,$2,$3,'Withdrawn question','medium',true) returning id",
+        [p, randomUUID(), url],
+      )
+    ).rows[0].id;
+    withdrawnIds.push(id);
+    await c.query(
+      "insert into public.user_question_state(user_id,question_id,status,confidence,next_revision_at,updated_at) values($1,$2,'solved',1,now()-interval '50 days',now()+interval '1 day')",
+      [first, id],
+    );
+  }
   await c.query(
     "insert into public.user_question_state(user_id,question_id,status,confidence,next_revision_at) values($1,$2,'attempted',4,now()-interval '40 days')",
     [second, ids[4]],
@@ -104,6 +126,12 @@ try {
   const result = await dashboardPractice(measured);
   assert.equal(reads, 1, "Recent and due rows use one read");
   assert.equal(result.recent.length, 5);
+  assert.ok(
+    ![...result.recent, ...result.revisions].some((row) =>
+      withdrawnIds.includes(row.id),
+    ),
+    "NeetCode and withdrawn alternatives stay out of dashboard queues",
+  );
   assert.equal(result.revisions.length, 3);
   assert.deepEqual(
     result.revisions.map((row) => row.id),
@@ -124,13 +152,13 @@ try {
   );
   assert.equal(
     result.recent[0].title,
-    "Islands and Treasure",
+    "Meeting Rooms II",
     "Free alternatives keep the reviewed title/link",
   );
   assert.equal(result.recent[0].id, ids[6]);
   assert.equal(
     result.recent[0].canonical_url,
-    "https://neetcode.io/problems/islands-and-treasure/question",
+    "https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1",
   );
   assert.ok(
     ![...result.recent, ...result.revisions].some((row) =>
