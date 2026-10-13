@@ -2,7 +2,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
   Building2,
   Check,
   ChevronDown,
@@ -12,7 +11,8 @@ import {
 } from "lucide-react";
 import { useClientSession } from "@/components/auth/client-session";
 import { prepYardCollections } from "@/features/patterns/collections.mjs";
-import { PracticePreview } from "@/components/landing/practice-preview";
+import { LandingHero } from "@/components/landing/landing-hero";
+import { LANDING_MOTION_STYLE } from "@/components/landing/landing-motion";
 
 const features = [
   {
@@ -37,56 +37,24 @@ const features = [
   },
 ];
 export function LandingPage({ patternCount }: { patternCount: number }) {
-  const { user } = useClientSession();
+  const { user, loading } = useClientSession();
+  const guestMotion = !loading && !user;
   const startHref = user ? "/dashboard" : "/signup";
   const startLabel = user ? "Go to dashboard" : "Create free account";
   return (
-    <div className="prepyard-landing">
-      <section
-        className="yard-hero yard-container"
-        aria-labelledby="yard-hero-title"
-      >
-        <div className="yard-hero-copy">
-          <p className="yard-eyebrow">
-            <span aria-hidden="true" /> Free coding interview preparation
-          </p>
-          <h1 id="yard-hero-title">
-            A clearer path to your <span>next interview.</span>
-          </h1>
-          <p className="yard-hero-description">
-            Choose the right questions. Learn the patterns. Keep your notes and
-            revisions in one place. PrepYard makes daily practice easier to
-            follow.
-          </p>
-          <div className="yard-hero-actions">
-            <Link className="yard-button yard-button-primary" href={startHref}>
-              {startLabel} <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-            <a
-              className="yard-button yard-button-secondary"
-              href="#how-it-works"
-            >
-              See how it works <ArrowUpRight size={17} aria-hidden="true" />
-            </a>
-          </div>
-          <p className="yard-hero-note">
-            Free with an account. Your progress stays with you.
-          </p>
-          <ul className="yard-hero-highlights" aria-label="Practice tools">
-            <li>
-              <Check size={15} aria-hidden="true" /> Company questions
-            </li>
-            <li>
-              <Check size={15} aria-hidden="true" /> {patternCount} pattern
-              groups
-            </li>
-            <li>
-              <Check size={15} aria-hidden="true" /> Private notes
-            </li>
-          </ul>
-        </div>
-        <PracticePreview signedIn={Boolean(user)} />
-      </section>
+    <div
+      className={["prepyard-landing", guestMotion && "is-guest-landing"]
+        .filter(Boolean)
+        .join(" ")}
+      style={guestMotion ? LANDING_MOTION_STYLE : undefined}
+    >
+      <LandingHero
+        patternCount={patternCount}
+        signedIn={Boolean(user)}
+        startHref={startHref}
+        startLabel={startLabel}
+        animate={guestMotion}
+      />
 
       <section
         id="features"

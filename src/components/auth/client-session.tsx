@@ -49,13 +49,18 @@ function SessionState({
     { scope, changes: false },
   );
   const user = data?.user?.id ? data.user : null;
+  const deferLandingUntilSessionIsReady = scope === "landing" && loading;
   return (
     <Context.Provider value={{ user, loading }}>
-      <SiteHeader user={user} pending={loading} />
-      {user && scope === "workspace" && (
-        <LeetCodeSyncCoordinator userId={user.id} />
+      {!deferLandingUntilSessionIsReady && (
+        <>
+          <SiteHeader user={user} pending={loading} />
+          {user && scope === "workspace" && (
+            <LeetCodeSyncCoordinator userId={user.id} />
+          )}
+          {children}
+        </>
       )}
-      {children}
     </Context.Provider>
   );
 }

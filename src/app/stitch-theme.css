@@ -2950,41 +2950,8 @@ body:has(.prep-top-navigation) > header.prep-top-navigation {
     }
   }
 
-  .yard-hero-copy > * {
-    animation: prep-enter 760ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .yard-hero-copy > :nth-child(1) {
-    animation-delay: 60ms;
-  }
-  .yard-hero-copy > :nth-child(2) {
-    animation-delay: 160ms;
-  }
-  .yard-hero-copy > :nth-child(3) {
-    animation-delay: 260ms;
-  }
-  .yard-hero-copy > :nth-child(4) {
-    animation-delay: 360ms;
-  }
-  .yard-hero-copy > :nth-child(5) {
-    animation-delay: 440ms;
-  }
-  .yard-hero-copy > :nth-child(6) {
-    animation-delay: 520ms;
-  }
-  .yard-preview-wrap {
-    animation: prep-enter-side 900ms cubic-bezier(0.2, 0.8, 0.2, 1) 180ms both;
-  }
-  .yard-preview {
-    animation: prep-float 6s ease-in-out 1s infinite;
-  }
-  .yard-eyebrow > span {
-    animation: prep-pulse 2.2s ease-out infinite;
-  }
   .dashboard-heading {
     animation: prep-enter 680ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .yard-preview-panel:not([hidden]) {
-    animation: prep-panel-enter 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   .yard-faq-list details[open] > p {
     animation: prep-faq-open 300ms ease-out both;
