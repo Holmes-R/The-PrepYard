@@ -52,15 +52,17 @@ function SessionState({
   const deferLandingUntilSessionIsReady = scope === "landing" && loading;
   return (
     <Context.Provider value={{ user, loading }}>
-      {!deferLandingUntilSessionIsReady && (
-        <>
-          <SiteHeader user={user} pending={loading} />
-          {user && scope === "workspace" && (
-            <AccountSyncCoordinator userId={user.id} />
-          )}
-          {children}
-        </>
-      )}
+      <div
+        style={{
+          display: deferLandingUntilSessionIsReady ? "none" : "contents",
+        }}
+      >
+        <SiteHeader user={user} pending={loading} />
+        {user && scope === "workspace" && (
+          <AccountSyncCoordinator userId={user.id} />
+        )}
+        {children}
+      </div>
     </Context.Provider>
   );
 }
