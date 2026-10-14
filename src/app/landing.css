@@ -130,12 +130,45 @@ body
   padding-right: 28px;
 }
 .yard-hero {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   gap: 64px;
   align-items: center;
   padding-top: 90px;
   padding-bottom: 88px;
+}
+.yard-hero::before {
+  position: absolute;
+  z-index: -1;
+  top: 4%;
+  right: 10%;
+  width: min(56vw, 720px);
+  height: 90%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 72% 32%, #314b3a80, transparent 50%),
+    radial-gradient(ellipse at 35% 68%, #23385473, transparent 55%);
+  filter: blur(32px);
+  content: "";
+  opacity: 0;
+}
+.yard-session-signal {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #34343a;
+}
+.yard-session-signal > span {
+  display: block;
+  width: 34%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4edea300, #4edea3, #adc6ff);
+  box-shadow: 0 0 12px #4edea37a;
+  transform: translateX(-110%);
 }
 .yard-hero-copy {
   min-width: 0;
@@ -238,8 +271,32 @@ body .yard-button-secondary:hover {
 }
 .yard-preview-wrap {
   min-width: 0;
+  position: relative;
+}
+.prepyard-landing.is-guest-landing .yard-preview-wrap {
+  padding: 64px 0 70px;
+}
+.yard-motion-decorations {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+.yard-motion-orbit {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 24px;
+  left: 12%;
+  border-radius: 50%;
+  background: #4edea3;
+  box-shadow:
+    0 0 0 6px #4edea31f,
+    0 0 22px #4edea3a6;
 }
 .yard-preview {
+  position: relative;
+  z-index: 1;
   padding: 20px;
   border: 1px solid #424249;
   background: #1c1c1f;
@@ -309,6 +366,8 @@ body .yard-button-secondary:hover {
   border-bottom: 1px solid #38383d;
 }
 .yard-preview-tabs > button {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -329,6 +388,24 @@ body .yard-button-secondary:hover {
   background: #333338;
   border-color: #62626b;
   color: #f4f4f5;
+}
+.yard-preview-tabs > button > span:last-child {
+  position: relative;
+  z-index: 1;
+}
+.prepyard-landing.is-guest-landing
+  .yard-preview-tabs
+  > button[aria-selected="true"] {
+  background: transparent;
+  border-color: transparent;
+}
+.yard-preview-tab-highlight {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border: 1px solid #62626b;
+  border-radius: 8px;
+  background: #333338;
 }
 .yard-preview-panel:focus-visible {
   outline: 2px solid #adc6ff;
@@ -420,6 +497,12 @@ body .yard-button-secondary:hover {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 12px !important;
+}
+.yard-hero-word {
+  margin-right: 0.2em;
+}
+.yard-hero-highlight .yard-hero-word:last-child {
+  margin-right: 0;
 }
 body .prep-main .prepyard-landing h2 {
   font-size: clamp(28px, 3vw, 38px);
@@ -751,6 +834,9 @@ body .prep-main .prepyard-landing h3 {
   .yard-preview {
     padding: 16px;
   }
+  .prepyard-landing.is-guest-landing .yard-preview-wrap {
+    padding: 58px 0 64px;
+  }
   .yard-preview-summary strong {
     font-size: 19px;
   }
@@ -806,6 +892,526 @@ body .prep-main .prepyard-landing h3 {
     flex-wrap: wrap;
   }
 }
+@property --yard-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.yard-ambient {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.yard-ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#d7f6e70d 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(
+    ellipse at 62% 46%,
+    #000 0%,
+    #000 28%,
+    transparent 78%
+  );
+  opacity: 0.4;
+}
+.yard-ambient-orb {
+  position: absolute;
+  width: clamp(230px, 32vw, 440px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.16;
+  will-change: transform;
+}
+.yard-ambient-orb-one {
+  top: 2%;
+  right: 3%;
+  background: #4edea3;
+}
+.yard-ambient-orb-two {
+  top: 35%;
+  right: 27%;
+  width: clamp(180px, 25vw, 340px);
+  background: #287958;
+}
+.yard-ambient-orb-three {
+  right: 12%;
+  bottom: 0;
+  width: clamp(190px, 26vw, 360px);
+  background: #285345;
+}
+.yard-code-symbol {
+  position: absolute;
+  top: var(--yard-symbol-y);
+  left: var(--yard-symbol-x);
+  color: #a9d7c7;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: clamp(15px, 1.7vw, 23px);
+  opacity: 0;
+  transition: transform var(--yard-symbol-parallax-duration)
+    var(--yard-motion-ease);
+  will-change: transform, translate;
+}
+.prepyard-landing.is-guest-landing .yard-preview {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.prepyard-landing.is-guest-landing .yard-preview::before {
+  position: absolute;
+  z-index: 0;
+  inset: -1px;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--yard-border-angle),
+    transparent 0deg 255deg,
+    #4edea31c 285deg,
+    #b5f5d5b8 315deg,
+    #4edea34d 333deg,
+    transparent 360deg
+  );
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.prepyard-landing.is-guest-landing .yard-preview > * {
+  position: relative;
+  z-index: 1;
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform var(--yard-button-hover-duration) var(--yard-motion-ease),
+    background-color var(--yard-button-hover-duration) var(--yard-motion-ease),
+    box-shadow var(--yard-button-hover-duration) var(--yard-motion-ease);
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #4edea31c, transparent);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice > * {
+  position: relative;
+  z-index: 1;
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice > svg {
+  transition: transform var(--yard-button-hover-duration)
+    var(--yard-motion-ease);
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px #4edea363,
+    0 0 20px #4edea310;
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice:hover::before {
+  opacity: 0.3;
+}
+.prepyard-landing.is-guest-landing .yard-preview-choice:hover > svg {
+  transform: translateX(4px);
+}
+.prepyard-landing.is-guest-landing .yard-button-primary {
+  transition:
+    transform var(--yard-button-hover-duration) var(--yard-motion-ease),
+    box-shadow var(--yard-button-hover-duration) var(--yard-motion-ease),
+    background-color var(--yard-button-hover-duration) var(--yard-motion-ease);
+}
+.prepyard-landing.is-guest-landing .yard-button-primary:hover {
+  box-shadow: 0 0 24px #4edea340;
+}
+.prepyard-landing.is-guest-landing .yard-button-primary:active {
+  transform: scale(0.98);
+}
+.prepyard-landing.is-guest-landing .yard-button-secondary {
+  transition:
+    transform var(--yard-button-hover-duration) var(--yard-motion-ease),
+    border-color var(--yard-button-hover-duration) var(--yard-motion-ease),
+    background-color var(--yard-button-hover-duration) var(--yard-motion-ease);
+}
+.prepyard-landing.is-guest-landing .yard-button-secondary:hover {
+  border-color: #4edea36b;
+}
+.prepyard-landing.is-guest-landing .yard-button-secondary > svg {
+  transition: transform var(--yard-button-hover-duration)
+    var(--yard-motion-ease);
+}
+.prepyard-landing.is-guest-landing .yard-button-secondary:hover > svg {
+  transform: translate(3px, -3px);
+}
+.prepyard-landing.is-guest-landing .yard-eyebrow > span {
+  position: relative;
+  animation: yard-dot-breathe var(--yard-hero-dot-pulse-duration) ease-in-out
+    infinite;
+}
+.prepyard-landing.is-guest-landing .yard-eyebrow > span::after {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid #4edea37a;
+  border-radius: 50%;
+  content: "";
+  animation: yard-dot-ring var(--yard-hero-dot-pulse-duration) ease-out infinite;
+}
+.prepyard-landing.is-guest-landing .yard-hero-word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(7px);
+  animation: yard-word-reveal var(--yard-hero-word-duration)
+    var(--yard-motion-ease) var(--yard-word-delay) both;
+}
+.prepyard-landing.is-guest-landing .yard-hero-highlight {
+  color: inherit;
+}
+.prepyard-landing.is-guest-landing .yard-hero-highlight .yard-hero-word {
+  background: linear-gradient(100deg, #a9d7c7 20%, #e1f7eb 48%, #a9d7c7 76%);
+  background-size: 220% 100%;
+  background-clip: text;
+  color: transparent;
+  animation-name: yard-word-reveal, yard-highlight-glide;
+  animation-duration:
+    var(--yard-hero-word-duration), var(--yard-hero-shimmer-duration);
+  animation-timing-function: var(--yard-motion-ease), ease-in-out;
+  animation-delay: var(--yard-word-delay), var(--yard-hero-shimmer-delay);
+  animation-fill-mode: both, none;
+  animation-iteration-count: 1, infinite;
+}
+.prepyard-landing.is-guest-landing
+  :is(
+    .yard-eyebrow,
+    .yard-hero-description,
+    .yard-hero-actions,
+    .yard-hero-note,
+    .yard-hero-highlights
+  ) {
+  opacity: 0;
+  animation: yard-hero-rise var(--yard-hero-entry-duration)
+    var(--yard-motion-ease) var(--yard-entry-delay) both;
+}
+.prep-landing-navigation.is-guest-landing-nav {
+  position: sticky;
+  top: 0;
+  transition:
+    background-color var(--yard-navbar-transition) var(--yard-motion-ease),
+    border-color var(--yard-navbar-transition) var(--yard-motion-ease),
+    box-shadow var(--yard-navbar-transition) var(--yard-motion-ease),
+    backdrop-filter var(--yard-navbar-transition) var(--yard-motion-ease);
+}
+.prep-landing-navigation.is-guest-landing-nav.is-scrolled {
+  border-bottom-color: #4edea34d;
+  background: #131314e8;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px #0003;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .prepyard-landing.is-guest-landing .yard-hero::before {
+    opacity: 0.8;
+    animation: yard-aurora-drift var(--yard-aurora-duration) ease-in-out
+      infinite alternate;
+  }
+  .prepyard-landing.is-guest-landing .yard-ambient-orb {
+    animation: yard-orb-drift var(--yard-background-orb-duration) ease-in-out
+      infinite alternate;
+  }
+  .prepyard-landing.is-guest-landing .yard-ambient-orb-two {
+    animation-delay: var(--yard-background-orb-delay-2);
+  }
+  .prepyard-landing.is-guest-landing .yard-ambient-orb-three {
+    animation-delay: var(--yard-background-orb-delay-3);
+  }
+  .prepyard-landing.is-guest-landing .yard-code-symbol {
+    animation: yard-symbol-drift var(--yard-symbol-cycle-duration) ease-in-out
+      infinite;
+    animation-delay: var(--yard-symbol-delay);
+  }
+  .prepyard-landing.is-guest-landing .yard-session-signal > span {
+    animation: yard-session-sweep var(--yard-preview-signal-duration)
+      cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .prepyard-landing.is-guest-landing .yard-motion-orbit {
+    animation: yard-orbit-pulse var(--yard-preview-orbit-duration) ease-in-out
+      infinite;
+  }
+  .prepyard-landing.is-guest-landing .yard-preview {
+    animation: yard-preview-float var(--yard-preview-float-duration) ease-in-out
+      var(--yard-preview-float-delay) infinite;
+  }
+  .prepyard-landing.is-guest-landing .yard-preview::before {
+    opacity: 1;
+    animation: yard-border-sweep var(--yard-preview-border-duration) linear
+      infinite;
+  }
+  .prepyard-landing.is-guest-landing .yard-feature-icon {
+    animation: yard-icon-breathe var(--yard-feature-breathe-duration)
+      ease-in-out infinite;
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-feature:nth-child(2)
+    .yard-feature-icon {
+    animation-delay: var(--yard-feature-delay-2);
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-feature:nth-child(3)
+    .yard-feature-icon {
+    animation-delay: var(--yard-feature-delay-3);
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-feature:nth-child(4)
+    .yard-feature-icon {
+    animation-delay: var(--yard-feature-delay-4);
+  }
+  .prepyard-landing.is-guest-landing .yard-step-number {
+    animation: yard-step-beacon var(--yard-step-beacon-duration) ease-in-out
+      infinite;
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-steps
+    > li:nth-child(2)
+    .yard-step-number {
+    animation-delay: var(--yard-step-delay-2);
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-steps
+    > li:nth-child(3)
+    .yard-step-number {
+    animation-delay: var(--yard-step-delay-3);
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-collection-heading
+    > span:first-child {
+    animation: yard-number-glow var(--yard-number-glow-duration) ease-in-out
+      infinite;
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-collection:nth-child(2)
+    .yard-collection-heading
+    > span:first-child {
+    animation-delay: var(--yard-collection-delay-2);
+  }
+  .prepyard-landing.is-guest-landing
+    .yard-collection:nth-child(3)
+    .yard-collection-heading
+    > span:first-child {
+    animation-delay: var(--yard-collection-delay-3);
+  }
+  .prepyard-landing.is-guest-landing .yard-preview-choice::before {
+    animation: yard-row-scan var(--yard-preview-scanner-duration) ease-in-out
+      infinite;
+    animation-delay: var(--yard-row-scan-delay);
+  }
+  body.has-scroll-reveal
+    .prepyard-landing.is-guest-landing
+    :is(
+      .yard-section-heading,
+      .yard-feature,
+      .yard-collection,
+      .yard-steps > li,
+      .yard-faq-list > details,
+      .yard-closing
+    ) {
+    opacity: 0;
+    transform: translateY(var(--yard-section-reveal-offset));
+    filter: none;
+  }
+  body.has-scroll-reveal
+    .prepyard-landing.is-guest-landing
+    :is(
+      .yard-section-heading,
+      .yard-feature,
+      .yard-collection,
+      .yard-steps > li,
+      .yard-faq-list > details,
+      .yard-closing
+    ).is-scroll-visible {
+    animation: yard-section-reveal var(--yard-section-reveal-duration)
+      var(--yard-motion-ease) both;
+  }
+}
+
+@keyframes yard-aurora-drift {
+  from {
+    transform: translate3d(3%, -2%, 0) scale(0.94);
+  }
+  to {
+    transform: translate3d(-5%, 4%, 0) scale(1.08);
+  }
+}
+@keyframes yard-orb-drift {
+  from {
+    transform: translate3d(-4%, 2%, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(5%, -4%, 0) scale(1.04);
+  }
+}
+@keyframes yard-symbol-drift {
+  0%,
+  10% {
+    translate: 0 7px;
+    opacity: 0;
+  }
+  18%,
+  66% {
+    translate: 0 0;
+    opacity: 0.24;
+  }
+  78%,
+  100% {
+    translate: 0 -9px;
+    opacity: 0;
+  }
+}
+@keyframes yard-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes yard-word-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@keyframes yard-dot-breathe {
+  0%,
+  100% {
+    transform: scale(0.86);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+@keyframes yard-dot-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.3);
+  }
+}
+@keyframes yard-preview-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 var(--yard-preview-float-distance);
+  }
+}
+@keyframes yard-border-sweep {
+  to {
+    --yard-border-angle: 360deg;
+  }
+}
+@keyframes yard-session-sweep {
+  0%,
+  12% {
+    transform: translateX(-110%);
+  }
+  72%,
+  100% {
+    transform: translateX(330%);
+  }
+}
+@keyframes yard-highlight-glide {
+  0%,
+  20% {
+    background-position: 100% 50%;
+  }
+  65%,
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes yard-icon-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes yard-step-beacon {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 #4edea300;
+  }
+  50% {
+    box-shadow: 0 0 0 5px #4edea31c;
+  }
+}
+@keyframes yard-number-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 #4edea300;
+  }
+  50% {
+    text-shadow: 0 0 14px #4edea36b;
+  }
+}
+@keyframes yard-orbit-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+@keyframes yard-row-scan {
+  0%,
+  22%,
+  100% {
+    opacity: 0;
+  }
+  30%,
+  42% {
+    opacity: 0.48;
+  }
+}
+@keyframes yard-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--yard-section-reveal-offset));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   body
     :is(.prep-landing-navigation, .prepyard-landing)
@@ -814,5 +1420,83 @@ body .prep-main .prepyard-landing h3 {
   }
   .yard-button:active {
     transform: none;
+  }
+  .prepyard-landing.is-guest-landing
+    :is(
+      .yard-hero::before,
+      .yard-ambient-orb,
+      .yard-code-symbol,
+      .yard-eyebrow > span,
+      .yard-eyebrow > span::after,
+      .yard-hero-word,
+      .yard-hero-highlight,
+      .yard-eyebrow,
+      .yard-hero-description,
+      .yard-hero-actions,
+      .yard-hero-note,
+      .yard-hero-highlights,
+      .yard-preview-wrap,
+      .yard-preview,
+      .yard-preview::before,
+      .yard-preview-choice::before,
+      .yard-session-signal > span,
+      .yard-feature-icon,
+      .yard-step-number,
+      .yard-collection-heading > span:first-child,
+      .yard-motion-orbit
+    ) {
+    animation: none !important;
+    transition: none !important;
+  }
+  .prepyard-landing.is-guest-landing .yard-hero-word {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .prepyard-landing.is-guest-landing .yard-hero-highlight {
+    background: none;
+    color: #a9d7c7;
+  }
+  .prepyard-landing.is-guest-landing .yard-hero-highlight .yard-hero-word {
+    background: none;
+    color: #a9d7c7;
+  }
+  .prepyard-landing.is-guest-landing
+    :is(
+      .yard-eyebrow,
+      .yard-hero-description,
+      .yard-hero-actions,
+      .yard-hero-note,
+      .yard-hero-highlights
+    ) {
+    opacity: 1;
+    transform: none;
+  }
+  .prepyard-landing.is-guest-landing .yard-preview {
+    transform: none !important;
+    translate: none !important;
+    will-change: auto;
+  }
+  .prepyard-landing.is-guest-landing .yard-preview-choice:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .prepyard-landing.is-guest-landing .yard-preview-choice:hover > svg,
+  .prepyard-landing.is-guest-landing .yard-button-secondary:hover > svg {
+    transform: none;
+  }
+  body.has-scroll-reveal
+    .prepyard-landing.is-guest-landing
+    :is(
+      .yard-section-heading,
+      .yard-feature,
+      .yard-collection,
+      .yard-steps > li,
+      .yard-faq-list > details,
+      .yard-closing
+    ) {
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 }

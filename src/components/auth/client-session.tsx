@@ -49,13 +49,20 @@ function SessionState({
     { scope, changes: false },
   );
   const user = data?.user?.id ? data.user : null;
+  const deferLandingUntilSessionIsReady = scope === "landing" && loading;
   return (
     <Context.Provider value={{ user, loading }}>
-      <SiteHeader user={user} pending={loading} />
-      {user && scope === "workspace" && (
-        <AccountSyncCoordinator userId={user.id} />
-      )}
-      {children}
+      <div
+        style={{
+          display: deferLandingUntilSessionIsReady ? "none" : "contents",
+        }}
+      >
+        <SiteHeader user={user} pending={loading} />
+        {user && scope === "workspace" && (
+          <AccountSyncCoordinator userId={user.id} />
+        )}
+        {children}
+      </div>
     </Context.Provider>
   );
 }
