@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { ClientSession } from "@/components/auth/client-session";
+import { SiteBackground } from "@/components/background/site-background";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import "./client-loading.css";
 import "./globals.css";
+import "./site-background.css";
 import "./launch-theme.css";
 import "./stitch-theme.css";
 import "./control-theme.css";
@@ -38,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
+        <SiteBackground />
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
