@@ -19,21 +19,18 @@ export function LandingHero({
   startHref,
   startLabel,
   animate,
-  showAmbientBackground = true,
 }: {
   patternCount: number;
   signedIn: boolean;
   startHref: string;
   startLabel: string;
   animate: boolean;
-  showAmbientBackground?: boolean;
 }) {
   const backgroundRef = useRef<HTMLDivElement>(null);
 
   function moveBackground(event: PointerEvent<HTMLElement>) {
     if (
       !animate ||
-      !showAmbientBackground ||
       event.pointerType !== "mouse" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
@@ -57,9 +54,7 @@ export function LandingHero({
       aria-labelledby="yard-hero-title"
       onPointerMove={moveBackground}
     >
-      {animate && showAmbientBackground && (
-        <LandingBackground containerRef={backgroundRef} />
-      )}
+      {animate && <LandingBackground containerRef={backgroundRef} />}
       <div className="yard-hero-copy">
         <p
           className="yard-eyebrow"

@@ -125,7 +125,7 @@ The public front door.
 - The main button adapts to your session: "Create free account" when signed out, "Go to dashboard" when signed in.
 - An interactive preview with Topics / Patterns / Companies tabs (Arrow keys, Home and End navigate them), each listing four curated destinations; guests are sent to sign-in with the destination preserved.
 - A feature grid, three collection guides, a three-step "How it works", and keyboard-accessible FAQ accordions.
-- A continuous particle background behind the landing content, using projected 3D depth and the charcoal/mint/blue theme. Normal page scrolling expands the particles horizontally, slightly enlarges them, and strengthens the subtle gradient. The canvas does not intercept clicks or scrolling. Its renderer is loaded separately, capped at 30 fps and 1.5× pixel density, and uses fewer particles on mobile. It pauses in hidden tabs, supports a small pause/resume control, and shows a still background for reduced-motion users. Animation frames and listeners are removed when leaving the landing page. No additional graphics dependency or configuration is required.
+- Guest landing animations include a staggered headline, ambient code symbols and gradient orbs, an interactive practice preview, and subtle section and navigation effects. Reduced-motion preferences are respected.
 
 ### Log in — `/login`
 

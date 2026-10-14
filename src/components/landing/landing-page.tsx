@@ -12,7 +12,6 @@ import {
 import { useClientSession } from "@/components/auth/client-session";
 import { prepYardCollections } from "@/features/patterns/collections.mjs";
 import { LandingHero } from "@/components/landing/landing-hero";
-import { LandingParticles } from "@/components/landing/landing-particles";
 import { LANDING_MOTION_STYLE } from "@/components/landing/landing-motion";
 
 const features = [
@@ -49,14 +48,12 @@ export function LandingPage({ patternCount }: { patternCount: number }) {
         .join(" ")}
       style={guestMotion ? LANDING_MOTION_STYLE : undefined}
     >
-      <LandingParticles />
       <LandingHero
         patternCount={patternCount}
         signedIn={Boolean(user)}
         startHref={startHref}
         startLabel={startLabel}
         animate={guestMotion}
-        showAmbientBackground={false}
       />
 
       <section
