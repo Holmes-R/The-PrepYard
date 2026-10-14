@@ -13,6 +13,7 @@ import {
 import { useClientSession } from "@/components/auth/client-session";
 import { prepYardCollections } from "@/features/patterns/collections.mjs";
 import { PracticePreview } from "@/components/landing/practice-preview";
+import { LandingParticles } from "@/components/landing/landing-particles";
 
 const features = [
   {
@@ -42,6 +43,7 @@ export function LandingPage({ patternCount }: { patternCount: number }) {
   const startLabel = user ? "Go to dashboard" : "Create free account";
   return (
     <div className="prepyard-landing">
+      <LandingParticles />
       <section
         className="yard-hero yard-container"
         aria-labelledby="yard-hero-title"

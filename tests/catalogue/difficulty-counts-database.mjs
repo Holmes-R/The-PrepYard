@@ -14,7 +14,7 @@ if (
   !target.pathname.endsWith("_test")
 )
   throw Error("Use a migrated isolated loopback _test database.");
-const c = new pg.Client({ connectionString: target.href });
+const c = new pg.Client({ connectionString: target.href }) ;
 try {
   await c.connect();
   await c.query("begin");

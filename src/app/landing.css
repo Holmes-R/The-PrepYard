@@ -110,6 +110,8 @@ body
   outline-offset: 4px;
 }
 .prepyard-landing {
+  position: relative;
+  isolation: isolate;
   --yard-muted: #b7b7c0;
   color: #f4f4f5;
   font-size: 16px;
@@ -813,6 +815,72 @@ body .prep-main .prepyard-landing h3 {
     transition: none;
   }
   .yard-button:active {
+    transform: none;
+  }
+}
+
+/* Decorative viewport backdrop stays behind every landing-page section. */
+.yard-particle-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: #131314;
+  background-image: linear-gradient(
+    100deg,
+    rgba(169, 215, 199, 0.025),
+    rgba(166, 200, 255, 0.025)
+  );
+}
+.yard-particle-canvas,
+.yard-particle-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.yard-particle-canvas {
+  opacity: 0.72;
+}
+.yard-particle-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(19, 19, 20, 0.15),
+    transparent 45%,
+    rgba(19, 19, 20, 0.22)
+  );
+}
+.prepyard-landing {
+  background: transparent;
+}
+.prepyard-landing .yard-collections-section {
+  background: rgba(23, 23, 25, 0.88);
+}
+.yard-particle-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid #414148;
+  border-radius: 8px;
+  background: #232326;
+  color: #f4f4f5;
+  cursor: pointer;
+}
+.yard-particle-toggle:hover {
+  background: #303035;
+}
+.yard-particle-toggle:active {
+  transform: translateY(1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .yard-particle-toggle:active {
     transform: none;
   }
 }
