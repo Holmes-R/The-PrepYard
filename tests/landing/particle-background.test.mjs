@@ -148,3 +148,15 @@ test("unsupported canvas uses the CSS fallback", () => {
   const state = setup();
   assert.equal(state.create({ getContext: () => null }), null);
 });
+
+test("a canvas initially hidden by session loading can initialize when revealed", () => {
+  const state = setup(0);
+  assert.equal(state.canvas.width, 0);
+  assert.equal(state.draws, 0);
+  state.canvas.parentElement.clientWidth = 1024;
+  state.controller.resize();
+  assert.equal(state.canvas.width, 1536);
+  assert.equal(state.draws, 1);
+  assert.equal(state.points.length, 1300);
+  assert.equal(state.scheduled.size, 0);
+});

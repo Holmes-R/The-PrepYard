@@ -60,6 +60,14 @@ export function LandingParticles() {
       });
     };
 
+    // The session wrapper can reveal the landing page without a window resize.
+    const host = canvasRef.current?.parentElement;
+    const sizeObserver =
+      host && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(resize)
+        : null;
+    if (host) sizeObserver?.observe(host);
+
     // Only decorative code is deferred; the landing content renders immediately.
     void import("@/lib/landing/particle-background")
       .then(({ createParticleBackground }) => {
@@ -82,6 +90,7 @@ export function LandingParticles() {
     document.addEventListener("pointerleave", leave);
     return () => {
       disposed = true;
+      sizeObserver?.disconnect();
       document.removeEventListener("visibilitychange", visibility);
       window.removeEventListener("scroll", scroll);
       window.removeEventListener("resize", resize);

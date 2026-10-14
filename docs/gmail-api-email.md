@@ -39,7 +39,7 @@ https://developers.google.com/oauthplayground
 1. Open Google's [OAuth Playground](https://developers.google.com/oauthplayground/).
 2. In its settings, enable **Use your own OAuth credentials** and enter the client ID and secret from step 3. Keep the Google server-side flow, access type **Offline**, and force prompt **Consent Screen**.
 3. Enter the send-only scope from step 2 and authorize it **as the PrepYard sender mailbox**, not another Google account.
-4. Read and complete Google's consent flow yourse`xlf. This grants the sender access; no student should complete this step. If Google blocks authorization, resolve its console requirements rather than changing scopes or weakening account protections.
+4. Read and complete Google's consent flow yourself. This grants the sender access; no student should complete this step. If Google blocks authorization, resolve its console requirements rather than changing scopes or weakening account protections.
 5. In Playground Step 2, exchange the authorization code and copy the **Refresh token** privately. Store that as `GMAIL_REFRESH_TOKEN` in Render.
 
 Use your own client credentials: tokens made with Playground's shared client are revoked after 24 hours. Store the refresh token, not the short-lived access token. If you authorize while the project is in Testing, obtain a fresh refresh token after its publishing status is changed. Tokens can also be revoked after account/security changes, so they are not guaranteed to last forever.

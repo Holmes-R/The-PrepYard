@@ -17,6 +17,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
+import {
+  LANDING_MOTION,
+  LANDING_NAV_STYLE,
+} from "@/components/landing/landing-motion";
 
 const links = [
   { href: "/dashboard", title: "Dashboard", icon: LayoutDashboard },
@@ -149,6 +153,7 @@ export function SiteHeader({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -162,6 +167,16 @@ export function SiteHeader({
   ].includes(pathname);
   const name = user?.name || user?.email?.split("@")[0] || "Your account";
   const quickSearchEnabled = !authPage && pathname !== "/";
+  const guestLanding = pathname === "/" && !pending && !user;
+  useEffect(() => {
+    if (!guestLanding) return;
+    const updateScrollState = () => {
+      setIsScrolled(window.scrollY > LANDING_MOTION.navbar.scrollThresholdPx);
+    };
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrollState);
+  }, [guestLanding]);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (
@@ -257,7 +272,16 @@ export function SiteHeader({
       </div>
     );
     return (
-      <header className="prep-landing-navigation">
+      <header
+        className={[
+          "prep-landing-navigation",
+          guestLanding && "is-guest-landing-nav",
+          guestLanding && isScrolled && "is-scrolled",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={guestLanding ? LANDING_NAV_STYLE : undefined}
+      >
         <div className="yard-header-inner">
           {brand}
           <div className="yard-header-desktop">

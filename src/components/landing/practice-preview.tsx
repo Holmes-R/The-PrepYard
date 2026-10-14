@@ -1,7 +1,20 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import Link from "next/link";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useSpring,
+} from "framer-motion";
 import {
   ArrowRight,
   Building2,
@@ -9,8 +22,12 @@ import {
   Layers3,
   LockKeyhole,
 } from "lucide-react";
+import {
+  LANDING_MOTION,
+  landingRowStyle,
+  useLandingReducedMotion,
+} from "@/components/landing/landing-motion";
 
-// Public, curated starting points. Account data stays behind authentication.
 const categories = [
   {
     key: "topics",
@@ -57,14 +74,14 @@ const categories = [
         href: "/patterns/sliding-window",
       },
       {
-        name: "Prefix Sum",
-        detail: "Answer range-sum queries efficiently",
-        href: "/patterns/prefix-sum",
-      },
-      {
-        name: "Modified Binary Search",
+        name: "Binary Search",
         detail: "Narrow the search space step by step",
         href: "/patterns/modified-binary-search",
+      },
+      {
+        name: "Fast & Slow Pointers",
+        detail: "Find cycles and work through linked structures",
+        href: "/patterns/fast-and-slow-pointer",
       },
     ],
   },
@@ -90,19 +107,75 @@ const categories = [
         href: "/companies/microsoft",
       },
       {
-        name: "Adobe",
+        name: "Meta",
         detail: "Explore company interview questions",
-        href: "/companies/adobe",
+        href: "/companies/meta",
       },
     ],
   },
 ] as const;
 
-export function PracticePreview({ signedIn }: { signedIn: boolean }) {
+export function PracticePreview({
+  signedIn,
+  animate = false,
+}: {
+  signedIn: boolean;
+  animate?: boolean;
+}) {
   const [selected, setSelected] = useState(0);
+  const [paused, setPaused] = useState(false);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const activityTimeout = useRef<number | null>(null);
   const id = useId();
+  const reducedMotion = useLandingReducedMotion();
+  const tiltXValue = useMotionValue(0);
+  const tiltYValue = useMotionValue(0);
+  const tiltX = useSpring(tiltXValue, LANDING_MOTION.preview.tiltSpring);
+  const tiltY = useSpring(tiltYValue, LANDING_MOTION.preview.tiltSpring);
   const Icon = categories[selected].icon;
+
+  useEffect(() => {
+    if (!animate || reducedMotion || paused) return;
+    const timer = window.setInterval(() => {
+      setSelected((current) => (current + 1) % categories.length);
+    }, LANDING_MOTION.preview.autoAdvanceMs);
+    return () => window.clearInterval(timer);
+  }, [animate, paused, reducedMotion]);
+
+  useEffect(
+    () => () => {
+      if (activityTimeout.current) window.clearTimeout(activityTimeout.current);
+    },
+    [],
+  );
+
+  function pauseForInteraction() {
+    if (!animate || reducedMotion) return;
+    setPaused(true);
+    if (activityTimeout.current) window.clearTimeout(activityTimeout.current);
+    activityTimeout.current = window.setTimeout(() => {
+      setPaused(false);
+      activityTimeout.current = null;
+    }, LANDING_MOTION.preview.resumeAfterMs);
+  }
+
+  function tiltPreview(event: PointerEvent<HTMLElement>) {
+    if (!animate || reducedMotion || event.pointerType !== "mouse") {
+      return;
+    }
+    pauseForInteraction();
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    const tiltRange = LANDING_MOTION.preview.tiltMaxDegrees * 2;
+    tiltXValue.set(y * -tiltRange);
+    tiltYValue.set(x * tiltRange);
+  }
+
+  function resetTilt() {
+    tiltXValue.set(0);
+    tiltYValue.set(0);
+  }
 
   function navigateTabs(
     event: KeyboardEvent<HTMLButtonElement>,
@@ -126,13 +199,33 @@ export function PracticePreview({ signedIn }: { signedIn: boolean }) {
         return;
     }
     event.preventDefault();
+    pauseForInteraction();
     setSelected(next);
     tabs.current[next]?.focus();
   }
 
   return (
     <div className="yard-preview-wrap">
-      <section className="yard-preview" aria-label="Explore PrepYard practice">
+      {animate && (
+        <div className="yard-motion-decorations" aria-hidden="true">
+          <span className="yard-motion-orbit" />
+        </div>
+      )}
+      <motion.section
+        className="yard-preview"
+        aria-label="Explore PrepYard practice"
+        style={{
+          transformPerspective: 1100,
+          rotateX: reducedMotion ? 0 : tiltX,
+          rotateY: reducedMotion ? 0 : tiltY,
+        }}
+        onPointerEnter={pauseForInteraction}
+        onPointerMove={tiltPreview}
+        onPointerLeave={resetTilt}
+        onClickCapture={pauseForInteraction}
+        onFocusCapture={pauseForInteraction}
+        onKeyDownCapture={pauseForInteraction}
+      >
         <div className="yard-preview-top">
           <div>
             <Code2 size={18} aria-hidden="true" />
@@ -140,6 +233,11 @@ export function PracticePreview({ signedIn }: { signedIn: boolean }) {
           </div>
           <span>Interactive preview</span>
         </div>
+        {animate && (
+          <div className="yard-session-signal" aria-hidden="true">
+            <span />
+          </div>
+        )}
         <div className="yard-preview-summary">
           <div>
             <span>Choose your focus</span>
@@ -169,50 +267,87 @@ export function PracticePreview({ signedIn }: { signedIn: boolean }) {
               onClick={() => setSelected(index)}
               onKeyDown={(event) => navigateTabs(event, index)}
             >
-              {category.label}
+              {selected === index && (
+                <motion.span
+                  className="yard-preview-tab-highlight"
+                  layoutId="yard-preview-tab-highlight"
+                  transition={{
+                    duration: reducedMotion
+                      ? 0
+                      : LANDING_MOTION.preview.tabTransitionMs / 1000,
+                    ease: LANDING_MOTION.easing,
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+              <span>{category.label}</span>
             </button>
           ))}
         </div>
-        {categories.map((category, index) => {
-          const ItemIcon = category.icon;
-          return (
-            <div
-              key={category.key}
-              className="yard-preview-panel"
-              role="tabpanel"
-              id={`${id}-panel-${category.key}`}
-              aria-labelledby={`${id}-tab-${category.key}`}
-              hidden={selected !== index}
-              tabIndex={0}
-            >
-              <p className="yard-preview-label">{category.heading}</p>
-              <ul className="yard-preview-choices">
-                {category.items.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      className="yard-preview-choice"
-                      href={
-                        signedIn
-                          ? item.href
-                          : "/login?next=" + encodeURIComponent(item.href)
+        <AnimatePresence mode="wait" initial={false}>
+          {categories.map((category, index) => {
+            if (selected !== index) return null;
+            const ItemIcon = category.icon;
+            return (
+              <motion.div
+                key={category.key}
+                className="yard-preview-panel"
+                role="tabpanel"
+                id={`${id}-panel-${category.key}`}
+                aria-labelledby={`${id}-tab-${category.key}`}
+                tabIndex={0}
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                transition={{
+                  duration: LANDING_MOTION.preview.panelTransitionMs / 1000,
+                  ease: LANDING_MOTION.easing,
+                }}
+              >
+                <p className="yard-preview-label">{category.heading}</p>
+                <ul className="yard-preview-choices">
+                  {category.items.map((item, rowIndex) => (
+                    <motion.li
+                      key={item.href}
+                      initial={
+                        reducedMotion ? { opacity: 0 } : { opacity: 0, y: 7 }
                       }
-                      prefetch={false}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: LANDING_MOTION.preview.rowTransitionMs / 1000,
+                        delay: reducedMotion
+                          ? 0
+                          : (rowIndex * LANDING_MOTION.preview.rowStaggerMs) /
+                            1000,
+                        ease: LANDING_MOTION.easing,
+                      }}
                     >
-                      <span className="yard-preview-choice-icon">
-                        <ItemIcon size={18} aria-hidden="true" />
-                      </span>
-                      <span className="yard-preview-choice-copy">
-                        <strong>{item.name}</strong>
-                        <span>{item.detail}</span>
-                      </span>
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+                      <Link
+                        className="yard-preview-choice"
+                        href={
+                          signedIn
+                            ? item.href
+                            : "/login?next=" + encodeURIComponent(item.href)
+                        }
+                        prefetch={false}
+                        style={landingRowStyle(rowIndex)}
+                      >
+                        <span className="yard-preview-choice-icon">
+                          <ItemIcon size={18} aria-hidden="true" />
+                        </span>
+                        <span className="yard-preview-choice-copy">
+                          <strong>{item.name}</strong>
+                          <span>{item.detail}</span>
+                        </span>
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </Link>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
         <div className="yard-preview-bottom">
           <span>Curated starting points</span>
           <span>
@@ -220,7 +355,7 @@ export function PracticePreview({ signedIn }: { signedIn: boolean }) {
             {signedIn ? "Choose one to practice" : "Log in to explore"}
           </span>
         </div>
-      </section>
+      </motion.section>
       <p className="yard-preview-caption">
         Pick a category, then choose where to begin.
       </p>
