@@ -1,0 +1,95 @@
+/* The question field's wrapper owns its border and background. */
+body .prep-filter-search > .prep-search-field {
+  height: 42px;
+  background: #111113;
+  border: 1px solid #37373b;
+  border-radius: 8px;
+}
+body .prep-filter-search > .prep-search-field > input[type="search"] {
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+/* Search focus belongs to the whole field, not a second box around its input. */
+body :is(.prep-quick-search, .company-search, .prep-search-field) {
+  position: relative;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+body :is(.prep-quick-search, .company-search, .prep-search-field)::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--control-focus);
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: left;
+  pointer-events: none;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+body :is(.prep-quick-search, .company-search, .prep-search-field):hover {
+  border-color: #ffffff26;
+}
+body :is(.prep-quick-search, .company-search, .prep-search-field):focus-within {
+  outline: none;
+  box-shadow: none;
+  border-color: #ffffff40;
+  background: #222225;
+}
+body
+  :is(
+    .prep-quick-search,
+    .company-search,
+    .prep-search-field
+  ):focus-within::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+body
+  :is(.prep-quick-search, .company-search, .prep-search-field):has(
+    input:focus-visible
+  )::after {
+  height: 3px;
+}
+body :is(.prep-quick-search, .company-search, .prep-search-field) > input,
+body :is(.prep-quick-search, .company-search, .prep-search-field) > input:focus,
+body
+  :is(.prep-quick-search, .company-search, .prep-search-field)
+  > input:focus-visible {
+  outline: none;
+  border: 0;
+  box-shadow: none;
+  caret-color: var(--control-focus);
+}
+body :is(.prep-quick-search, .company-search, .prep-search-field) > svg {
+  transition: color 160ms ease;
+}
+body
+  :is(.prep-quick-search, .company-search, .prep-search-field):focus-within
+  > svg {
+  color: var(--control-focus);
+}
+@media (prefers-reduced-motion: reduce) {
+  body :is(.prep-quick-search, .company-search, .prep-search-field),
+  body :is(.prep-quick-search, .company-search, .prep-search-field)::after,
+  body :is(.prep-quick-search, .company-search, .prep-search-field) > svg {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  body
+    :is(.prep-quick-search, .company-search, .prep-search-field):focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+  body :is(.prep-quick-search, .company-search, .prep-search-field)::after {
+    background: Highlight;
+  }
+}

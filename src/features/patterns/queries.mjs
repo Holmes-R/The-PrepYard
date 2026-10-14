@@ -1,3 +1,4 @@
+import { practiceQuestionsSql } from "../questions/practice.mjs";
 import {
   roadmapChoices,
   canonicalPatternSlug,
@@ -42,7 +43,7 @@ export function patternFilters(params = {}) {
     page: /^[1-9][0-9]{0,4}$/.test(one("page")) ? Number(one("page")) : 1,
   };
 }
-function queryParts(f) {
+function queryParts(f, includeState = true) {
   const args = [];
   const add = (v) => {
     args.push(v);
@@ -84,10 +85,14 @@ function queryParts(f) {
   return {
     args,
     add,
-    base: `from public.questions q ${f.collection === hotlistSlug ? "join public.topic_frequency_questions hot on hot.question_id=q.id" : ""} join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id() where ${where.join(" and ")}`,
+    base: `from ${practiceQuestionsSql} q ${f.collection === hotlistSlug ? "join public.topic_frequency_questions hot on hot.question_id=q.id" : ""} join public.question_dsa_topics qt on qt.question_id=q.id join public.dsa_topics t on t.id=qt.topic_id ${includeState ? "left join public.user_question_state u on u.question_id=q.id and u.user_id=private.student_id()" : ""} where ${where.join(" and ")}`,
   };
 }
-export async function patternOverview(client, f) {
+export async function patternOverview(
+  client,
+  f,
+  loadMetadata = patternMetadata,
+) {
   const { args, base } = queryParts(f);
   // The topic chips are driven by these groups rather than by a separate topic list,
   // because a chip showing a count for a topic with no matching questions is a lie.
@@ -97,26 +102,7 @@ export async function patternOverview(client, f) {
       args,
     )
   ).rows;
-  const patterns = roadmapChoices;
-  const collections = (
-    await client.query(
-      "select slug,name from public.pattern_collections where slug=any($1::text[]) order by name",
-      [prepYardCollectionSlugs],
-    )
-  ).rows;
-  const picker = queryParts({
-    ...f,
-    topic: "",
-    q: "",
-    difficulty: "",
-    progress: "",
-  });
-  const topics = (
-    await client.query(
-      `select t.slug,t.name,t.position,count(*)::int total ${picker.base} group by t.id order by t.position,t.name`,
-      picker.args,
-    )
-  ).rows;
+  const { topics, patterns, collections } = await loadMetadata(client, f);
   return {
     topics,
     groups,
@@ -125,6 +111,32 @@ export async function patternOverview(client, f) {
     total: groups.reduce((n, g) => n + g.total, 0),
     solved: groups.reduce((n, g) => n + g.solved, 0),
   };
+}
+export async function patternMetadata(client, f) {
+  const patterns = roadmapChoices;
+  const collections = (
+    await client.query(
+      "select slug,name from public.pattern_collections where slug=any($1::text[]) order by name",
+      [prepYardCollectionSlugs],
+    )
+  ).rows;
+  const picker = queryParts(
+    {
+      ...f,
+      topic: "",
+      q: "",
+      difficulty: "",
+      progress: "",
+    },
+    false,
+  );
+  const topics = (
+    await client.query(
+      `select t.slug,t.name,t.position,count(*)::int total ${picker.base} group by t.id order by t.position,t.name`,
+      picker.args,
+    )
+  ).rows;
+  return { topics, patterns, collections };
 }
 export async function patternQuestions(client, f) {
   const { args, base, add } = queryParts(f);
@@ -164,7 +176,7 @@ export async function patternQuestions(client, f) {
                   "case q.difficulty when 'easy' then 1 when 'medium' then 2 else 3 end,lower(q.title),q.id");
   const rows = (
     await client.query(
-      `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.difficulty,(select name from public.platforms p where p.id=q.platform_id) platform,
+      `select ${f.collection === hotlistSlug ? "hot.reported_frequency,hot.company_count," : ""} q.id,q.title,q.canonical_url,q.original_url,q.difficulty,q.practice_platform platform,
  u.confidence revision_confidence,coalesce(u.status,'not_started') status,coalesce(u.bookmarked,false) bookmarked,u.next_revision_at is not null revision,
  exists(select 1 from public.notes n where n.question_id=q.id and n.user_id=private.student_id()) has_note,
  coalesce((select jsonb_agg(jsonb_build_object('slug',p.slug,'name',p.name) order by p.name) from public.question_patterns qp join public.patterns p on p.id=qp.pattern_id where qp.question_id=q.id and qp.reviewed),'[]'::jsonb) patterns,

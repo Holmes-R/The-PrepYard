@@ -50,7 +50,7 @@ import {
   type Sheet,
   type Filters,
   type DifficultyCounts,
-} from "@/features/catalogue/queries.mjs";
+} from "@/features/catalogue/filters.mjs";
 export type CompanyItem = DifficultyCounts & {
   slug: string;
   name: string;
@@ -251,6 +251,9 @@ function QuestionRow({
             {question.title}
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
+          <span className="question-platform-label" title={question.platform}>
+            {question.platform}
+          </span>
           <div className="question-topics" aria-label="Question patterns">
             {question.patterns.length ? (
               question.patterns.map((pattern) => (

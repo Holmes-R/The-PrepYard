@@ -181,6 +181,9 @@ export function Question({
               (opens on {q.platform} in a new tab)
             </span>
           </a>
+          <span className="question-platform-label" title={q.platform}>
+            {q.platform}
+          </span>
           {!hideTopics && (
             <div className="dsa-tags" aria-label="Question patterns">
               {!q.patterns.length && (

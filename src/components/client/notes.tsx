@@ -48,12 +48,16 @@ function NoteCard({ note: n }: { note: JsonData<NotePage>["rows"][number] }) {
         <NoteContent content={n.content} />
       </details>
       <div>
-        <a href={n.canonical_url} target="_blank" rel="noopener noreferrer">
-          Open question <ArrowUpRight size={14} />
-        </a>
-        <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
-          Find in practice
-        </Link>
+        {n.canonical_url && (
+          <a href={n.canonical_url} target="_blank" rel="noopener noreferrer">
+            Open question <ArrowUpRight size={14} />
+          </a>
+        )}
+        {n.canonical_url && (
+          <Link href={"/patterns?q=" + encodeURIComponent(n.title)}>
+            Find in practice
+          </Link>
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -128,16 +132,18 @@ export function ClientNotes({
         <label className="sr-only" htmlFor="notes-search">
           Search notes
         </label>
-        <Search size={18} aria-hidden="true" />
-        <input
-          key={query}
-          id="notes-search"
-          name="q"
-          type="search"
-          maxLength={200}
-          defaultValue={query}
-          placeholder="Search titles, content, or tags…"
-        />
+        <div className="prep-note-search-field prep-search-field">
+          <Search size={18} aria-hidden="true" />
+          <input
+            key={query}
+            id="notes-search"
+            name="q"
+            type="search"
+            maxLength={200}
+            defaultValue={query}
+            placeholder="Search titles, content, or tags…"
+          />
+        </div>
         <Button type="submit">Search</Button>
         {query && (
           <Link className="prep-note-clear" href="/notes">

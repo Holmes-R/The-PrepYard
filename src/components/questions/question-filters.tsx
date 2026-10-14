@@ -166,7 +166,7 @@ export function QuestionFilters({
       <div className="prep-filter-main">
         <label className="prep-filter-field prep-filter-search">
           <span>Question</span>
-          <div>
+          <div className="prep-search-field">
             <Search size={17} aria-hidden="true" />
             <input
               type="search"

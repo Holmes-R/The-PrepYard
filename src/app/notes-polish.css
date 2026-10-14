@@ -10,17 +10,29 @@
   border-radius: 8px;
   background: var(--card);
 }
-.prep-note-search > svg {
+.prep-note-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 0 12px;
+  background: var(--background);
+  border: 1px solid var(--input);
+  border-radius: 8px;
+}
+.prep-note-search-field > svg {
   flex-shrink: 0;
   color: var(--muted-foreground);
 }
 .prep-note-search input {
   flex: 1;
-  min-width: 150px;
-  padding: 10px 12px;
+  min-width: 0;
+  width: 100%;
+  padding: 10px 0;
   min-height: 44px;
-  background: var(--background);
-  border: 1px solid var(--input);
+  background: transparent;
+  border: 0;
   border-radius: 8px;
   color: var(--foreground);
   font-size: 14px;
@@ -235,10 +247,8 @@ body .prep-note-content p {
   .prep-note-dialog {
     padding: 16px;
   }
-  .prep-note-search input {
-    min-width: 0;
-    width: calc(100% - 32px);
-    flex-basis: calc(100% - 32px);
+  .prep-note-search-field {
+    flex-basis: 100%;
   }
   .prep-note-toolbar {
     gap: 10px;

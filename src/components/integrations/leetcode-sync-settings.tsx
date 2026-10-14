@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, RefreshCw, Link2, ChevronDown } from "lucide-react";
+import { RefreshCw, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClientResource } from "@/lib/client/use-client-resource";
 import { ResourceState } from "@/components/feedback/resource-state";
@@ -15,58 +14,18 @@ import {
   type SyncResource,
 } from "@/features/leetcode/client";
 
-export function LeetCodeSyncSettings() {
+export function LeetCodeAccountPanel() {
   const resource = useClientResource<SyncResource>(SYNC_SETTINGS_URL, {
     changes: false,
   });
-  return (
-    <section className="prep-sync-page">
-      <Link href="/dashboard" className="prep-sync-back">
-        <ArrowLeft size={16} aria-hidden="true" /> Back to dashboard
-      </Link>
-      <header className="launch-page-heading">
-        <h1>LeetCode sync</h1>
-        <p>
-          New Accepted submissions automatically update completion across
-          company and pattern pages. No extension is needed.
-        </p>
-      </header>
-      {resource.data ? (
-        <SyncPanel
-          key={resource.data.settings?.username ?? "disconnected"}
-          settings={resource.data.settings}
-          reload={resource.retry}
-        />
-      ) : (
-        <ResourceState title="Your connection" {...resource} />
-      )}
-      <details className="prep-sync-help">
-        <summary>
-          <span>How sync works</span>
-          <ChevronDown size={18} aria-hidden="true" />
-        </summary>
-        <ol>
-          <li>
-            Connect your LeetCode username once to turn on automatic sync.
-          </li>
-          <li>Submit a solution on LeetCode and get an Accepted result.</li>
-          <li>
-            Return to PrepYard. Matching questions are marked solved across
-            company and pattern pages on the next check.
-          </li>
-        </ol>
-        <p>
-          Checks run every two minutes while PrepYard is visible and online,
-          using your latest 20 public Accepted submissions. Only submissions
-          accepted after connecting count; older solves and failed attempts are
-          left unchanged. LeetCode delays can postpone an update.
-        </p>
-        <p>
-          Your notes and revision ratings stay as they are. No LeetCode password
-          is needed. You can pause or disconnect sync at any time.
-        </p>
-      </details>
-    </section>
+  return resource.data ? (
+    <SyncPanel
+      key={resource.data.settings?.username ?? "disconnected"}
+      settings={resource.data.settings}
+      reload={resource.retry}
+    />
+  ) : (
+    <ResourceState title="LeetCode connection" {...resource} />
   );
 }
 
@@ -119,7 +78,7 @@ function SyncPanel({
     <div className="prep-sync-card">
       <div className="prep-sync-card-title">
         <Link2 size={20} aria-hidden="true" />
-        <h2>Connect your public profile</h2>
+        <h2>LeetCode</h2>
       </div>
       <p>
         Connect once to enable automatic sync. Matching questions are marked

@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 import { SWRConfig } from "swr";
 import { usePathname } from "next/navigation";
 import { useClientResource } from "@/lib/client/use-client-resource";
-import { LeetCodeSyncCoordinator } from "@/components/integrations/leetcode-sync-coordinator";
+import { AccountSyncCoordinator } from "@/components/integrations/account-sync-coordinator";
 import { SiteHeader } from "@/components/navigation/site-header";
 
 type User = { id: string; name?: string | null; email?: string | null };
@@ -56,7 +56,7 @@ function SessionState({
         <>
           <SiteHeader user={user} pending={loading} />
           {user && scope === "workspace" && (
-            <LeetCodeSyncCoordinator userId={user.id} />
+            <AccountSyncCoordinator userId={user.id} />
           )}
           {children}
         </>

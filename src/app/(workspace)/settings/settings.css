@@ -197,3 +197,8 @@
 .prep-sync-help p:last-child {
   margin-bottom: 0;
 }
+
+.prep-sync-accounts {
+  display: grid;
+  gap: 20px;
+}

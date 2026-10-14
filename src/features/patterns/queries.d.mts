@@ -49,8 +49,21 @@ export function patternFilters(
 export function patternOverview(
   client: PoolClient,
   filters: PatternFilters,
+  loadMetadata?: (
+    client: PoolClient,
+    filters: PatternFilters,
+  ) => Promise<PatternMetadata>,
 ): Promise<PatternOverview>;
 export function patternQuestions(
   client: PoolClient,
   filters: PatternFilters,
 ): Promise<PatternRows>;
+
+export type PatternMetadata = Pick<
+  PatternOverview,
+  "topics" | "patterns" | "collections"
+>;
+export function patternMetadata(
+  client: PoolClient,
+  filters: PatternFilters,
+): Promise<PatternMetadata>;

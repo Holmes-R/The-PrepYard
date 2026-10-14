@@ -1,3 +1,4 @@
+import { practiceNote, practiceQuestionsSql } from "../questions/practice.mjs";
 // Called inside withStudentDatabase so all reads use the signed-in owner's policies.
 export async function studentNotes(
   client,
@@ -11,8 +12,7 @@ export async function studentNotes(
     typeof requestedQuery === "string"
       ? requestedQuery.trim().slice(0, 200)
       : "";
-  const base =
-    "from public.notes n join public.questions q on q.id=n.question_id where n.user_id=private.student_id() and length(btrim(n.content))>0 and (strpos(lower(q.title),lower($1))>0 or strpos(lower(n.content),lower($1))>0 or strpos(lower(array_to_string(n.tags,' ')),lower($1))>0)";
+  const base = `from public.notes n join public.questions q on q.id=n.question_id left join ${practiceQuestionsSql} practice on practice.id=q.id where n.user_id=private.student_id() and length(btrim(n.content))>0 and (strpos(lower(q.title),lower($1))>0 or strpos(lower(n.content),lower($1))>0 or strpos(lower(array_to_string(n.tags,' ')),lower($1))>0 or strpos(lower(practice.title),lower($1))>0)`;
   const total = (
     await client.query("select count(*)::int total " + base, [query])
   ).rows[0].total;
@@ -26,5 +26,5 @@ export async function studentNotes(
       [query, pageSize, (page - 1) * pageSize],
     )
   ).rows;
-  return { rows, total, page, pages };
+  return { rows: rows.map(practiceNote), total, page, pages };
 }

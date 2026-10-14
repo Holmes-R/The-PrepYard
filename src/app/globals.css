@@ -46,3 +46,13 @@ body {
 .skip-link:focus {
   top: 1rem;
 }
+
+/* Destination platform, shared by company and pattern rows. */
+.question-platform-label {
+  display: inline-block;
+  margin: 4px 8px 4px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary, #a1a1aa);
+  font-weight: 400;
+}

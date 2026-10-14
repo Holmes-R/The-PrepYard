@@ -14,7 +14,7 @@ import {
   filtersToParams,
   type Filters,
   type Sheet,
-} from "@/features/catalogue/queries.mjs";
+} from "@/features/catalogue/filters.mjs";
 import type {
   Choice,
   PatternFilters,

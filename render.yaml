@@ -1,0 +1,36 @@
+# Supabase remains the database. Render runs only the Next.js web service.
+services:
+  - type: web
+    name: the-prepyard
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: corepack pnpm install --frozen-lockfile --prod=false && corepack pnpm build
+    startCommand: AUTH_URL="${AUTH_URL:-$RENDER_EXTERNAL_URL}" corepack pnpm exec next start --hostname 0.0.0.0 --port "$PORT"
+    # The existing /api/health requires login; keep that boundary intact.
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_EMAIL_PROVIDER
+        value: gmail-api
+      - key: DATABASE_URL
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REFRESH_TOKEN
+        sync: false

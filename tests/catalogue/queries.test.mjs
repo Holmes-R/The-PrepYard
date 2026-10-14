@@ -17,6 +17,8 @@ const recordingClient = (calls) => ({
             id: "c0000000-0000-4000-8000-000000000001",
             slug: "acme",
             name: "Acme",
+            available: ["all"],
+            topics: [],
           },
         ],
       };
@@ -25,7 +27,18 @@ const recordingClient = (calls) => ({
     if (sql.includes("as uses")) return { rows: [] };
     if (sql.includes("as total"))
       return {
-        rows: [{ total: "3", easy_count: 1, medium_count: 2, hard_count: 0 }],
+        rows: [
+          {
+            total: 3,
+            solved: 2,
+            page: 1,
+            pages: 1,
+            rows: [],
+            easy_count: 1,
+            medium_count: 2,
+            hard_count: 0,
+          },
+        ],
       };
     if (/^select count\(\*\) as n /.test(sql)) return { rows: [{ n: "2" }] };
     return { rows: [] };
@@ -50,7 +63,7 @@ test("default filters never emit a dangling where or comments inside SQL", async
     [sheet.easy_count, sheet.medium_count, sheet.hard_count],
     [1, 2, 0],
   );
-  assert.ok(calls.length >= 6);
+  assert.equal(calls.length, 2);
   for (const { sql } of calls) {
     assert.ok(
       !/\bwhere\s*$/i.test(sql),
@@ -61,7 +74,7 @@ test("default filters never emit a dangling where or comments inside SQL", async
       "where with no conditions before order by: …" + sql.slice(-90),
     );
     assert.ok(
-      !sql.includes("//"),
+      !sql.replace(/'(?:''|[^'])*'/g, "''").includes("//"),
       "// written inside a SQL string is not a comment: …" +
         sql.slice(Math.max(0, sql.indexOf("//") - 60), sql.indexOf("//") + 70),
     );
@@ -83,7 +96,7 @@ test("selected filters still become bound conditions", async () => {
   const total = calls.find((c) => c.sql.includes("as total"));
   assert.match(total.sql, /q\.difficulty=\$3/);
   assert.match(total.sql, /strpos\(lower\(q\.title\),lower\(\$4\)\)>0/);
-  assert.match(total.sql, /u\.status='solved'/);
+  assert.match(total.sql, /own\.status='solved'/);
   assert.ok(!/\bwhere\s*$/i.test(total.sql));
 });
 

@@ -11,6 +11,8 @@ import "./control-theme.css";
 import "./question-polish.css";
 import "./question-uniform.css";
 import "./notes-polish.css";
+import "./account-menu.css";
+import "./search-controls.css";
 
 const inter = localFont({
   src: "./fonts/Inter-variable.ttf",
