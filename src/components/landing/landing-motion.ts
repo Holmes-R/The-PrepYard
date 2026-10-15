@@ -48,9 +48,7 @@ export const LANDING_MOTION = {
     featureDelayMs: [0, -1200, -2500, -3700] as const,
     stepDelayMs: [0, -1500, -3000] as const,
     collectionDelayMs: [0, -1300, -2600] as const,
-    symbolParallaxMs: 600,
     orbDelayMs: [0, -8000, -14000] as const,
-    symbolFadeCycleMs: 12500,
   },
   background: {
     orbDriftMs: 26000,
@@ -101,7 +99,6 @@ export const LANDING_MOTION_STYLE: MotionStyle = {
   "--yard-preview-border-duration": `${LANDING_MOTION.preview.borderSweepMs}ms`,
   "--yard-preview-float-delay": `${LANDING_MOTION.preview.floatStartDelayMs}ms`,
   "--yard-preview-signal-duration": `${LANDING_MOTION.preview.signalSweepMs}ms`,
-  "--yard-symbol-parallax-duration": `${LANDING_MOTION.preview.symbolParallaxMs}ms`,
   "--yard-preview-orbit-duration": `${LANDING_MOTION.preview.orbitPulseMs}ms`,
   "--yard-feature-breathe-duration": `${LANDING_MOTION.preview.featureBreatheMs}ms`,
   "--yard-step-beacon-duration": `${LANDING_MOTION.preview.stepBeaconMs}ms`,
@@ -116,7 +113,6 @@ export const LANDING_MOTION_STYLE: MotionStyle = {
   "--yard-background-orb-duration": `${LANDING_MOTION.background.orbDriftMs}ms`,
   "--yard-background-orb-delay-2": `${LANDING_MOTION.preview.orbDelayMs[1]}ms`,
   "--yard-background-orb-delay-3": `${LANDING_MOTION.preview.orbDelayMs[2]}ms`,
-  "--yard-symbol-cycle-duration": `${LANDING_MOTION.preview.symbolFadeCycleMs}ms`,
   "--yard-section-reveal-duration": `${LANDING_MOTION.sections.revealMs}ms`,
   "--yard-section-reveal-offset": `${LANDING_MOTION.sections.revealOffsetPx}px`,
   "--yard-preview-scanner-duration": `${LANDING_MOTION.preview.scannerCycleMs}ms`,
@@ -138,18 +134,5 @@ export function landingWordDelayStyle(delayMs: number): MotionStyle {
 export function landingRowStyle(index: number): MotionStyle {
   return {
     "--yard-row-scan-delay": `${index * LANDING_MOTION.preview.scannerRowDelayMs}ms`,
-  };
-}
-
-export function landingSymbolStyle(
-  index: number,
-  x: number,
-  y: number,
-  total: number,
-): MotionStyle {
-  return {
-    "--yard-symbol-x": `${x}%`,
-    "--yard-symbol-y": `${y}%`,
-    "--yard-symbol-delay": `${-Math.round((LANDING_MOTION.preview.symbolFadeCycleMs / total) * index)}ms`,
   };
 }

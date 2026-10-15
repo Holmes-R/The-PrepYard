@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, type PointerEvent } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { PracticePreview } from "@/components/landing/practice-preview";
@@ -26,35 +25,12 @@ export function LandingHero({
   startLabel: string;
   animate: boolean;
 }) {
-  const backgroundRef = useRef<HTMLDivElement>(null);
-
-  function moveBackground(event: PointerEvent<HTMLElement>) {
-    if (
-      !animate ||
-      event.pointerType !== "mouse" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    backgroundRef.current
-      ?.querySelectorAll<HTMLElement>(".yard-code-symbol")
-      .forEach((symbol, index) => {
-        const factor = ((index % 5) + 1) * 3;
-        symbol.style.transform = `translate3d(${x * factor}px, ${y * factor}px, 0)`;
-      });
-  }
-
   return (
     <section
       className="yard-hero yard-container"
       aria-labelledby="yard-hero-title"
-      onPointerMove={moveBackground}
     >
-      {animate && <LandingBackground containerRef={backgroundRef} />}
+      {animate && <LandingBackground />}
       <div className="yard-hero-copy">
         <p
           className="yard-eyebrow"

@@ -560,9 +560,23 @@ body .prep-main .prepyard-landing h3 {
   max-width: 55ch;
 }
 .yard-collections-section {
-  background: #171719;
+  position: relative;
+  background: transparent;
+}
+.yard-collections-section::before,
+.yard-collections-section::after {
+  position: absolute;
+  left: 50%;
+  width: min(calc(100% - 56px), 1440px);
   border-top: 1px solid #303034;
-  border-bottom: 1px solid #303034;
+  content: "";
+  transform: translateX(-50%);
+}
+.yard-collections-section::before {
+  top: 0;
+}
+.yard-collections-section::after {
+  bottom: 0;
 }
 .yard-collection-grid {
   display: grid;
@@ -944,18 +958,6 @@ body .prep-main .prepyard-landing h3 {
   width: clamp(190px, 26vw, 360px);
   background: #285345;
 }
-.yard-code-symbol {
-  position: absolute;
-  top: var(--yard-symbol-y);
-  left: var(--yard-symbol-x);
-  color: #a9d7c7;
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: clamp(15px, 1.7vw, 23px);
-  opacity: 0;
-  transition: transform var(--yard-symbol-parallax-duration)
-    var(--yard-motion-ease);
-  will-change: transform, translate;
-}
 .prepyard-landing.is-guest-landing .yard-preview {
   transform-style: preserve-3d;
   will-change: transform;
@@ -1136,11 +1138,6 @@ body .prep-main .prepyard-landing h3 {
   .prepyard-landing.is-guest-landing .yard-ambient-orb-three {
     animation-delay: var(--yard-background-orb-delay-3);
   }
-  .prepyard-landing.is-guest-landing .yard-code-symbol {
-    animation: yard-symbol-drift var(--yard-symbol-cycle-duration) ease-in-out
-      infinite;
-    animation-delay: var(--yard-symbol-delay);
-  }
   .prepyard-landing.is-guest-landing .yard-session-signal > span {
     animation: yard-session-sweep var(--yard-preview-signal-duration)
       cubic-bezier(0.45, 0, 0.55, 1) infinite;
@@ -1259,23 +1256,6 @@ body .prep-main .prepyard-landing h3 {
   }
   to {
     transform: translate3d(5%, -4%, 0) scale(1.04);
-  }
-}
-@keyframes yard-symbol-drift {
-  0%,
-  10% {
-    translate: 0 7px;
-    opacity: 0;
-  }
-  18%,
-  66% {
-    translate: 0 0;
-    opacity: 0.24;
-  }
-  78%,
-  100% {
-    translate: 0 -9px;
-    opacity: 0;
   }
 }
 @keyframes yard-hero-rise {
@@ -1425,7 +1405,6 @@ body .prep-main .prepyard-landing h3 {
     :is(
       .yard-hero::before,
       .yard-ambient-orb,
-      .yard-code-symbol,
       .yard-eyebrow > span,
       .yard-eyebrow > span::after,
       .yard-hero-word,
