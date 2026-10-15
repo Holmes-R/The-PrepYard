@@ -125,7 +125,7 @@ The public front door.
 - The main button adapts to your session: "Create free account" when signed out, "Go to dashboard" when signed in.
 - An interactive preview with Topics / Patterns / Companies tabs (Arrow keys, Home and End navigate them), each listing four curated destinations; guests are sent to sign-in with the destination preserved.
 - A feature grid, three collection guides, a three-step "How it works", and keyboard-accessible FAQ accordions.
-- Guest landing animations include a staggered headline, ambient code symbols and gradient orbs, an interactive practice preview, and subtle section and navigation effects. Reduced-motion preferences are respected.
+- Guest landing animations include a staggered headline, gradient orbs, an interactive practice preview, and subtle section and navigation effects. The shared landing/login/signup background includes 32 floating programming snippets (12 on mobile or low-power devices), including Python, JavaScript, TypeScript, Java, C++, Rust, Go, Kotlin, and SQL. A soft mint/blue gradient follows the mouse and gently expands with page scrolling; code text moves at different depths. Pointer and scroll updates are batched into animation frames without React re-renders. Hidden tabs pause the code animation, and reduced-motion users get a still background.
 
 ### Log in — `/login`
 

@@ -80,6 +80,7 @@ body:has(.prep-auth-header) .prep-main {
 .site-background__fallback,
 .site-background__overlay,
 .site-background__mouse-glow,
+.site-background__aurora,
 .site-background__symbols,
 .site-background__canvas {
   position: absolute;
@@ -130,24 +131,52 @@ body:has(.prep-auth-header) .prep-main {
 
 .site-background__mouse-glow {
   inset: auto;
-  top: var(--site-pointer-y, 50%);
-  left: var(--site-pointer-x, 50%);
+  top: 0;
+  left: 0;
   width: var(--site-background-mouse-glow-size);
   height: var(--site-background-mouse-glow-size);
   border-radius: 50%;
   background: radial-gradient(
     circle,
     rgb(78 222 163 / var(--site-background-mouse-glow-opacity)) 0,
-    rgb(10 42 31 / 6%) 38%,
+    rgb(173 198 255 / 8%) 38%,
     transparent 72%
   );
   opacity: 0;
-  transform: translate3d(-50%, -50%, 0);
-  transition: opacity var(--site-background-mouse-glow-transition) ease;
+  transform: translate3d(
+    calc(var(--site-pointer-x, 50vw) - 50%),
+    calc(var(--site-pointer-y, 50vh) - 50%),
+    0
+  );
+  transition:
+    opacity var(--site-background-mouse-glow-transition) ease,
+    transform 280ms ease-out;
+}
+
+.site-background__aurora {
+  inset: -18%;
+  width: 136%;
+  height: 136%;
+  background:
+    radial-gradient(ellipse at 20% 35%, rgb(78 222 163 / 16%), transparent 48%),
+    radial-gradient(ellipse at 82% 65%, rgb(120 163 255 / 20%), transparent 48%);
+  opacity: calc(0.55 + var(--site-scroll-progress, 0) * 0.3);
+  transform: translate3d(
+      calc(var(--site-pointer-shift-x, 0px) * 1.5),
+      calc(
+        var(--site-pointer-shift-y, 0px) - var(--site-scroll-parallax, 0px) *
+          0.28
+      ),
+      0
+    )
+    scale(calc(1 + var(--site-scroll-progress, 0) * 0.14));
+  transition:
+    transform 700ms ease-out,
+    opacity 700ms ease-out;
 }
 
 .site-background__symbols {
-  --site-scroll-parallax: 0px;
+  mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent);
 }
 
 .site-background__symbol {
@@ -158,15 +187,17 @@ body:has(.prep-auth-header) .prep-main {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: var(--symbol-size);
   line-height: 1;
+  white-space: nowrap;
+  user-select: none;
   transform: translate3d(
-    var(--symbol-mouse-x, 0px),
+    calc(var(--site-pointer-shift-x, 0px) * var(--symbol-depth)),
     calc(
-      var(--site-scroll-parallax, 0px) * var(--symbol-depth) * -0.12 +
-        var(--symbol-mouse-y, 0px)
+      var(--site-scroll-parallax, 0px) * var(--symbol-depth) * -0.35 +
+        var(--site-pointer-shift-y, 0px) * var(--symbol-depth)
     ),
     0
   );
-  will-change: transform, opacity;
+  transition: transform 550ms ease-out;
 }
 
 .site-background__symbol > span {
@@ -241,6 +272,16 @@ body:has(.prep-auth-header) .prep-main {
   .site-background__canvas,
   .site-background__mouse-glow {
     display: none;
+  }
+
+  .site-background__aurora,
+  .site-background__symbol {
+    transform: none;
+    transition: none;
+  }
+
+  .site-background__aurora {
+    opacity: 0.55;
   }
 
   .site-background__symbol > span {

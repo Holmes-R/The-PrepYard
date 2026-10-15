@@ -43,6 +43,7 @@ export function SiteBackground() {
       <div className="site-background__fallback" />
       <ThpaceBackground onReady={handleReady} onFallback={handleFallback} />
       <div className="site-background__overlay" />
+      <div className="site-background__aurora" />
       <div className="site-background__mouse-glow" />
       <FloatingSymbols />
     </div>
