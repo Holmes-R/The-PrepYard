@@ -1,0 +1,20 @@
+[33mc459988[m[33m ([m[1;31mhariharan/main[m[33m, [m[1;31mhariharan/HEAD[m[33m)[m fix(background): use DSA terms and algorithm expressions
+[33ma4edd46[m feat(background): enrich code snippets and interactive gradients
+[33ma5d9363[m Merge pull request #6 from narainsurya/fix-login
+[33m200b353[m[33m ([m[1;31morigin/fix-login[m[33m, [m[1;32mfix-login[m[33m)[m feat(background): add animated Thpace to landing and auth pages
+[33m16f49b4[m fix(landing): keep guest animations and remove particle backdrop
+[33m8a5676f[m Merge landing updates with continuous particle background
+[33m9e05d53[m Verification mail works
+[33m3e02b0d[m Merge pull request #5 from narainsurya/Add Animation
+[33mdd2a49d[m fix(landing): preserve landing content during session loading
+[33m21cf169[m feat(landing): add guest animations and better UI in landing page
+[33mcfcafe7[m feat(landing): add guest animations and better UI in landing page
+[33mfd2dbad[m feat: prepare Render Free deployment with Gmail API email
+[33m2557032[m Removed Neetcode Questions
+[33m8013698[m Fix the dropdown UI of dashboard
+[33m438aefa[m Implemented “Sync accounts” in the dashboard and settings page
+[33m189545f[m Merge pull request #4 from narainsurya/fix-login
+[33m5dce102[m feat(ui): add scroll reveals and page transition swoosh
+[33m06f9cca[m Merge pull request #3 from narainsurya/fix-login
+[33mde724cb[m ui-fix-logout-button
+[33mef171e4[m Merge pull request #1 from narainsurya/fix-login

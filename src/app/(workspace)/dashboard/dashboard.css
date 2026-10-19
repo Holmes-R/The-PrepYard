@@ -3,6 +3,9 @@ body .prep-dashboard-clean {
   --dashboard-surface: #19191b;
   --dashboard-border: #323236;
   --dashboard-muted: #b7b7c0;
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
   display: grid;
   grid-template-areas: "heading" "progress" "focus" "collections" "activity" "history";
   gap: 28px;
@@ -13,7 +16,7 @@ body .prep-dashboard-clean {
   padding: 8px 0 20px;
 }
 body:has(.prep-dashboard-clean) > main.prep-main {
-  max-width: 1240px;
+  max-width: 1360px;
 }
 .prep-dashboard-clean :is(h1, h2, h3, p, dl, dd, ul) {
   margin: 0;

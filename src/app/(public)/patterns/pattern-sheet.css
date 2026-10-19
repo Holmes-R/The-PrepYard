@@ -1,12 +1,15 @@
 /* Keep the practice sheet comfortably readable on wide screens. */
 body:has(.dsa-sheet) > main {
-  max-width: 1120px;
+  max-width: 1360px;
   margin-inline: auto;
   width: 100%;
   padding: 0;
 }
 .dsa-sheet {
   --ring: #ff914d;
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
   color: #e7e7e7;
   background: linear-gradient(145deg, #181818, #111111);
   border: 0;

@@ -22,6 +22,9 @@ body:has(.company-sheet-theme) > main {
   --primary-foreground: #181818;
   --border: #393939;
   --ring: #ff914d;
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
   color: #e1e1e1;
   font-family: inherit;
 }

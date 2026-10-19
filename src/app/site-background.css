@@ -35,7 +35,7 @@ body:has(.site-background) .prep-auth-header {
   max-width: none;
   margin: 0;
   flex: 0 0 auto;
-  padding: 18px max(28px, calc((100% - 1440px) / 2 + 28px));
+  padding: 18px max(28px, calc((100% - 1600px) / 2 + 28px));
   border-bottom-color: rgb(212 212 212 / 12%);
   background: linear-gradient(
     105deg,
@@ -49,6 +49,12 @@ body:has(.site-background) .prep-auth-header {
 body:has(.site-background) .prep-auth-header .prep-brand {
   min-height: 44px;
   align-items: center;
+}
+
+@media (max-width: 600px) {
+  body:has(.site-background) .prep-auth-header {
+    padding-inline: 20px;
+  }
 }
 
 body:has(.site-background) .prep-footer {

@@ -1,4 +1,10 @@
 /* Shared note editor and notebook controls; inherited charcoal theme. */
+.prep-notes-page {
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+}
+
 .prep-note-search {
   display: flex;
   flex-wrap: wrap;

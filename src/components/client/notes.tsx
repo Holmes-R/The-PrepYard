@@ -101,7 +101,7 @@ export function ClientNotes({
     return "/notes?" + next;
   }
   return (
-    <>
+    <div className="prep-notes-page">
       <header className="launch-page-heading">
         <h1>Your private notebook.</h1>
         <p>
@@ -196,6 +196,6 @@ export function ClientNotes({
           )}
         </nav>
       )}
-    </>
+    </div>
   );
 }

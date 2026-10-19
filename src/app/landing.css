@@ -30,7 +30,7 @@ body:has(.prep-landing-navigation) .prep-footer nav a {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  max-width: 1440px;
+  max-width: 1600px;
   margin: auto;
   padding: 18px 28px;
 }
