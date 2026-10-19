@@ -1307,9 +1307,8 @@ body .launch-button {
 }
 @media (min-width: 1600px) {
   body:has(.prep-top-navigation) > main.prep-main {
-    max-width: 1440px;
+    max-width: 1360px;
     margin-inline: auto;
-    padding-left: 270px;
   }
 }
 @media (max-width: 1250px) {
@@ -1997,7 +1996,7 @@ body::before {
 body:has(.prep-top-navigation) > main.prep-main {
   margin: 0 auto;
   width: 100%;
-  max-width: 1320px;
+  max-width: 1360px;
   padding: 38px 32px 56px;
   min-height: calc(100vh - 126px);
 }
