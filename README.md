@@ -1,316 +1,200 @@
 # The PrepYard
 
-Free, account-based coding interview preparation for students — company-wise question sheets, pattern-based practice, private notes, and a spaced-revision system in one app.
+**Free coding-interview practice and progress tracking for students.**
 
-Repository: [Holmes-R/The-PrepYard](https://github.com/Holmes-R/The-PrepYard)
+PrepYard brings company-wise questions, standard DSA topics, patterns, practice collections, notes, revisions, and progress into one workspace.
 
-## Overview
+- Repository: [Holmes-R/The-PrepYard](https://github.com/Holmes-R/The-PrepYard)
+- Live app: [the-prepyard.onrender.com](https://the-prepyard.onrender.com/)
 
-The PrepYard helps you prepare for coding interviews in three ways:
+## What you can do
 
-1. **Practice by company** — pick a company (for example Amazon or 1Kosmos) and work through the questions it is known to ask, ordered by how frequently they are reported.
-2. **Practice by pattern** — browse DSA questions grouped into patterns and topics (two-pointers, dynamic programming, graphs, …) so you learn transferable approaches instead of isolated tricks.
-3. **Track your progress** — mark questions solved, bookmark them, keep private notes, and schedule revisions with a confidence rating. Everything is saved to your account and shows up on your dashboard.
+- **Practice by company:** browse company question lists and filter by topic, difficulty, reported frequency, or your own progress.
+- **Learn by topic or pattern:** practice standard data-structure and algorithm topics, then browse reusable patterns such as Prefix Sum or Two Pointers.
+- **Use practice collections:** explore curated collections such as Interview Launchpad, DSA Deep Dive, and Interview Hotlist.
+- **Track your work:** mark questions solved, review your dashboard, and record confidence ratings with revision history.
+- **Keep private notes:** add notes to questions, optionally tag them, and save changes only when you choose **Save now**.
+- **Sync accounts:** connect supported public LeetCode and GeeksforGeeks profiles. HackerRank and CodeChef tracking remains manual. An optional browser extension can import LeetCode solved history.
 
-Everything requires a free email/password account. Notes and progress are private to you; nothing is shared or published to other students.
+PrepYard uses an account email and a separate PrepYard password. It does **not** ask for or store your Google/Gmail password. Email verification and password reset use the configured email provider.
 
-## Tech stack
+## Data and limitations
 
-| Layer     | Choices                                                                         |
-| --------- | ------------------------------------------------------------------------------- |
-| Framework | Next.js 16 (App Router), React 19, TypeScript                                   |
-| Styling   | Tailwind CSS 4, Radix primitives, Lucide icons, locally bundled Inter font      |
-| Data      | PostgreSQL via `pg` (node-postgres), 15 SQL migrations, row-level security      |
-| Auth      | Auth.js (v5 beta) credentials — email + PrepYard password, encrypted JWT cookie |
-| Tooling   | pnpm 11.19, ESLint, Prettier, GitHub Actions                                    |
+Question catalogues and company-frequency observations come from reviewed external datasets. Coverage and freshness can vary. Frequency is historical reported data; it is not a prediction of what an interviewer will ask.
 
-Supabase may host the PostgreSQL database and run migrations, but it does **not** authenticate users — the app talks to the database directly through a restricted server-side login.
+Where a reviewed free alternative exists for a paid problem, PrepYard can link to that alternative. This coverage is not complete. PrepYard does not bypass subscription checks or copy third-party problem statements or solutions. See [free practice destinations](docs/free-practice.md) and [collection attribution](docs/collection-attribution.md).
 
-## Getting started
-
-### Prerequisites
-
-- Node.js 22.12+ (Node 22 or 24)
-- pnpm 11.19.0 (`corepack enable` installs it from `package.json`)
-- A PostgreSQL 17 database (local or Supabase)
-
-### 1. Install
-
-```bash
-git clone https://github.com/Holmes-R/The-PrepYard.git
-cd The-PrepYard
-pnpm install --frozen-lockfile
-```
-
-### 2. Configure environment
-
-Create `.env.local` in the repository root (it is git-ignored — never commit it):
-
-```bash
-AUTH_URL=http://localhost:3000
-AUTH_SECRET=generate-with-openssl-rand-base64-32
-DATABASE_URL=postgresql://user:password@host:5432/postgres
-AUTH_EMAIL_PROVIDER=gmail
-GMAIL_USER=you@gmail.com
-GMAIL_APP_PASSWORD=...     # Google App Password, not your account password
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
-Enable 2-Step Verification on the Google account and create an App Password for Gmail SMTP. Use the same account for `GMAIL_USER`; set both Gmail variables when using the Gmail provider. Render Free uses Gmail API over HTTPS because outbound SMTP is blocked; see the deployment guide below. The sender displays as PrepYard from that account.
-
-Sign-in fails closed: without this configuration, protected pages deny access. A wrong or missing `AUTH_SECRET` invalidates every session. See [password authentication](docs/password-auth.md) for the full walkthrough.
-
-### 3. Database
-
-Apply all 15 migrations in `supabase/migrations/` in timestamp order (Supabase CLI: `supabase db push`, or paste them into the SQL editor in order). Then provision the restricted `prepyard_web` login that the app uses — see the [database guide](docs/database.md). Do not point the app at a privileged database role.
-
-### 4. Run
-
-```bash
-pnpm dev        # http://localhost:3000
-```
-
-Create an account at `/signup`, confirm the emailed link, then log in at `/login`. Your password is a **PrepYard password** — never reuse your email or Google password.
-
-## Deploy on Render
-
-The [Render Free deployment guide](docs/render-deployment.md) covers the repository Blueprint, existing Supabase database, Gmail API verification/reset emails and live checks. `render.yaml` configures the Next.js web service; its production secret is generated by Render. Authorize the sender with the [Gmail API setup](docs/gmail-api-email.md), then add your database URL and sender OAuth settings privately in Render. No custom domain is required. No database migrations or import jobs run automatically during deployment. Free instances sleep when idle, so a first visit after inactivity can be slow.
-
-## Scripts
-
-| Command          | What it does                                                           |
-| ---------------- | ---------------------------------------------------------------------- |
-| `pnpm dev`       | Start the development server                                           |
-| `pnpm build`     | Production build                                                       |
-| `pnpm start`     | Serve the production build                                             |
-| `pnpm check`     | Full gate: format, lint, unit tests, types, build, route/session tests |
-| `pnpm lint`      | ESLint                                                                 |
-| `pnpm typecheck` | `tsc --noEmit` (after Next type generation)                            |
-| `pnpm format`    | Prettier write                                                         |
-| `pnpm db:test`   | Migrations + RLS/identity tests on a disposable local PostgreSQL       |
-
-Test-only entry points (also part of `pnpm check`): `test:patterns`, `test:catalogue`, `test:import`, `test:auth`, `test:access`, `test:notes`. Database-backed suites run with their own `test:*:database` scripts and need a reachable PostgreSQL.
-
-Admin/import entry points: `import:company`, `import:repository`, `patterns:publish`, `collections:publish`, `logos:publish-reviewed`, `topics:fetch`, `logos:fetch`. These are documented in [the importer guide](docs/importer.md) and [company workflow](docs/company-pages.md).
-
-## Project structure
-
-```
-src/
-  app/                  # Routes (App Router)
-    page.tsx            #   Public landing page
-    login, signup, ...  #   Pre-sign-in pages (also: forgot/reset/verify email)
-    (public)/           #   App pages: companies, explore, patterns, about
-    (workspace)/        #   Workspace pages: dashboard, notes, components
-    api/                #   Route handlers (auth, companies, notes, health, …)
-  components/           # Feature UI (sheets, questions, notes) + ui/ primitives
-  features/             # Domain logic: catalogue, patterns, notes, progress, auth
-  lib/                  # Server helpers: database transactions, auth policy, site nav
-  proxy.ts              # Request guard — redirects signed-out users away from app pages
-  auth.ts               # Auth.js configuration (credentials provider)
-supabase/migrations/    # 15 ordered SQL migrations (schema, RLS, grants, identity)
-scripts/                # Importers, publishers, data fetchers
-tests/                  # Unit, auth, import, access and database suites
-docs/                   # In-depth guides (see below)
-```
-
-## Pages
-
-Only the landing page and the five account pages are public. Every other page requires a session and redirects signed-out visitors to `/login?next=…`, returning them to the page they wanted afterwards. On any signed-in page, `Ctrl/Cmd+K` opens the quick search.
-
-### Home — `/`
-
-The public front door.
-
-- The main button adapts to your session: "Create free account" when signed out, "Go to dashboard" when signed in.
-- An interactive preview with Topics / Patterns / Companies tabs (Arrow keys, Home and End navigate them), each listing four curated destinations; guests are sent to sign-in with the destination preserved.
-- A feature grid, three collection guides, a three-step "How it works", and keyboard-accessible FAQ accordions.
-- Guest landing animations include a staggered headline, gradient orbs, an interactive practice preview, and subtle section and navigation effects. The shared landing/login/signup background includes 32 floating DSA terms and algorithm expressions (12 on mobile or low-power devices), including arrays, linked lists, trees, graphs, binary search, sliding windows, dynamic programming, and complexity notation. A soft mint/blue gradient follows the mouse and gently expands with page scrolling; code text moves at different depths. Pointer and scroll updates are batched into animation frames without React re-renders. Hidden tabs pause the code animation, and reduced-motion users get a still background.
-
-### Log in — `/login`
-
-- Sign in with your email and PrepYard password.
-- Honors a `?next=` redirect so you land back on the page you came from.
-- Links to sign-up and password recovery; failed attempts show an error without revealing whether the account exists.
-
-### Sign up — `/signup`
-
-- Create an account with your name, email, and a 12–128 character password (entered twice).
-- Sends a verification email; you confirm the link before you can log in.
-
-### Forgot password — `/forgot-password`
-
-- Enter your account email to have a password-reset link sent to you.
-
-### Reset password — `/reset-password`
-
-- The emailed link carries a token; choose and confirm a new password.
-- Without a valid token the page offers to request a new link.
-
-### Verify email — `/verify-email`
-
-- The emailed verification link lands here and confirms your account.
-- Without a token, the page links back to sign-up to request a new email.
-
-### Companies — `/companies`
-
-The company directory.
-
-- Search companies (debounced, saved in the URL), sort by question count, name, or most solved, and switch between "All companies" and "Your practice" (companies you have solved at least one question in).
-- Each card shows the question pool, solved percentage, a progress meter, and difficulty totals; company logos fall back to colored initials when missing.
-- Expanding a card inlines the full question sheet with a live solved/total counter; one card opens at a time.
-- Twelve companies per page, with Previous/Next pagination; the open card and filters stay in the address bar, so views are shareable and survive back/forward.
-
-### Company sheet — `/companies/1kosmos`
-
-The question list for one company (for example `1kosmos`).
-
-- Filters: question search, difficulty, progress (any / not started / attempted / solved / needs revision), multi-select topic chips, plus "More filters" for sort order, time window (only windows the company actually has), and minimum frequency/acceptance percentages.
-- Click column headers to sort by up to three priorities at once (question, difficulty, frequency, revision).
-- Every row: a solved toggle, a direct link to the problem on its platform, pattern tags, up to four company tags with reported frequency (clicking one deep-links to that company), an expandable topic list, a revision button, and a note button.
-- The revision dialog rates each session (Struggled / Tough / Got it / Nailed it), schedules a next-day reminder, and lists your dated revision history.
-- The note editor starts blank for new notes, holds up to 50,000 characters, and supports optional custom tags. Click **Save now** to save text and tags together; **Close** keeps a draft in the current browser tab without saving it to your account.
-- Paginated with skeletons while loading, a Retry on failure, and a redirect to login if your session expires.
-
-### Explore — `/explore`
-
-A hub page for choosing where to practice.
-
-- Large cards link to the company directory, the full topic list, and each practice collection (Interview Launchpad, DSA Deep Dive, Interview Hotlist).
-- Progress and notes are shared everywhere: a question solved in one collection stays solved in every view.
-
-### Patterns hub — `/patterns`
-
-The DSA practice hub.
-
-- A progress card shows solved/total and completion percentage for whatever you are currently viewing.
-- Three browsing modes: **Topics** (numbered pattern roadmap), **Patterns**, and **Collections**, each with counts.
-- Filters: question search, difficulty, progress (any / unsolved / solved / bookmarked), single-select topic chips, a **Shuffle** button for random order, and "More filters" for a specific pattern, a collection, or hiding topic tags in rows.
-- Results appear as topic accordions — each with its own completion meter, solved count, sortable column header, and Previous/Next pagination.
-- Active filters show as removable chips; the Interview Hotlist gets a note explaining its dynamic top-20-per-topic ranking.
-
-### Pattern sheet — `/patterns/two-pointers`
-
-The question list for one pattern group.
-
-- Hero with the pattern name and a progress card; a back link to all topics.
-- Filters: search, difficulty, progress, topic chips, plus sort orders — Recommended, Easy→Hard, Hard→Easy, Revision priority (soonest-due first), and Shuffle.
-- Every row carries a solved toggle, the platform link, a "peak frequency · N companies" badge, pattern tags, a difficulty badge, an expandable topic column, and the same revision dialog and note editor as company sheets.
-- Sorting and pagination live in the URL; unknown slugs 404, and a renamed slug redirects.
-
-### Dashboard — `/dashboard`
-
-Your progress at a glance.
-
-- Four stat cards: questions solved (with easy/medium/hard breakdown), completion rate, revisions due (with a link to the review queue), and saved notes (with a link to the notebook).
-- Collection cards with solved/total, a progress bar, and a "How collections work" explainer.
-- A recent-practice list (each entry links back to the question) and a seven-day revision activity chart.
-
-### Notes — `/notes`
-
-Your private notebook.
-
-- Saved notes appear as compact cards, newest edit first, with 24 notes per page. Optional custom tags are visible on each card; the note body stays collapsed until **View note** is selected.
-- Search question titles, note text, or tags across all saved notes, including other pages.
-- **Edit note** opens the same editor used on company and pattern pages. The saved note and its tags are shared across these views for the same question.
-- Cards link to the original question and offer **Find in practice**.
-- **Delete note** asks for confirmation; Escape cancels. Clearing the editor text and clicking **Save now** also deletes the saved note.
-
-### About — `/about`
-
-A short mission statement about the project. Requires sign-in like every app page.
-
-### Components — `/components`
-
-A gallery of the design system: button variants and states, checkboxes (including indeterminate), radios, filter chips, typography scale, and example question and note components. Previews are local-only — nothing here reads or writes your account data.
+The app keeps source and import metadata out of student practice screens. The repository’s importer and attribution guides explain how catalogue data is reviewed and maintained.
 
 ## How it works
 
-**Sign-in and data access.** The browser never receives database credentials. Auth.js verifies your password and stores an encrypted JWT cookie; `src/proxy.ts` checks it before any protected page or API is served. Server code opens a PostgreSQL transaction, switches to the restricted `authenticated` permission role, and scopes the request to your student id — row-level security policies double-check ownership on every query, so even a buggy query can only ever touch your own notes and progress.
+1. A student signs in with email and a PrepYard password.
+2. The browser requests catalogue and personal progress data through the Next.js application.
+3. Server-side code validates the session and accesses PostgreSQL with the restricted `prepyard_web` role.
+4. PostgreSQL row-level security limits notes, progress, and revision records to their owner.
+5. Catalogue updates are reviewed and imported separately from normal student traffic.
 
-**Catalogue data.** Approved upstream datasets are imported separately from website traffic: the importer normalizes and validates a staged snapshot, then publishes it atomically — a failed import leaves the last good dataset in place. Student progress is keyed to stable question ids, so imports never overwrite your solved/bookmarked/notes state. Source URLs, dataset dates, and import logs stay internal.
+Supabase can host PostgreSQL and apply migrations. PrepYard does **not** use Supabase Auth; account registration, password verification, and sessions are handled by the application.
 
-**Client rendering.** Pages load a shell immediately, then fetch private JSON from authenticated APIs (SWR deduplicates and caches them per session). Saves and deletions refresh only the affected data; a 401 returns you to login with your destination preserved. Private responses are always `private, no-store`. Filters and pagination are serialized into the URL, so any filtered view is shareable and survives reloads.
+## Tech stack
 
-## Testing and CI
+| Area        | Technology                                                                |
+| ----------- | ------------------------------------------------------------------------- |
+| Web app     | Next.js 16 App Router, React 19, TypeScript                               |
+| UI          | Tailwind CSS 4, Lucide icons, locally bundled Inter font                  |
+| Data        | PostgreSQL with `pg`, ordered SQL migrations, row-level security          |
+| Accounts    | Auth.js credentials, scrypt password hashes, email verification and reset |
+| Client data | SWR for request deduplication and refresh                                 |
+| Tooling     | Node.js, pnpm, ESLint, Prettier, GitHub Actions                           |
+| Hosting     | Render web service; Supabase PostgreSQL is the documented database setup  |
 
-- **Unit tests** — query builders and fixtures: `pnpm test:patterns`, `pnpm test:catalogue`, `pnpm test:import`, `pnpm test:auth`; `pnpm test:notes` verifies manual saving, draft recovery, tags, validation, and note queries
-- **Post-build integration** — `pnpm test:access` boots the built app and verifies protected-route redirects and forged-cookie denial
-- **Database tests** — `pnpm db:test` and the `test:*:database` scripts run migrations, row-level-security and publication checks against a disposable PostgreSQL
-- **CI** — `.github/workflows/ci.yml` runs format, lint, tests, typecheck, build and access checks on every push/PR, plus migration/policy tests on a fresh PostgreSQL service
+## Run locally
 
-## Documentation
+### Requirements
 
-| Guide                                            | Contents                                               |
-| ------------------------------------------------ | ------------------------------------------------------ |
-| [Password authentication](docs/password-auth.md) | Account setup, email delivery, reset flows             |
-| [Database](docs/database.md)                     | Schema, access matrix, restricted login, deployment    |
-| [Company pages](docs/company-pages.md)           | Company sheets and the publication workflow            |
-| [Pattern sheet](docs/pattern-sheet.md)           | Practice sheets, filters, revision dialog, collections |
-| [Notes](docs/notes.md)                           | Private notes model and the notebook page              |
-| [Importer](docs/importer.md)                     | Pinned fixtures, staging SQL, publication              |
-| [Architecture](docs/architecture.md)             | Design boundaries and data-ownership rules             |
-| [Roadmap](docs/roadmap.md)                       | Planned work                                           |
-| [UI guide](docs/stitch-ui.md)                    | Design language, components, accessibility conventions |
+- Node.js 22.12 or later in the supported 22.x line, or Node.js 24
+- pnpm 11 (`corepack enable` can install the version specified by the project)
+- A Supabase PostgreSQL project, or a compatible local Supabase instance for development.
+- An email sender for account verification and password reset
 
-## Notes
+### 1. Get the code
 
-- The project does not bypass paid problem access or reproduce third-party problem statements; questions link to their canonical platform pages.
-- Keep source licensing and attribution records internal, as described in [collection attribution](docs/collection-attribution.md).
-- Never commit secrets. `.env.local`, privileged database URLs, and the `prepyard_web` password stay on your machine or in your host's secret store.
-
-## Sync accounts
-
-Open **Dashboard → Sync accounts**, enter your public LeetCode username, and connect. Automatic sync is enabled by default once a username is connected. Only submissions accepted after connecting are eligible; older solves and failed/pending attempts do not change completion. Recent publicly visible Accepted submissions are checked every two minutes while PrepYard is visible and online, with manual Sync now, pause/resume, and disconnect controls. Matching questions update across company pages, patterns, and dashboard totals. Notes and revision ratings are preserved, and previously processed submissions do not undo a later manual uncheck. No LeetCode passwords, cookies, or solution code are collected.
-
-Apply migration `20261010001400_leetcode_sync.sql` before using this feature. Public syncing is limited to the latest 20 Accepted submissions and may miss older/private activity; closing all PrepYard tabs stops periodic checks. See [sync setup and limitations](docs/leetcode-sync.md). Run `pnpm test:leetcode` for adapter checks.
-
-### Complete LeetCode history
-
-The optional Chrome/Edge extension imports all solved question slugs from a signed-in LeetCode tab and checks every two minutes while LeetCode and PrepYard tabs are open. Completion is shared across company and pattern pages. Passwords, cookies and solution code remain outside PrepYard. Apply migration `20261010001500_leetcode_history.sql` after the sync-settings migration. Run `pnpm build:extension` to package the downloadable ZIP; the production build does this automatically. Install/setup, privacy and limitations are documented in [LeetCode sync](docs/leetcode-sync.md).
-
-### GeeksforGeeks account sync
-
-Apply [the account-sync migration](supabase/migrations/20261012001700_account_sync.sql) after earlier migrations and restart the app. Open **Dashboard → Sync accounts** to connect LeetCode and GeeksforGeeks independently. GFG first records a complete public solved-question baseline, without marking old history complete. Later checks, every two minutes while PrepYard is visible and online, mark newly visible matching solves across company and pattern pages, including reviewed GFG alternatives. Each connection has Sync now, pause/resume and disconnect controls. Notes and revision ratings are preserved; no platform credentials are collected.
-
-HackerRank and CodeChef remain manual in this release. GFG checks public solved-list changes rather than timestamped acceptance events; repeated solves of an already observed question do not trigger updates. See [Sync accounts setup and limitations](docs/sync-accounts.md). Run `pnpm test:accounts` for adapter checks; the database CI job tests baseline isolation, idempotency and owner policies.
-
-## Writing and saving notes
-
-New notes start blank, without preset templates. Company rows, pattern rows, and the notebook use the same private note editor for each question.
-
-1. Open the question's note icon, or choose **Edit note** on its notebook card.
-2. Write your note. Optionally choose a code language and **Insert code**, then use **Preview** to check the formatting.
-3. Add your own optional tags by typing a label and pressing Enter or **Add tag**. Use the remove icon to delete a tag. Each note allows up to 8 tags, with 1–32 characters per tag.
-4. Click **Save now** to save the current text and tags together. The status changes from **Unsaved changes** to **Saving…**, then **Saved**. If saving fails, the editor shows **Not saved**; click **Save now** again to retry.
-5. Open **Notes** to see the saved card and its tags. Search by question title, note text, or tag; choose **View note** to read the content.
-
-**Saving is manual.** Typing, changing tags, previewing, restoring a draft, or clicking **Close** never saves to your account. Edits made while a save is in progress remain unsaved until you click **Save now** again. Clearing all note text deletes the saved note only after **Save now** is clicked.
-
-**Draft recovery.** Unsaved text and tags are kept locally in this browser tab, scoped to your signed-in account and question. Closing the editor, navigating away, or refreshing leaves the draft recoverable in the same tab. Reopening offers **Restore draft** or **Discard draft**. Restoring only loads the draft into the editor; click **Save now** to save it to your account. Closing the browser tab ends this recovery session. If browser storage is unavailable, save before closing the editor.
-
-Notes remain private under the existing owner policies and have a 50,000-character limit. Preview supports headings, bullet lists, and language-labelled fenced code blocks with **Copy code**; raw HTML remains text.
-
-**Database setup:** apply [the optional note-tags migration](supabase/migrations/20261010001600_note_tags.sql) after earlier migrations. Existing notes receive an empty tag list and retain their text. Changing from automatic to manual saving needs no additional migration. See [the notes guide](docs/notes.md) for storage and access details. Run `pnpm test:notes` for editor, manual-save, draft, query, and validation checks.
-
-## Free practice destinations
-
-Company and pattern lists use reviewed free equivalents for paid LeetCode exercises. Students see the destination title, difficulty, platform and link without a premium label. Stable question IDs, company observations, notes, revisions and LeetCode sync identities remain unchanged. Unmatched paid exercises are pending internally and excluded before counting/filtering/pagination; historical notes remain editable.
-
-The first reviewed set has 10 equivalents on GeeksforGeeks. This is not complete replacement coverage. See [free practice maintenance](docs/free-practice.md). No migration or privileged database connection is needed for these display mappings. Restart the app after pulling this change.
-
-```powershell
-pnpm practice:audit --directory "C:\path\to\pinned-company-snapshot"
-pnpm practice:check-links
-pnpm test:practice
+```sh
+git clone https://github.com/Holmes-R/The-PrepYard.git
+cd The-PrepYard
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
-## Catalogue performance
+### 2. Create local environment settings
 
-Company sheets now combine filtered counts and paginated rows into one database query. Shared company/topic/collection metadata is cached for 60 seconds; personal progress, revisions, notes and sessions remain fresh and private. Authenticated data responses include Server-Timing measurements, with optional logging via PREPYARD_PERFORMANCE_LOG=1. No migration or new service is required. Restart the app after pulling. See [performance setup and validation](docs/performance.md). Run pnpm test:performance for cache/timing checks.
+Copy the example file and edit `.env.local` in the repository root:
 
-## Daily practice dashboard
+```sh
+cp .env.example .env.local
+```
 
-The dashboard keeps one primary Practice now action, three compact progress cards, your three most recent questions, and the three earliest due revisions with their saved confidence ratings. Collection cards show a short purpose and progress; expand About this collection for the full explanation. Weekly revision activity and expandable recent history sit below. On mobile, recent practice and revision come before statistics. Sync accounts is available from the account dropdown on desktop and the navigation menu on mobile.
+Set at least:
 
-Recent questions and revisions share one private database query, keeping the dashboard at four catalogue reads. Unlisted and unresolved paid questions are excluded. Questions open in their matching practice or company view when available, with a direct platform link as a fallback. No migration is required. See [the dashboard guide](docs/dashboard.md).
+```dotenv
+AUTH_URL=http://localhost:3000
+AUTH_SECRET=your-generated-secret
+DATABASE_URL=your-restricted-database-connection-url
+AUTH_EMAIL_PROVIDER=gmail
+GMAIL_USER=your-sender@gmail.com
+GMAIL_APP_PASSWORD=your-google-app-password
+```
+
+Generate an `AUTH_SECRET` locally:
+
+```sh
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+`GMAIL_APP_PASSWORD` is a Google App Password, not the sender’s regular Google password. Other supported email options are Gmail API and Resend; Resend needs a verified sending domain. See [password and email setup](docs/password-auth.md) and [Gmail API setup](docs/gmail-api-email.md).
+
+Keep `.env.local` private. Never commit database passwords, email credentials, OAuth tokens, or `AUTH_SECRET`.
+
+### 3. Prepare the database
+
+Apply the migrations in `supabase/migrations/` in filename order. The app must connect with the restricted `prepyard_web` role, not the database administrator or `service_role` account. For Supabase, the connection URL uses the Session pooler and the username `prepyard_web.<project-ref>`.
+
+Follow the [database setup guide](docs/database.md) before linking or changing a hosted project. Inspect the migration plan before applying it. Catalogue data may need to be published separately; migrations create the schema and do not automatically import the question catalogue.
+
+### 4. Start the app
+
+```sh
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000), create an account at `/signup`, verify the email, and log in at `/login`.
+
+## Pages
+
+| Page                | What it’s for                                      |
+| ------------------- | -------------------------------------------------- |
+| `/`                 | Project landing page                               |
+| `/dashboard`        | Progress, recent practice, and revision overview   |
+| `/companies`        | Search and browse the company directory            |
+| `/companies/[slug]` | A company’s questions and filters                  |
+| `/patterns`         | Standard topics, pattern browsing, and collections |
+| `/patterns/[slug]`  | A dedicated pattern question list                  |
+| `/explore`          | Entry point to topics and practice collections     |
+| `/notes`            | Search and manage your saved notes                 |
+| `/settings`         | Connect or manage supported sync accounts          |
+| `/about`            | About PrepYard                                     |
+
+Company cards open the company question page in a new tab. Question tracking, notes, and revisions are shared across company, topic, pattern, and collection views.
+
+## Account sync
+
+Open **Settings → Sync accounts** to connect supported public profiles. PrepYard does not ask for platform passwords, cookies, or solution code.
+
+- **LeetCode username sync** checks recent public Accepted submissions. Only submissions accepted after connecting are eligible; the public feed is limited and may omit activity.
+- **GeeksforGeeks sync** records a public solved-list baseline when connected, then tracks newly visible matching problems. It does not use a reliable acceptance timestamp.
+- **LeetCode browser extension** is an optional way to import full solved history from a signed-in LeetCode tab. The LeetCode session remains in the browser and is not sent to PrepYard.
+- **HackerRank and CodeChef** are manual in this release.
+
+Completion sync updates the same PrepYard question across company, topic, pattern, and collection pages. Notes and revision history are preserved. Read [Sync accounts](docs/sync-accounts.md) and [LeetCode sync](docs/leetcode-sync.md) for setup, privacy details, and limitations.
+
+## Development commands
+
+| Command                 | Purpose                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `pnpm dev`              | Start the development server                                                       |
+| `pnpm build`            | Build the production app and package the optional browser extension                |
+| `pnpm start`            | Start the production build                                                         |
+| `pnpm check`            | Run formatting, lint, tests, typecheck, build, and access checks                   |
+| `pnpm lint`             | Run ESLint                                                                         |
+| `pnpm typecheck`        | Generate Next.js types and run TypeScript checks                                   |
+| `pnpm format:check`     | Check formatting with Prettier                                                     |
+| `pnpm db:test`          | Run database migrations and access tests on a disposable local PostgreSQL instance |
+| `pnpm test:notes`       | Run note editor, tag, and query tests                                              |
+| `pnpm test:accounts`    | Run account-sync adapter tests                                                     |
+| `pnpm test:leetcode`    | Run LeetCode adapter and extension tests                                           |
+| `pnpm test:performance` | Run cache and request-timing tests                                                 |
+
+Database integration tests use a separate disposable test database. **Never point a test or importer command at the production database.** See [test instructions](tests/README.md).
+
+## Project structure
+
+```text
+src/
+  app/                 Next.js pages, route handlers, and styles
+  components/          Navigation, company/pattern sheets, notes, and UI
+  features/            Catalogue, authentication, progress, patterns, and sync logic
+  lib/                 Database, session, validation, and shared server helpers
+  auth.ts              Auth.js configuration
+  proxy.ts             Protected-route and session guard
+supabase/migrations/   Database schema, access policies, and indexes
+scripts/               Catalogue import, publication, and maintenance commands
+tests/                 Unit, integration, and database test suites
+docs/                  Setup and feature guides
+extensions/            Optional LeetCode browser extension
+```
+
+## Contributing
+
+Contributions and clear bug reports are welcome. Before opening a pull request:
+
+1. Explain the user problem and the change you made.
+2. Add or update documentation when setup, privacy, or behavior changes.
+3. Add a new migration for database changes; do not edit migrations that may already have been applied.
+4. Run `pnpm check` when your environment supports the complete check suite.
+5. Keep secrets, real student data, and production connection strings out of commits and screenshots.
+
+For catalogue changes, include the reviewed fixture or attribution update and explain how the change was validated.
+
+## Guides
+
+- [Database setup and access rules](docs/database.md)
+- [Password authentication and email delivery](docs/password-auth.md)
+- [Render deployment](docs/render-deployment.md)
+- [Company pages and catalogue updates](docs/company-pages.md)
+- [Patterns and practice collections](docs/pattern-sheet.md)
+- [Notes and manual saving](docs/notes.md)
+- [Sync accounts setup and limitations](docs/sync-accounts.md)
+- [LeetCode username sync and browser extension](docs/leetcode-sync.md)
+- [Catalogue performance](docs/performance.md)
+- [Importer workflow](docs/importer.md)
+- [Project roadmap](docs/roadmap.md)
