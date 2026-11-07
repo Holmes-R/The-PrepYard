@@ -1394,6 +1394,9 @@ body .launch-button {
   }
 }
 @media (max-width: 700px) {
+  .prep-quick-search {
+    flex-basis: 170px;
+  }
   .prep-quick-search input {
     width: 90px;
   }
@@ -1812,12 +1815,25 @@ body::before {
 }
 .prep-top-navigation-inner {
   min-height: 72px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
   align-items: center;
   gap: 22px;
   max-width: 1600px;
   margin: auto;
   padding: 12px 26px;
+}
+.prep-navigation-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.prep-account-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
 }
 .prep-desktop-navigation {
   flex-shrink: 0;
@@ -1974,7 +1990,9 @@ body::before {
   background: #2a2a2b;
 }
 .prep-quick-search {
-  margin-left: auto;
+  flex: 0 1 220px;
+  min-width: 150px;
+  margin-left: 0;
   background: #201f20;
   border: 1px solid #ffffff05;
   border-radius: 8px;
@@ -2594,6 +2612,7 @@ body .note-card-heading svg {
 }
 @media (max-width: 800px) {
   .prep-desktop-navigation,
+  .prep-account-tools,
   .prep-account-actions,
   .prep-top-profile,
   .prep-top-signout {
@@ -2601,8 +2620,16 @@ body .note-card-heading svg {
   }
   .prep-top-navigation-inner {
     min-height: 66px;
+    display: flex;
     padding: 12px 18px;
     gap: 14px;
+  }
+  .prep-navigation-search {
+    flex: 1;
+    min-width: 0;
+  }
+  .prep-quick-search {
+    flex-basis: 200px;
   }
   .prep-mobile-menu {
     display: grid;
@@ -3039,5 +3066,79 @@ body:has(.prep-top-navigation) > header.prep-top-navigation {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+}
+
+/* Keep the shared shell visually continuous with the catalogue page surface. */
+.prep-top-navigation,
+body:has(.prep-top-navigation) > header.prep-top-navigation {
+  background: #131314;
+  backdrop-filter: none;
+  border-bottom-color: #ffffff0c;
+}
+
+.prep-top-navigation-inner {
+  padding-inline: clamp(20px, 3vw, 48px);
+}
+
+.prep-footer {
+  box-sizing: border-box;
+  width: 100%;
+  margin-inline: 0;
+  padding: 20px clamp(20px, 3vw, 48px) 24px;
+  background: #131314;
+  border-top-color: #ffffff0c;
+  color: #a1a1aa;
+  line-height: 1.6;
+}
+
+.prep-footer p {
+  max-width: 100%;
+  margin: 0 auto;
+  padding-inline: 8px;
+}
+
+body .company-page-heading {
+  padding-inline: 0;
+  text-align: left;
+}
+
+body .company-page-heading > .sheet-eyebrow {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+@media (max-width: 580px) {
+  .prep-top-navigation-inner {
+    padding-inline: 14px;
+  }
+
+  .prep-footer {
+    padding: 18px 20px 22px;
+  }
+}
+
+/* Keep the company directory, page shell, and footer on the same surface token. */
+body:has(.company-sheet-theme) > header.prep-top-navigation,
+body:has(.company-sheet-theme) > main.prep-main,
+body:has(.company-sheet-theme) > footer.prep-footer,
+body:has(.company-sheet-theme) .company-sheet-theme {
+  background-color: var(--background);
+}
+
+/* Add breathing room above the section labels on both practice pages. */
+body .company-page-heading {
+  padding-top: 16px;
+}
+
+body .dsa-hero {
+  padding-top: 16px;
+}
+
+@media (max-width: 580px) {
+  body .company-page-heading,
+  body .dsa-hero {
+    padding-top: 12px;
   }
 }

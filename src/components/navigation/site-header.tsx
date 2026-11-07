@@ -342,33 +342,37 @@ export function SiteHeader({
     <header className="prep-top-navigation">
       <div className="prep-top-navigation-inner">
         {brand}
-        <div className="prep-desktop-navigation">{navigation}</div>
-        <form
-          className="prep-quick-search"
-          action={pathname === "/companies" ? "/companies" : "/patterns"}
-        >
-          <Search size={16} />
-          <input
-            ref={searchRef}
-            type="search"
-            name={pathname === "/companies" ? "find" : "q"}
-            placeholder="Quick search…"
-            aria-label={
-              pathname === "/companies"
-                ? "Search companies"
-                : "Search practice questions"
-            }
-            maxLength={100}
-          />
-          <kbd>Ctrl K</kbd>
-        </form>
-        <span className="prep-account-status">
-          <span />
-          Free workspace
-        </span>
-        <div className="prep-account-actions">
-          <AccountMenu key={pathname} name={name} pathname={pathname} />
-          <LogoutConfirmation />
+        <div className="prep-navigation-search">
+          <div className="prep-desktop-navigation">{navigation}</div>
+          <form
+            className="prep-quick-search"
+            action={pathname === "/companies" ? "/companies" : "/patterns"}
+          >
+            <Search size={16} />
+            <input
+              ref={searchRef}
+              type="search"
+              name={pathname === "/companies" ? "find" : "q"}
+              placeholder="Quick search…"
+              aria-label={
+                pathname === "/companies"
+                  ? "Search companies"
+                  : "Search practice questions"
+              }
+              maxLength={100}
+            />
+            <kbd>Ctrl K</kbd>
+          </form>
+        </div>
+        <div className="prep-account-tools">
+          <span className="prep-account-status">
+            <span />
+            Free workspace
+          </span>
+          <div className="prep-account-actions">
+            <AccountMenu key={pathname} name={name} pathname={pathname} />
+            <LogoutConfirmation />
+          </div>
         </div>
         <button
           ref={menuRef}
