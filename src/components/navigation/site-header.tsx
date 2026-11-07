@@ -363,12 +363,12 @@ export function SiteHeader({
             />
             <kbd>Ctrl K</kbd>
           </form>
-        </div>
-        <div className="prep-account-tools">
           <span className="prep-account-status">
             <span />
             Free workspace
           </span>
+        </div>
+        <div className="prep-account-tools">
           <div className="prep-account-actions">
             <AccountMenu key={pathname} name={name} pathname={pathname} />
             <LogoutConfirmation />

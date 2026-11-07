@@ -1816,7 +1816,9 @@ body::before {
 .prep-top-navigation-inner {
   min-height: 72px;
   display: grid;
-  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  grid-template-columns:
+    minmax(max-content, 1fr) minmax(max-content, 1fr)
+    max-content;
   align-items: center;
   gap: 22px;
   max-width: 1600px;
@@ -1826,7 +1828,7 @@ body::before {
 .prep-navigation-search {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 16px;
 }
 .prep-account-tools {
@@ -2627,6 +2629,7 @@ body .note-card-heading svg {
   .prep-navigation-search {
     flex: 1;
     min-width: 0;
+    justify-content: flex-start;
   }
   .prep-quick-search {
     flex-basis: 200px;
@@ -3120,11 +3123,11 @@ body .company-page-heading > .sheet-eyebrow {
 }
 
 /* Keep the company directory, page shell, and footer on the same surface token. */
-body:has(.company-sheet-theme) > header.prep-top-navigation,
-body:has(.company-sheet-theme) > main.prep-main,
-body:has(.company-sheet-theme) > footer.prep-footer,
+body:has(.company-sheet-theme) .prep-top-navigation,
+body:has(.company-sheet-theme) main.prep-main,
+body:has(.company-sheet-theme) footer.prep-footer,
 body:has(.company-sheet-theme) .company-sheet-theme {
-  background-color: var(--background);
+  background-color: #0a0a0a;
 }
 
 /* Add breathing room above the section labels on both practice pages. */
@@ -3141,4 +3144,79 @@ body .dsa-hero {
   body .dsa-hero {
     padding-top: 12px;
   }
+}
+
+/* The logo opens the company question sheet in a new tab; the name remains the inline expander. */
+body .company-card-identity {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+body .company-card-logo-link {
+  display: inline-flex;
+  padding: 22px 22px 0;
+  border-radius: 12px;
+}
+
+body .company-card-toggle {
+  width: 100%;
+  padding: 8px 22px 4px;
+  text-align: left;
+}
+
+body .company-card.is-open .company-card-toggle {
+  padding: 8px 22px 4px;
+}
+
+body .company-card-logo-link:focus-visible {
+  outline: 2px solid #adc6ff;
+  outline-offset: 3px;
+}
+
+/* Company name, logo, and external-link icon open the dedicated company sheet. */
+body .company-card-toggle {
+  color: inherit;
+  text-decoration: none;
+}
+
+body .company-card-toggle:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Company cards use an external-link icon for opening the dedicated sheet. */
+body .company-card-newtab {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin: 14px 14px 0 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #a1a1aa;
+}
+
+body .company-card-newtab:hover {
+  border-color: #ffffff12;
+  background: #ffffff08;
+  color: #f4f4f5;
+}
+
+body .company-card-newtab:focus-visible {
+  outline: 2px solid #adc6ff;
+  outline-offset: 2px;
+}
+body .company-card-newtab {
+  align-self: center;
+  margin: 0 14px 0 0;
+  padding: 0;
+}
+body .company-card-newtab {
+  position: relative;
+  top: -6px;
 }

@@ -23,7 +23,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowUpRight, ArrowRight, Search } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import { saveQuestionProgress } from "@/features/progress/actions";
 import dynamic from "next/dynamic";
 const NoteEditor = dynamic(
@@ -242,15 +242,7 @@ function QuestionRow({
           onClick={() => save("solved", !solved)}
         />
         <div className="question-title-block">
-          <a
-            href={question.canonical_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="question-title"
-          >
-            {question.title}
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
+          <span className="question-title">{question.title}</span>
           <span className="question-platform-label" title={question.platform}>
             {question.platform}
           </span>
@@ -717,7 +709,6 @@ function CompanyPanel({
   initial,
   initialFilters,
   open,
-  onToggle,
   onApplied,
   sync,
   logoSrc,
@@ -726,7 +717,6 @@ function CompanyPanel({
   initial?: Sheet;
   initialFilters?: Filters;
   open: boolean;
-  onToggle: () => void;
   onApplied: (slug: string, next: Filters) => void;
   // Back/forward navigation can land on a filtered view from the address bar.
   // The tick bumps once per such navigation; the panel then loads those filters.
@@ -774,39 +764,45 @@ function CompanyPanel({
   return (
     <section className={"company-card " + (open ? "is-open" : "")}>
       <div className="company-card-head">
-        <button
-          className="company-card-toggle"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => {
-            onToggle();
-            if (!open && !sheet && !loading) {
-              didInit.current = true;
-              void load();
-            }
-          }}
-        >
-          <CompanyLogo
-            name={company.name}
-            slug={company.slug}
-            available={company.has_logo}
-            src={logoSrc}
-          />
-          <span className="company-card-name">{company.name}</span>
-          {open && (
-            <span className="company-progress-count">
-              {solved} / {total}
-            </span>
-          )}
-        </button>
+        <div className="company-card-identity">
+          <a
+            className="company-card-logo-link"
+            href={"/companies/" + company.slug}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={"Open " + company.name + " questions in a new tab"}
+            title={"Open " + company.name + " questions in a new tab"}
+          >
+            <CompanyLogo
+              name={company.name}
+              slug={company.slug}
+              available={company.has_logo}
+              src={logoSrc}
+            />
+          </a>
+          <a
+            className="company-card-toggle"
+            href={"/companies/" + company.slug}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={"Open " + company.name + " questions in a new tab"}
+          >
+            <span className="company-card-name">{company.name}</span>
+            {open && (
+              <span className="company-progress-count">
+                {solved} / {total}
+              </span>
+            )}
+          </a>
+        </div>
         <a
           className="company-card-newtab"
           href={"/companies/" + company.slug}
           target="_blank"
           rel="noopener noreferrer"
-          title={"Open " + company.name + " in a new tab"}
+          aria-label={"Open " + company.name + " questions in a new tab"}
+          title={"Open " + company.name + " questions in a new tab"}
         >
-          <span className="sr-only">Open {company.name} in a new tab</span>
           <ArrowUpRight size={17} aria-hidden="true" />
         </a>
       </div>
@@ -829,7 +825,11 @@ function CompanyPanel({
               style={{ width: total ? (100 * solved) / total + "%" : "0%" }}
             />
           </div>
-          <Link href={"/companies/" + company.slug}>
+          <Link
+            href={"/companies/" + company.slug}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Open company <ArrowRight size={16} />
           </Link>
         </div>
@@ -862,7 +862,7 @@ export function CompanySection({
   // exact view is shareable. The directory passes its own handler instead.
   syncUrl?: boolean;
 }) {
-  const [open, setOpen] = useState(Boolean(initial));
+  const open = Boolean(initial);
   const router = useRouter();
   const pathname = usePathname();
   return (
@@ -871,7 +871,6 @@ export function CompanySection({
       initial={initial}
       initialFilters={initialFilters}
       open={open}
-      onToggle={() => setOpen(!open)}
       onApplied={(_slug, next) => {
         if (!syncUrl) return;
         const query = filtersToParams(next).toString();
@@ -974,13 +973,6 @@ export function CompanyDirectory({
   };
   const handleApplied = (slug: string, next: Filters) => {
     commitUrl(slug, next, search);
-  };
-  const handleToggle = (slug: string) => {
-    const next = openSlug === slug ? null : slug;
-    setOpenSlug(next);
-    // Closing drops the company view from the URL; opening writes it once the
-    // panel reports its applied filters.
-    if (!next) commitUrl(null, viewRef.current.filters, search);
   };
   const term = search.trim().toLowerCase();
   const matching = useMemo(
@@ -1144,7 +1136,6 @@ export function CompanyDirectory({
               company.slug === initialOpen ? initialFilters : undefined
             }
             open={activeSlug === company.slug}
-            onToggle={() => handleToggle(company.slug)}
             onApplied={handleApplied}
             sync={company.slug === openSlug ? sync : null}
             logoSrc={logoMap[company.slug] ?? null}
